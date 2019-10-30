@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug diffie-hellman",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "diffie-hellman",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "MIMode": "lldb",
+            "preLaunchTask": "make"
+        }
+    ]
+}
