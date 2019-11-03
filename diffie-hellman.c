@@ -46,7 +46,15 @@ void diffie_hellman()
     int result = EVP_PKEY_set1_DH(params, dh);
     report_progress("EVP_PKEY_set1_DH", result == 1);
 
+    /* Allocate context for the key generation */
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(params, NULL);
+    report_progress("EVP_PKEY_CTX_new", ctx != NULL);
+
     /* ... to be completed ... */
+
+    /* Free context for the key generation */
+    EVP_PKEY_CTX_free(ctx);
+    report_progress("EVP_PKEY_CTX_free", true);
 
     /* Free Diffie-Hellman parameters structure */
     EVP_PKEY_free(params);
