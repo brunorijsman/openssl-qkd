@@ -31,6 +31,19 @@ void init()
     report_progress("CONF_modules_load_file", okay);
 }
 
+void diffie_hellman()
+{
+    /* Allocate Diffie-Hellman parameters structure */
+    EVP_PKEY *params = EVP_PKEY_new();
+    report_progress("EVP_PKEY_new", params != NULL);
+
+    /* ... to be completed ... */
+
+    /* Free Diffie-Hellman parameters structure */
+    EVP_PKEY_free(params);
+    report_progress("EVP_PKEY_free", true);
+}
+
 void cleanup()
 {
     /* Remove all digests and ciphers */
@@ -49,7 +62,7 @@ void cleanup()
 int main(int argc, char *argv[])
 {
     init();
-    /* ... Do some crypto stuff here ... */
+    diffie_hellman();
     cleanup();
     return 0;
 }
