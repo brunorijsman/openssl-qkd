@@ -1,9 +1,10 @@
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <openssl/conf.h>
-#include <openssl/evp.h>
+#include <openssl/dh.h>
 #include <openssl/err.h>
+#include <openssl/evp.h>
 
 void report_progress(const char *what, bool okay)
 {
@@ -36,6 +37,14 @@ void diffie_hellman()
     /* Allocate Diffie-Hellman parameters structure */
     EVP_PKEY *params = EVP_PKEY_new();
     report_progress("EVP_PKEY_new", params != NULL);
+
+    /* Use standard Diffie-Hellman parameters as defined in RFC5154 */
+    DH *dh = DH_get_2048_256();
+    report_progress("DH_get_2048_256", dh != NULL);
+
+    /* Set parameters structure to standard parameters */
+    int result = EVP_PKEY_set1_DH(params, dh);
+    report_progress("EVP_PKEY_set1_DH", result == 1);
 
     /* ... to be completed ... */
 
