@@ -15,7 +15,7 @@ void report_progress(const char *what, bool okay)
     }
 }
 
-int main(int argc, char *argv[])
+void init()
 {
     /* Load the human readable error strings */
     ERR_load_crypto_strings();
@@ -29,9 +29,10 @@ int main(int argc, char *argv[])
     unsigned long flags = CONF_MFLAGS_IGNORE_MISSING_FILE;
     int okay = (1 == CONF_modules_load_file(NULL, NULL, flags));
     report_progress("CONF_modules_load_file", okay);
+}
 
-    /* ... Do some crypto stuff here ... */
-
+void cleanup()
+{
     /* Remove all digests and ciphers */
     EVP_cleanup();
     report_progress("EVP_cleanup", true);
@@ -43,6 +44,12 @@ int main(int argc, char *argv[])
     /* Remove error strings */
     ERR_free_strings();
     report_progress("ERR_free_strings", true);
+}
 
+int main(int argc, char *argv[])
+{
+    init();
+    /* ... Do some crypto stuff here ... */
+    cleanup();
     return 0;
 }
