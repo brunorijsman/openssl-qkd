@@ -50,6 +50,10 @@ void diffie_hellman()
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(params, NULL);
     report_progress("EVP_PKEY_CTX_new", ctx != NULL);
 
+    /* Initialize key generation context */
+    result = EVP_PKEY_keygen_init(ctx);
+    report_progress("EVP_PKEY_keygen_init", result == 1);
+
     /* ... to be completed ... */
 
     /* Free context for the key generation */
