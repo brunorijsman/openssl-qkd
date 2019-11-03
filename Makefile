@@ -1,8 +1,11 @@
-CC = gcc
-CFLAGS = -I. -g
+OPENSSL_INCLUDE=$(HOME)/openssl/include
+OPENSSL_LIB=$(HOME)/openssl
+
+CC = clang
+CFLAGS = -I. -I$(OPENSSL_INCLUDE) -L$(OPENSSL_LIB) -g
 
 diffie-hellman: diffie-hellman.c
-	$(CC) -o $@ $< $(CFLAGS)
+	$(CC) -Wall -o $@ $< $(CFLAGS) -lcrypto
 
 .PHONY: clean
 
