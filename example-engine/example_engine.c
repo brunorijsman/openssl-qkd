@@ -94,6 +94,7 @@ static int dh_generate_key(DH *dh)
 static DH_METHOD example_dh_method = {
     .name = "Example DH Method",
     .generate_key = dh_generate_key,
+    .compute_key = NULL,                    /* TOOD */
     .bn_mod_exp = NULL,                     /* TODO */
     .init = NULL,                           /* TODO */
     .finish = NULL,                         /* TODO */
