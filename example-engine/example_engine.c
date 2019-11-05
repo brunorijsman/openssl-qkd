@@ -5,7 +5,7 @@ static const char *example_engine_name = "Example Engine by Bruno Rijsman";
 
 int example_engine_init(ENGINE *engine)
 {
-    return 0;
+    return 1;
 }
 
 int example_engine_bind(ENGINE *engine, const char *engine_id)
