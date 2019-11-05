@@ -35,7 +35,7 @@ example = example_section
 engine_id = example
 #dynamic_path = /usr/local/lib/engines-3/example.so
 default_algorithms = ALL
-#init = 0
+init = 0
 #CRYPT_PARAMS = id-Gost28147-89-CryptoPro-A-ParamSet
 
 # End engine definitions.
