@@ -6,8 +6,8 @@ CFLAGS = -Wall -I. -I$(OPENSSL_INCLUDE) -L$(OPENSSL_LIB) -g
 
 all: example.so test_example_engine
 
-example.so: example_engine.c
-	$(LINK.c) -shared -o $@ $< -lcrypto -fPIC
+example.so: example_engine.c qkd_api.c
+	$(LINK.c) -shared -o $@ $^ -lcrypto -fPIC
 
 test_example_engine: test_example_engine.c example.so
 	$(CC) -o $@ $< $(CFLAGS) -lcrypto example.so
