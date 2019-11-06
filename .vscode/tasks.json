@@ -6,7 +6,7 @@
         {
             "type": "shell",
             "label": "make",
-            "command": "make",
+            "command": "cd example-engine; make",
             "args": [],
             "options": {},
             "problemMatcher": [],

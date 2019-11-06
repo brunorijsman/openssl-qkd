@@ -1,14 +1,15 @@
 {
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": "Debug diffie-hellman",
+            "name": "Debug example_engine",
             "type": "cppdbg",
             "request": "launch",
-            "program": "diffie-hellman",
+            "program": "test_example_engine",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/example-engine",
             "MIMode": "lldb",
             "preLaunchTask": "make"
         }
