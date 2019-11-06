@@ -6,7 +6,7 @@ if [[ ! -L ${OPENSSL_ENGINES}/etsi_qkd_server.dylib ]]; then
     ln -s etsi_qkd_server.dylib ${OPENSSL_ENGINES}/etsi_qkd_server.dylib
 fi
 
-if [[ ! -L ${OPENSSL_ENGINES}/etsi_qkd_client.sdylib]]; then
+if [[ ! -L ${OPENSSL_ENGINES}/etsi_qkd_client.dylib ]]; then
     ln -s etsi_qkd_client.dylib ${OPENSSL_ENGINES}/etsi_qkd_client.dylib
 fi
 
