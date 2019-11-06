@@ -20,8 +20,8 @@ static int client_generate_key(DH *dh)
         BN_set_word(priv_key, 11111);
         BN_set_word(pub_key, 22222);
     } else {
-        BN_set_word(priv_key, 0);
-        BN_set_word(pub_key, 0);
+        BN_set_word(priv_key, 1);
+        BN_set_word(pub_key, 1);
         /* TODO: Client side processing
         - The client uses the received DH public key as the ETSI API key_handle
         - The client calls QKD_OPEN() with the key_handle obtained it this way.
@@ -51,9 +51,11 @@ static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
     assert(size == KEY_HANDLE_SIZE);
 
     printf("KEY HANDLE: ");
-    for (int i = 0; i < sizeof(key); i++) {
+    int i;
+    for (i = 0; i < sizeof(key_handle); i++) {
         printf("%02x", (unsigned char) (key_handle[i]));
     }
+    printf("\n");
 
     /* TODO: For now, the stub has a hard-coded assumption that the QKD server and client run
              on the same host, and the stub never even looks at the destination address. */
@@ -87,6 +89,7 @@ static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
     for (int i = 0; i < sizeof(key); i++) {
         printf("%02x", (unsigned char) (key[i]));
     }
+    printf("\n");
 
     result = QKD_CLOSE(key_handle);
     report_progress("QKD_CLOSE", QKD_RC_SUCCESS == result);
