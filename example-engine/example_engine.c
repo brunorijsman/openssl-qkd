@@ -138,7 +138,38 @@ static int dh_generate_key(DH *dh)
            - The client sets its DH private key to NULL. Just as on the server, the QKD exchange
              does not use any DH private key on the client. */
     }
+    /* I am not sure if we can synchronize the key_handle in this function already.
+       We could calculate the 'lowest slot' on both sides of the link here
+       and then agree on a key_handle in the compute function by taking the max. 
+       That would mean no qkd api calls here.*/
     return 0;
+}
+
+static int compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
+{
+    /* See comment above. All qkd api calls would then happen here. */
+    
+    /* TODO: The overloaded compute_key function on the client does the following:
+    - The client calls QKD_CONNECT_BLOCKING.
+    - This call requires the IP address of the peer (the server in this case). 
+      Does OpenSSL provide some API to get the IP address of the peer?
+    - Once again, is OpenSSL tolerant to doing a blocking call here? I don't 
+      think we can use the non-blocking variation (which is not well-defined in 
+      the ETSI API document; there is no sequence diagram for it).
+    - The client calls QKD_GET_KEY which returns a key_buffer. This is used as 
+      the shared secret and returned. */
+
+    /* TODO: The overloaded compute_key function on the server does the following:
+    - The server verifies that the received client public key is equal to its 
+      own server public key. If not, it fails. This is just a sanity check and 
+      this step is not essential for guaranteeing the security of the procedure 
+      (any attacker can easily spoof the public key).
+    - The server calls QKD_CONNECT_BLOCKING. (See considerations on the client 
+      side about needing the IP address of the peer, the client in this case, 
+      and this call being blocking.)
+    - The server calls QKD_GET_KEY which returns a key_buffer. This is used as 
+      the shared secret and returned. Note that this returns the same key_buffer 
+      as that which was return on the client side, so it is indeed a shared secret.s */
 }
 
 static DH_METHOD example_dh_method = {
