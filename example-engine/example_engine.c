@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <string.h>
 #include <openssl/bn.h>
 #include <openssl/dh.h>
 #include <openssl/engine.h>
@@ -173,8 +174,14 @@ static int dh_generate_key(DH *dh)
       the shared secret and returned. Note that this returns the same key_buffer 
       as that which was return on the client side, so it is indeed a shared secret.s */
 
+    int size = DH_size(dh);
+    key = malloc(size);
+    report_progress("Allocate shared secret memory", key != NULL);
+    /* TODO: put somthing in the key */
+    memset(key, 3, size);
+
     printf("dh_compute_key [exit]\n");
-    return -1;  /* TODO */
+    return size;
 }
 
 static DH_METHOD example_dh_method = {
