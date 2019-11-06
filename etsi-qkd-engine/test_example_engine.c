@@ -1,3 +1,5 @@
+// DEPRECATED - DELETE THIS
+
 #include <openssl/engine.h>
 #include <stdbool.h>
 #include <stdio.h>
