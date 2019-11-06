@@ -2,12 +2,12 @@
 
 export OPENSSL_ENGINES="/usr/local/lib/engines-3"
 
-if [[ ! -L {$OPENSSL_ENGINES}/etsi_qkd_server.so ]]; then
-    ln -s etsi_qkd_server.dylib {$OPENSSL_ENGINES}/etsi_qkd_server.so 
+if [[ ! -L ${OPENSSL_ENGINES}/etsi_qkd_server.so ]]; then
+    ln -s etsi_qkd_server.dylib ${OPENSSL_ENGINES}/etsi_qkd_server.so 
 fi
 
-if [[ ! -L {$OPENSSL_ENGINES}/etsi_qkd_client.so ]]; then
-    ln -s etsi_qkd_client.dylib {$OPENSSL_ENGINES}/etsi_qkd_client.so
+if [[ ! -L ${OPENSSL_ENGINES}/etsi_qkd_client.so ]]; then
+    ln -s etsi_qkd_client.dylib ${OPENSSL_ENGINES}/etsi_qkd_client.so
 fi
 
 export LD_LIBRARY_PATH="$HOME/openssl/:."
