@@ -146,7 +146,7 @@ static int dh_generate_key(DH *dh)
     return 1;
 }
 
-/* TODO static */ int dh_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
+static int dh_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
 {
     printf("dh_compute_key [enter]\n");
 
@@ -175,8 +175,9 @@ static int dh_generate_key(DH *dh)
       as that which was return on the client side, so it is indeed a shared secret.s */
 
     int size = DH_size(dh);
-    key = malloc(size);
-    report_progress("Allocate shared secret memory", key != NULL);
+// @@@    key = malloc(size);
+    printf("Allocated size=%d\n", size);
+    report_progress("dh_compute_key: allocate shared secret memory", key != NULL);
     /* TODO: put somthing in the key */
     memset(key, 3, size);
 
