@@ -82,7 +82,9 @@ static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
     report_progress("client_compute_key: allocate shared secret memory", key != NULL);
     // /* TODO: put somthing in the key */
     // memset(key, 3, size);
+    printf("Before QKD_GET_KEY\n");
     result = QKD_GET_KEY(key_handle, (char *)key);
+    printf("After QKD_GET_KEY\n");
     report_progress("QKD_GET_KEY", QKD_RC_SUCCESS == result);
 
     printf("KEY: ");

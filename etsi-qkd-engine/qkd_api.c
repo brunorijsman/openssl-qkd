@@ -59,6 +59,7 @@ uint32_t QKD_GET_KEY(key_handle_t key_handle, char* key_buffer) {
         error("ERROR with getaddrinfo");
     }
 
+    printf("create socket...\n");
     int sd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sd == -1) {
         error("ERROR opening socket");
