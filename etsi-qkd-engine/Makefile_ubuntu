@@ -4,16 +4,18 @@ OPENSSL_LIB=$(HOME)/openssl
 CC = gcc
 CFLAGS = -Wall -I. -I$(OPENSSL_INCLUDE) -L$(OPENSSL_LIB) -g
 
-all: example.so test_example_engine
+all: etsi_qkd_client.so etsi_qkd_server.so
 
-example.so: example_engine.c qkd_api.c
+etsi_qkd_client.so: etsi_qkd_client.c etsi_qkd_common.c qkd_api.c 
 	$(LINK.c) -shared -o $@ $^ -lcrypto -fPIC
 
-test_example_engine: test_example_engine.c example.so
-	$(CC) -o $@ $< $(CFLAGS) -lcrypto example.so
+etsi_qkd_server.so: etsi_qkd_server.c etsi_qkd_common.c qkd_api.c 
+	$(LINK.c) -shared -o $@ $^ -lcrypto -fPIC
 
 clean:
-	rm -f example.so test_example_engine *.o core
+	rm -f etsi_qkd_client.so etsi_qkd_server.so *.o core
 	rm -rf *.dSYM
 
 .PHONY: all clean
+
+
