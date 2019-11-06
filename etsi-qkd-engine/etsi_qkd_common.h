@@ -12,7 +12,7 @@ int engine_bind_common(ENGINE *engine, const char *engine_id, const char *engine
 
 /* We can control a "fixed" key (instead of an actual QKD-negotiated key) to allow end-to-end
 testing before the interaction with the QKD-API has actually been implemented. */
-static bool return_fixed_key_for_testing = true;
+static bool return_fixed_key_for_testing = false;
 
 /* When we run on SimulaQron, we do certain things differently than "in real life" (see below) */
 static bool running_on_simulaqron = false;
