@@ -145,7 +145,7 @@ static int dh_generate_key(DH *dh)
     return 0;
 }
 
-static int compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
+static int dh_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
 {
     /* See comment above. All qkd api calls would then happen here. */
     
@@ -170,12 +170,13 @@ static int compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
     - The server calls QKD_GET_KEY which returns a key_buffer. This is used as 
       the shared secret and returned. Note that this returns the same key_buffer 
       as that which was return on the client side, so it is indeed a shared secret.s */
+    return -1;  /* TODO */
 }
 
 static DH_METHOD example_dh_method = {
     .name = "Example DH Method",
     .generate_key = dh_generate_key,
-    .compute_key = NULL,                    /* TOOD */
+    .compute_key = dh_compute_key,
     .bn_mod_exp = NULL,                     /* TODO */
     .init = NULL,                           /* TODO */
     .finish = NULL,                         /* TODO */
