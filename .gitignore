@@ -56,3 +56,6 @@ dkms.conf
 
 # Local settings files
 .gitattributes
+
+# Word file being edited
+~*.docx
