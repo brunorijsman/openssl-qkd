@@ -29,14 +29,12 @@ openssl_conf = openssl_def
 engines = engine_section
 
 [engine_section]
-example = example_section
+etsi_qkd_server = etsi_qkd_server_section
 
-[example_section]
-engine_id = example
-#dynamic_path = /usr/local/lib/engines-3/example.so
+[etsi_qkd_server_section]
+engine_id = etsi_qkd_server
 default_algorithms = ALL
 init = 0
-#CRYPT_PARAMS = id-Gost28147-89-CryptoPro-A-ParamSet
 
 # End engine definitions.
 
