@@ -54,9 +54,13 @@ $(ENGINE_DIR)/$(SERVER): $(SERVER)
 
 test:
 	@./stop-server.sh
+	@./start-tshark.sh
+	@sleep 1
 	@./start-server.sh
 	@./run-client.sh
 	@./stop-server.sh
+	@sleep 1
+	@./stop-tshark.sh
 
 clean: clean-test
 	rm -f $(CLIENT) $(SERVER)
@@ -69,5 +73,6 @@ clean-test:
 	./stop-server.sh
 	rm -f *.out
 	rm -f *.pid
+	rm -f *.tcap
 
 .PHONY: all keys test clean clean-test
