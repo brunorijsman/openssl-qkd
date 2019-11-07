@@ -14,6 +14,9 @@
 #include <sys/random.h>
 #include "qkd_api.h"
 #include <assert.h>
+#include <etsi_qkd_debug.h>
+
+/* TODO: consistent file names: etsi_qkd_... */
 
 /* Current limitations in this stub:
  * - More than one concurrent connection not yet supported
@@ -29,26 +32,6 @@
 
 QKD_QOS current_qos;
 key_handle_t zeros_array = {0};
-
-static void error_if(const char *function, bool is_error, const char *msg) 
-{
-    if (is_error) {
-        fprintf(stderr, "[%s] %s: %s\n", function, msg, strerror(errno));
-        exit(1);
-    }
-}
-
-#define ERROR_IF(is_error, msg) error_if(__func__, is_error, msg)
-
-static void fatal_if(const char *function, bool is_error, const char *msg) 
-{
-    if (is_error) {
-        fprintf(stderr, "[%s] %s: %s\n", function, msg, strerror(errno));
-        exit(1);
-    }
-}
-
-#define FATAL_IF(is_error, msg) fatal_if(__func__, is_error, msg)
 
 void key_handle_set_null(key_handle_t *key_handle)
 {
@@ -99,18 +82,18 @@ static int create_listen_socket()
 {
     /* Create the socket. */
     int sock = socket(AF_INET, SOCK_STREAM, 0);
-    ERROR_IF(sock == -1, "socket failed");
+    QKD_error_if(sock == -1, "socket failed");
 
     /* The client and server may run on the same host. In that case we want to allow both of them
     to create a listening socket for the same port. */
     int on = 1;
     int result = setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&on, sizeof(on));
-    ERROR_IF(result != 0, "setsockopt SO_REUSEPORT failed");
+    QKD_error_if(result != 0, "setsockopt SO_REUSEPORT failed");
 
     /* We want to be able to bind again while a previous socket for the same port is still in the
     lingering state. */
     result = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
-    ERROR_IF(result != 0, "setsockopt SO_REUSEADDR failed");
+    QKD_error_if(result != 0, "setsockopt SO_REUSEADDR failed");
 
     /* Bind the socket to the QKD port and the wildcard address. */
     struct sockaddr_in listen_address; 
@@ -119,7 +102,7 @@ static int create_listen_socket()
     listen_address.sin_addr.s_addr = htonl(INADDR_ANY); 
     listen_address.sin_port = htons(ETSI_QKD_PORT);
     result = bind(sock, (const struct sockaddr *) &listen_address, sizeof(listen_address));
-    ERROR_IF(result != 0, "bind failed");
+    QKD_error_if(result != 0, "bind failed");
 
     return sock;
 }
@@ -134,9 +117,9 @@ typedef struct qkd_session_t {
 QKD_SESSION *qkd_session_new(char *destination, QKD_QOS qos)
 {
     QKD_SESSION *session = malloc(sizeof(QKD_SESSION));
-    FATAL_IF(session == NULL, "malloc failed");
+    QKD_fatal_if(session == NULL, "malloc failed");
     session->destination = strdup(destination);
-    key_handle_set_random(&session->key_handle);
+    key_handle_set_random(&session->key_handle);  /* TODO: support chosen key_handle */
     session->qos = qos;
     session->listen_sock = create_listen_socket();
     return session;
@@ -146,7 +129,7 @@ void qkd_session_delete(QKD_SESSION *session)
 {
     assert(session != NULL);
     int result = close(session->listen_sock);
-    ERROR_IF(result == -1, "close failed");
+    QKD_error_if(result == -1, "close failed");
     free(session);
 }
 
@@ -157,6 +140,7 @@ QKD_RC QKD_open(char *destination, QKD_QOS qos, key_handle_t *key_handle)
     assert(key_handle != NULL);
     assert(qkd_session == NULL);   /* TODO: For now we only support one session */
     qkd_session = qkd_session_new(destination, qos);
+    memcpy(key_handle, qkd_session->key_handle, sizeof(key_handle_t));   /* TODO: do cleaner */
     return QKD_RC_SUCCESS;
 }
 

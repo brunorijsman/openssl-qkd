@@ -25,11 +25,13 @@ SERVER = etsi_qkd_server$(SHARED_EXT)
 
 all: $(CLIENT) $(SERVER) key.pem cert.pem $(ENGINE_DIR)/$(CLIENT) $(ENGINE_DIR)/$(SERVER)
 
-$(CLIENT): etsi_qkd_client.c etsi_qkd_common.c qkd_api.c 
-	$(LINK.c) -shared -o $@ $^ -lcrypto
+CLIENT_C = etsi_qkd_client.c etsi_qkd_common.c etsi_qkd_debug.c qkd_api.c 
+$(CLIENT): $(CLIENT_C) etsi_qkd_common.h
+	$(LINK.c) -shared -o $@ $(CLIENT_C) -lcrypto
 
-$(SERVER): etsi_qkd_server.c etsi_qkd_common.c qkd_api.c 
-	$(LINK.c) -shared -o $@ $^ -lcrypto
+SERVER_C = etsi_qkd_server.c etsi_qkd_common.c etsi_qkd_debug.c qkd_api.c 
+$(SERVER): $(SERVER_C) etsi_qkd_common.h
+	$(LINK.c) -shared -o $@ $(SERVER_C) -lcrypto
 
 key.pem cert.pem:
 	$(SHARED_PATH_ENV)=${HOME}/openssl \
@@ -57,6 +59,7 @@ test: all
 	@sleep 1
 	@./start-server.sh
 	@./run-client.sh
+	@sleep 1
 	@./stop-server.sh
 	@sleep 1
 	@./stop-tshark.sh

@@ -2,10 +2,12 @@
 #include <string.h>
 #include <openssl/engine.h>
 #include "qkd_api.h"
+#include "etsi_qkd_debug.h"
 
 static int server_generate_key(DH *dh)
 {
-    printf("server_generate_key [enter]\n");
+    QKD_report("server_generate_key [enter]");
+    /* QKD_report WITH FILENAME AND FUNCTION AND LINE */
     
     BIGNUM *pub_key = BN_secure_new();
     report_progress("server_generate_key: BN_secure_new (priv_key)", pub_key != NULL);
@@ -33,8 +35,8 @@ static int server_generate_key(DH *dh)
         key_handle_t key_handle = key_handle_null;
         result = QKD_open("localhost", qos, &key_handle);
         report_progress("QKD_open", QKD_RC_SUCCESS == result);
-        printf("sizeof key_handle: %ld\n", sizeof(key_handle));
-        printf("key_handle: ");
+        fprintf(stderr, "sizeof key_handle: %ld\n", sizeof(key_handle));
+        fprintf(stderr, "key_handle: ");
         for (int i=0; i<sizeof(key_handle); i++) {
             printf("%02x", (unsigned char) (key_handle[i]));
         }
@@ -51,11 +53,11 @@ static int server_generate_key(DH *dh)
         BN_set_word(priv_key, 1);
     }
 
-    printf("DH public key: %s\n", BN_bn2hex(pub_key));
-    printf("DH private key: %s\n", BN_bn2hex(priv_key));
+    fprintf(stderr, "DH public key: %s\n", BN_bn2hex(pub_key));
+    fprintf(stderr, "DH private key: %s\n", BN_bn2hex(priv_key));
 
     int result = DH_set0_key(dh, pub_key, priv_key);
-    report_progress("dh_generate_key: DH_set0_key", result == 1);
+    report_progress("server_generate_key: DH_set0_key", result == 1);
 
     printf("server_generate_key [exit]\n");
     return 1;

@@ -10,7 +10,7 @@ void fatal(const char *format, ...)
 {
     va_list argptr;
     va_start(argptr, format);
-    vprintf(format, argptr);
+    vfprintf(stderr, format, argptr);
     va_end(argptr);
     exit(1);
 }
@@ -18,7 +18,7 @@ void fatal(const char *format, ...)
 void report_progress(const char *what, bool okay)
 {
     if (okay) {
-        printf("%s: OK\n", what);
+        fprintf(stderr, "%s: OK\n", what);
     } else {
         fatal("%s: FAILED\n", what);
     }
