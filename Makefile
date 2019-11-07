@@ -4,12 +4,10 @@ ifeq ($(UNAME_S), Linux)
 	CC = gcc
 	SHARED_EXT = .so
 	SHARED_PATH_ENV = LD_LIBRARY_PATH
-	ENGINE_DIR = /usr/local/lib/engines-3
 else ifeq ($(UNAME_S), Darwin)
 	CC = clang
 	SHARED_EXT = .dylib
 	SHARED_PATH_ENV = DYLD_FALLBACK_LIBRARY_PATH
-	ENGINE_DIR = /usr/local/lib/engine
 else
 $(error Unsupported platform)
 endif
@@ -18,6 +16,7 @@ OPENSSL ?= $(HOME)/openssl
 OPENSSL_INCLUDE = $(OPENSSL)/include
 OPENSSL_LIB = $(OPENSSL)
 OPENSSL_BIN = $(OPENSSL)/apps
+ENGINE_DIR = /usr/local/lib/engines-3
 
 CFLAGS = -Wall -I. -I$(OPENSSL_INCLUDE) -L$(OPENSSL_LIB) -g -fPIC
 
@@ -42,17 +41,17 @@ key.pem cert.pem:
 		-days 365 \
 		-nodes \
 		-subj /O=Example \
-		-config server_cert_ssl_config.cnf
+		-config certificate_openssl.cnf
 
 $(ENGINE_DIR)/$(CLIENT): $(CLIENT)
 	mkdir -p $(ENGINE_DIR)
-	cp $(CLIENT) $(ENGINE_DIR)
+	ln -sf ${CURDIR}/$(CLIENT) $(ENGINE_DIR)/$(CLIENT)
 
 $(ENGINE_DIR)/$(SERVER): $(SERVER)
 	mkdir -p $(ENGINE_DIR)
-	cp $(SERVER) $(ENGINE_DIR)
+	ln -sf ${CURDIR}/$(SERVER) $(ENGINE_DIR)/$(SERVER)
 
-test:
+test: all
 	@./stop-server.sh
 	@./start-tshark.sh
 	@sleep 1
@@ -67,10 +66,13 @@ clean: clean-test
 	rm -rf $(ENGINE_DIR)/$(CLIENT) $(ENGINE_DIR)/$(SERVER)
 	rm -f key.pem cert.pem
 	rm -f *.o core
+	rm -f $(ENGINE_DIR)/$(CLIENT)
+	rm -f $(ENGINE_DIR)/$(SERVER)
 	rm -rf *.dSYM
 
 clean-test:
 	./stop-server.sh
+	./stop-tshark.sh
 	rm -f *.out
 	rm -f *.pid
 	rm -f *.tcap
