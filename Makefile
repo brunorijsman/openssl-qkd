@@ -14,10 +14,10 @@ else
 $(error Unsupported platform)
 endif
 
-OPENSLL ?= $(HOME)/openssl
-OPENSSL_INCLUDE = $(OPENSLL)/include
-OPENSSL_LIB = $(OPENSLL)
-OPENSSL_BIN = $(OPENSLL)/apps
+OPENSSL ?= $(HOME)/openssl
+OPENSSL_INCLUDE = $(OPENSSL)/include
+OPENSSL_LIB = $(OPENSSL)
+OPENSSL_BIN = $(OPENSSL)/apps
 
 CFLAGS = -Wall -I. -I$(OPENSSL_INCLUDE) -L$(OPENSSL_LIB) -g -fPIC
 
@@ -53,31 +53,10 @@ $(ENGINE_DIR)/$(SERVER): $(SERVER)
 	cp $(SERVER) $(ENGINE_DIR)
 
 test:
-#	Kill old server if it is still running
-	@./kill-server.sh
-#	Start server in background
-	@$(SHARED_PATH_ENV)=${HOME}/openssl \
-		$(OPENSSL_BIN)/openssl s_server \
-		-key key.pem \
-		-cert cert.pem \
-		-accept 44330 \
-		-www \
-		>server.out 2>&1 & \
-		echo "$$!" > server.pid
-	@echo "Started server in background (PID `cat server.pid`)"
-#	Run client
-	@echo "GET /" | \
-		$(SHARED_PATH_ENV)=${HOME}/openssl \
-		$(OPENSSL_BIN)/openssl s_client \
-		-tls1_2 \
-		-cipher 'DHE-RSA-AES128-GCM-SHA256' \
-		-connect localhost:44330 \
-		-CAfile cert.pem \
-		-msg \
-		>client.out 2>&1 &
-	@echo "Ran client"
-#	Stop server
-	@./kill-server.sh
+	@./stop-server.sh
+	@./start-server.sh
+	@./run-client.sh
+	@./stop-server.sh
 
 clean: clean-test
 	rm -f $(CLIENT) $(SERVER)
@@ -87,7 +66,7 @@ clean: clean-test
 	rm -rf *.dSYM
 
 clean-test:
-	@./kill-server.sh
+	./stop-server.sh
 	rm -f *.out
 	rm -f *.pid
 
