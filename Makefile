@@ -34,7 +34,7 @@ $(SERVER): etsi_qkd_server.c etsi_qkd_common.c qkd_api.c
 
 key.pem cert.pem:
 	$(SHARED_PATH_ENV)=${HOME}/openssl \
-	$(OPENSSL_BIN)/openssl req \
+		$(OPENSSL_BIN)/openssl req \
 		-x509 \
 		-newkey rsa:2048 \
 		-keyout key.pem \
@@ -52,11 +52,43 @@ $(ENGINE_DIR)/$(SERVER): $(SERVER)
 	mkdir -p $(ENGINE_DIR)
 	cp $(SERVER) $(ENGINE_DIR)
 
-clean:
+test:
+#	Kill old server if it is still running
+	@./kill-server.sh
+#	Start server in background
+	@$(SHARED_PATH_ENV)=${HOME}/openssl \
+		$(OPENSSL_BIN)/openssl s_server \
+		-key key.pem \
+		-cert cert.pem \
+		-accept 44330 \
+		-www \
+		>server.out 2>&1 & \
+		echo "$$!" > server.pid
+	@echo "Started server in background (PID `cat server.pid`)"
+#	Run client
+	@echo "GET /" | \
+		$(SHARED_PATH_ENV)=${HOME}/openssl \
+		$(OPENSSL_BIN)/openssl s_client \
+		-tls1_2 \
+		-cipher 'DHE-RSA-AES128-GCM-SHA256' \
+		-connect localhost:44330 \
+		-CAfile cert.pem \
+		-msg \
+		>client.out 2>&1 &
+	@echo "Ran client"
+#	Stop server
+	@./kill-server.sh
+
+clean: clean-test
 	rm -f $(CLIENT) $(SERVER)
 	rm -rf $(ENGINE_DIR)/$(CLIENT) $(ENGINE_DIR)/$(SERVER)
 	rm -f key.pem cert.pem
 	rm -f *.o core
 	rm -rf *.dSYM
 
-.PHONY: all keys clean
+clean-test:
+	@./kill-server.sh
+	rm -f *.out
+	rm -f *.pid
+
+.PHONY: all keys test clean clean-test
