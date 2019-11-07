@@ -2,7 +2,7 @@ openssl_conf = openssl_def
 
 [openssl_def]
 engines = engine_section
-xxx =
+
 [engine_section]
 etsi_qkd_server = etsi_qkd_server_section
 
