@@ -3,10 +3,12 @@ ifeq ($(UNAME_S), Linux)
 	@echo "Linux"
 	CC = gcc
 	SHARED_EXT = .so
+	SHARED_PATH_ENV = LD_LIBRARY_PATH
 	ENGINE_DIR = /usr/local/lib/engines-3
 else ifeq ($(UNAME_S), Darwin)
 	CC = clang
 	SHARED_EXT = .dylib
+	SHARED_PATH_ENV = DYLD_FALLBACK_LIBRARY_PATH
 	ENGINE_DIR = /usr/local/lib/engine
 else
 $(error Unsupported platform)
@@ -31,8 +33,16 @@ $(SERVER): etsi_qkd_server.c etsi_qkd_common.c qkd_api.c
 	$(LINK.c) -shared -o $@ $^ -lcrypto
 
 key.pem cert.pem:
-	# $(OPENSSL_BIN)/openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 \
-	# 	-subj "O=Example"
+	$(SHARED_PATH_ENV)=${HOME}/openssl \
+	$(OPENSSL_BIN)/openssl req \
+		-x509 \
+		-newkey rsa:2048 \
+		-keyout key.pem \
+		-out cert.pem \
+		-days 365 \
+		-nodes \
+		-subj /O=Example \
+		-config server_cert_ssl_config.cnf
 
 $(ENGINE_DIR)/$(CLIENT): $(CLIENT)
 	mkdir -p $(ENGINE_DIR)
