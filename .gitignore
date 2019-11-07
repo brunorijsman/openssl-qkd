@@ -63,8 +63,8 @@ dkms.conf
 # Keys and certs
 *.pem
 
-# Wireshark tcap files
-*.tcap
+# Wireshark pcap files
+*.pcap
 
 # PID files
 *.pid

@@ -4,7 +4,7 @@ rm -f tshark.out
 echo "tshark started on $(date +'%Y-%m-%dT%H:%M:%S.%s')" >tshark.out
 tshark \
     -i lo0 \
-    -w tshark.tcap \
+    -w tshark.pcap \
     -V \
     -d tcp.port==44330,tls \
     "tcp port 44330" \

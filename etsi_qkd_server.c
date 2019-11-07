@@ -19,28 +19,20 @@ static int server_generate_key(DH *dh)
         BN_set_word(pub_key, 22222);
     } else {
         printf("server_generate_key (server)\n");
-        /* For now, the stub has a hard-coded assumption that the QKD server and client run
-           on the same host, and the stub never even looks at the destination address. */
-        ip_address_t destination = {
-            .length = 0,
-            .address = {0}
-        };
-
         /* For now, we only specify the requested_lengh as a QoS parameter. For now, we don't
         specify max_bps or priority. */
-        qos_t qos = {
+        QKD_QOS qos = {
             .requested_length = 0,   /* TODO: This should be set */
             .max_bps = 0,
             .priority = 0,
             .timeout = 0
         };
 
-        /* Calls QKD_OPEN() with a NULL key_handle, which generates a new key_handle, which is 64 octets. */
-        enum RETURN_CODES result;
-        key_handle_t key_handle;
-        memset(key_handle, 0, sizeof(key_handle));
-        result = QKD_OPEN(destination, qos, key_handle);
-        report_progress("QKD_OPEN", QKD_RC_SUCCESS == result);
+        /* Calls QKD_open() with a NULL key_handle, which generates a new key_handle, which is 64 octets. */
+        QKD_RC result;
+        key_handle_t key_handle = key_handle_null;
+        result = QKD_open("localhost", qos, &key_handle);
+        report_progress("QKD_open", QKD_RC_SUCCESS == result);
         printf("sizeof key_handle: %ld\n", sizeof(key_handle));
         printf("key_handle: ");
         for (int i=0; i<sizeof(key_handle); i++) {
@@ -78,10 +70,10 @@ static int server_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
       own server public key. If not, it fails. This is just a sanity check and 
       this step is not essential for guaranteeing the security of the procedure 
       (any attacker can easily spoof the public key).
-    - The server calls QKD_CONNECT_BLOCKING. (See considerations on the client 
+    - The server calls QKD_connect_blocking. (See considerations on the client 
       side about needing the IP address of the peer, the client in this case, 
       and this call being blocking.)
-    - The server calls QKD_GET_KEY which returns a key_buffer. This is used as 
+    - The server calls QKD_get_key which returns a key_buffer. This is used as 
       the shared secret and returned. Note that this returns the same key_buffer 
       as that which was return on the client side, so it is indeed a shared secret.s */
 

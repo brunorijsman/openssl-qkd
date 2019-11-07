@@ -24,7 +24,7 @@ static int client_generate_key(DH *dh)
         BN_set_word(pub_key, 1);
         /* TODO: Client side processing
         - The client uses the received DH public key as the ETSI API key_handle
-        - The client calls QKD_OPEN() with the key_handle obtained it this way.
+        - The client calls QKD_open() with the key_handle obtained it this way.
         - Note that the overloaded generate_key function does different things on the server
             side and the client side. Thus, there needs to be some way for the overloaded function
             to "know" whether it is being called in a server role or a client role. (How?)
@@ -46,7 +46,7 @@ static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
     printf("client_compute_key [enter]\n");
     
     // We get the key handle from the public key of the server.
-    key_handle_t key_handle;
+    key_handle_t key_handle = key_handle_null;
     int size = BN_bn2bin(pub_key, (unsigned char *)key_handle);
     assert(size == KEY_HANDLE_SIZE);
 
@@ -57,35 +57,28 @@ static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
     }
     printf("\n");
 
-    /* TODO: For now, the stub has a hard-coded assumption that the QKD server and client run
-             on the same host, and the stub never even looks at the destination address. */
-    ip_address_t destination = {
-            .length = 0,
-            .address = {0}
-    };
-        /* TODO: For now, set QoS to dummy values */
+    /* TODO: For now, set QoS to dummy values */
     int key_size = DH_size(dh);
-    qos_t qos = {
-            .requested_length = key_size,   /* TODO: This one we should probably set */
-            .max_bps = 0,
-            .priority = 0,
-            .timeout = 0
+    QKD_QOS qos = {
+        .requested_length = key_size,   /* TODO: This one we should probably set */
+        .max_bps = 0,
+        .priority = 0,
+        .timeout = 0
     };
-    enum RETURN_CODES result;
-    result = QKD_OPEN(destination, qos, key_handle);
-    report_progress("QKD_OPEN", QKD_RC_SUCCESS == result);
+    QKD_RC result = QKD_open("localhost", qos, &key_handle);
+    report_progress("QKD_open", QKD_RC_SUCCESS == result);
 
-    result = QKD_CONNECT_BLOCKING(key_handle, 0);
-    report_progress("QKD_CONNECT_BLOCKING", QKD_RC_SUCCESS == result);
+    result = QKD_connect_blocking(&key_handle, 0);
+    report_progress("QKD_connect_blocking", QKD_RC_SUCCESS == result);
 
     printf("Allocated size=%d\n", key_size);
     report_progress("client_compute_key: allocate shared secret memory", key != NULL);
     // /* TODO: put somthing in the key */
     // memset(key, 3, size);
-    printf("Before QKD_GET_KEY\n");
-    result = QKD_GET_KEY(key_handle, (char *)key);
-    printf("After QKD_GET_KEY\n");
-    report_progress("QKD_GET_KEY", QKD_RC_SUCCESS == result);
+    printf("Before QKD_get_key\n");
+    result = QKD_get_key(&key_handle, (char *)key);
+    printf("After QKD_get_key\n");
+    report_progress("QKD_get_key", QKD_RC_SUCCESS == result);
 
     printf("KEY: ");
     for (int i = 0; i < sizeof(key); i++) {
@@ -93,17 +86,17 @@ static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
     }
     printf("\n");
 
-    result = QKD_CLOSE(key_handle);
-    report_progress("QKD_CLOSE", QKD_RC_SUCCESS == result);
+    result = QKD_close(&key_handle);
+    report_progress("QKD_close", QKD_RC_SUCCESS == result);
 
     /* TODO: The overloaded compute_key function on the client does the following:
-    - The client calls QKD_CONNECT_BLOCKING.
+    - The client calls QKD_connect_blocking.
     - This call requires the IP address of the peer (the server in this case). 
       Does OpenSSL provide some API to get the IP address of the peer?
     - Once again, is OpenSSL tolerant to doing a blocking call here? I don't 
       think we can use the non-blocking variation (which is not well-defined in 
       the ETSI API document; there is no sequence diagram for it).
-    - The client calls QKD_GET_KEY which returns a key_buffer. This is used as 
+    - The client calls QKD_get_key which returns a key_buffer. This is used as 
       the shared secret and returned. */
 
     

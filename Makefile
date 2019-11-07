@@ -18,7 +18,7 @@ OPENSSL_LIB = $(OPENSSL)
 OPENSSL_BIN = $(OPENSSL)/apps
 ENGINE_DIR = /usr/local/lib/engines-3
 
-CFLAGS = -Wall -I. -I$(OPENSSL_INCLUDE) -L$(OPENSSL_LIB) -g -fPIC
+CFLAGS = -Wall -Werror -I. -I$(OPENSSL_INCLUDE) -L$(OPENSSL_LIB) -g -fPIC
 
 CLIENT = etsi_qkd_client$(SHARED_EXT)
 SERVER = etsi_qkd_server$(SHARED_EXT)
@@ -75,6 +75,6 @@ clean-test:
 	./stop-tshark.sh
 	rm -f *.out
 	rm -f *.pid
-	rm -f *.tcap
+	rm -f *.pcap
 
 .PHONY: all keys test clean clean-test
