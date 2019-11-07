@@ -9,7 +9,6 @@ ${OPENSSL_BIN}/openssl s_server \
     -cert cert.pem \
     -accept 44330 \
     -www \
-    -engine etsi_qkd_server \
     >>server.out 2>&1 & \
     echo $! >server.pid
 echo "OK (PID `cat server.pid`)"
