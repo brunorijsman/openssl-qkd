@@ -14,64 +14,29 @@
 #include <sys/random.h>
 #include "qkd_api.h"
 #include <assert.h>
-#include <qkd_debug.h>
+#include "qkd_debug.h"
 
-/* TODO: consistent file names: qkd_... */
+/* TODO: Remove superfluous header files */
 
-/* Current limitations in this stub:
+/* Current limitations in this mock:
  * - More than one concurrent connection not yet supported
  * - Pre-defined key handles (section 6.1.3 and 6.1.4) not yet supported
  * - IPv6 is not yet supported (only IPv4)
  * - Timeout on blocking connect is not yet supported (timeout is ignored)
  */
 
-
 #define BUFSIZE 1024
 
 #define QKD_PORT 8080
 
-QKD_QOS current_qos;
-key_handle_t zeros_array = {0};
+QKD_qos_t current_qos;
 
-void key_handle_set_null(key_handle_t *key_handle)
-{
-    assert(key_handle != NULL);
-    bzero(key_handle, sizeof(key_handle_t));
-}
-
-bool key_handle_is_null(key_handle_t *key_handle)
-{
-    assert(key_handle != NULL);
-    for (size_t i=0; i<sizeof(key_handle_t); i++) {
-        if (key_handle[i] != 0) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void key_handle_set_zero(key_handle_t *key_handle)
-{
-    assert(key_handle != NULL);
-    bzero(key_handle, sizeof(key_handle_t));
-}
-
-void key_handle_set_random(key_handle_t *key_handle)
-{
-    /* Fill the handle with random bytes, but make sure we don't accidentally pick the null key. */
-    assert(key_handle != NULL);
-    bool at_least_one_non_zero;
-    do {
-        at_least_one_non_zero = false;
-        for (size_t i=0; i<sizeof(key_handle_t); i++) {
-            char c = rand();
-            (*key_handle)[i] = c;
-            if (c) {
-                at_least_one_non_zero = true;
-            }
-        }
-    } while (!at_least_one_non_zero);
-}
+typedef struct qkd_session_t {
+    char *destination;
+    QKD_key_handle_t key_handle;
+    QKD_qos_t qos;
+    int listen_sock;
+} QKD_SESSION;
 
 /** 
  * Create a listening socket.
@@ -107,19 +72,12 @@ static int create_listen_socket()
     return sock;
 }
 
-typedef struct qkd_session_t {
-    char *destination;
-    key_handle_t key_handle;
-    QKD_QOS qos;
-    int listen_sock;
-} QKD_SESSION;
-
-QKD_SESSION *qkd_session_new(char *destination, QKD_QOS qos)
+QKD_SESSION *qkd_session_new(char *destination, QKD_qos_t qos)
 {
     QKD_SESSION *session = malloc(sizeof(QKD_SESSION));
     QKD_fatal_if(session == NULL, "malloc failed");
     session->destination = strdup(destination);
-    key_handle_set_random(&session->key_handle);  /* TODO: support chosen key_handle */
+    QKD_key_handle_set_random(&session->key_handle);  /* TODO: support chosen key_handle */
     session->qos = qos;
     session->listen_sock = create_listen_socket();
     return session;
@@ -135,27 +93,27 @@ void qkd_session_delete(QKD_SESSION *session)
 
 static QKD_SESSION *qkd_session = NULL;  /* TODO: For now this is the one and only session */
 
-QKD_RC QKD_open(char *destination, QKD_QOS qos, key_handle_t *key_handle)
+QKD_RC QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle)
 {
     assert(key_handle != NULL);
     assert(qkd_session == NULL);   /* TODO: For now we only support one session */
     qkd_session = qkd_session_new(destination, qos);
-    memcpy(key_handle, qkd_session->key_handle, sizeof(key_handle_t));   /* TODO: do cleaner */
+    *key_handle = qkd_session->key_handle;
     return QKD_RC_SUCCESS;
 }
 
-QKD_RC QKD_connect_nonblock(const key_handle_t *key_handle)
+QKD_RC QKD_connect_nonblock(const QKD_key_handle_t *key_handle)
 {
     /* TODO: Not yet implemented. */
     return QKD_RC_NOT_SUPPORTED;
 }
 
-QKD_RC QKD_connect_blocking(const key_handle_t *key_handle, uint32_t timeout)
+QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout)
 {
     return QKD_RC_SUCCESS;
 }
 
-QKD_RC QKD_get_key(const key_handle_t *key_handle, char* key_buffer) {
+QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* key_buffer) {
     /* TODO: Implement this; fixed shared secret for now */
     assert(key_buffer != NULL);
     for (size_t i = 0; i < current_qos.requested_length; i++) {
@@ -164,7 +122,7 @@ QKD_RC QKD_get_key(const key_handle_t *key_handle, char* key_buffer) {
     return QKD_RC_SUCCESS;
 }
 
-QKD_RC QKD_PLACEHOLDER_FOR_OLD_CODE(const key_handle_t *key_handle, char* key_buffer) {
+QKD_RC QKD_PLACEHOLDER_FOR_OLD_CODE(const QKD_key_handle_t *key_handle, char* key_buffer) {
     // const char* hostname = "localhost";
     // const char* portname = "8080";
     // char buf[BUFSIZE];
@@ -203,7 +161,7 @@ QKD_RC QKD_PLACEHOLDER_FOR_OLD_CODE(const key_handle_t *key_handle, char* key_bu
     //     }
 
     //     /* Send key_handle first */
-    //     int n = write(sd, key_handle, KEY_HANDLE_SIZE);
+    //     int n = write(sd, key_handle, QKD_KEY_HANDLE_SIZE);
     //     if (n < 0) {
     //         error("ERROR writing to socket");
     //     }
@@ -245,7 +203,7 @@ QKD_RC QKD_PLACEHOLDER_FOR_OLD_CODE(const key_handle_t *key_handle, char* key_bu
     //         error("ERROR reading from socket");
     //     }
 
-    //     if (memcmp(key_handle, buf, KEY_HANDLE_SIZE) != 0) {
+    //     if (memcmp(key_handle, buf, QKD_KEY_HANDLE_SIZE) != 0) {
     //         /* key_handle is different from what was expected */
     //         n = write(session_fd, &(char){ 1 }, sizeof(char));
     //         if (n < 0) {
@@ -280,7 +238,8 @@ QKD_RC QKD_PLACEHOLDER_FOR_OLD_CODE(const key_handle_t *key_handle, char* key_bu
     return 0;
 }
 
-QKD_RC QKD_close(key_handle_t *key_handle)
+QKD_RC QKD_close(const QKD_key_handle_t *key_handle)
 {
+    /* TODO */
     return QKD_RC_SUCCESS;
 }

@@ -1,4 +1,4 @@
-#include "qkd_common.h"
+#include "qkd_engine_common.h"
 #include <string.h>
 #include <openssl/engine.h>
 #include "qkd_api.h"
@@ -8,63 +8,68 @@ static int server_generate_key(DH *dh)
 {
     QKD_enter();
     
-    BIGNUM *pub_key = BN_secure_new();
-    QKD_fatal_if(pub_key == NULL, "BN_secure_new (pub_key) failed");
+    BIGNUM *public_key = BN_secure_new();
+    QKD_fatal_if(public_key == NULL, "BN_secure_new (public_key) failed");
 
-    BIGNUM *priv_key = BN_secure_new();
-    QKD_fatal_if(priv_key == NULL, "BN_secure_new (priv_key) failed");
+    BIGNUM *private_key = BN_secure_new();
+    QKD_fatal_if(private_key == NULL, "BN_secure_new (private_key) failed");
 
-    if (return_fixed_key_for_testing) {
-        QKD_report("server_generate_key (fixed number)");
-        BN_set_word(priv_key, 11111);
-        BN_set_word(pub_key, 22222);
+    if (QKD_return_fixed_key_for_testing) {
+        QKD_report("Return fixed key");
+        BN_set_word(private_key, QKD_fixed_private_key);
+        BN_set_word(public_key, QKD_fixed_public_key);
     } else {
-        QKD_report("server_generate_key (server)");
-        /* For now, we only specify the requested_lengh as a QoS parameter. For now, we don't
-        specify max_bps or priority. */
-        QKD_QOS qos = {
-            .requested_length = 0,   /* TODO: This should be set */
-            .max_bps = 0,
-            .priority = 0,
-            .timeout = 0
-        };
 
-        /* Calls QKD_open() with a NULL key_handle, which generates a new key_handle, which is 64 octets. */
-        QKD_RC result;
-        key_handle_t key_handle = key_handle_null;
-        result = QKD_open("localhost", qos, &key_handle);
-        QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_open failed");
-        QKD_report("sizeof key_handle: %ld\n", sizeof(key_handle));
+        BN_set_word(private_key, 1);
+        BN_set_word(public_key, 1);
+        /* TODO */
 
-        /* TODO: use convert to string and QKD_report */
-        fprintf(stderr, "key_handle: ");
-        for (int i=0; i<sizeof(key_handle); i++) {
-            printf("%02x", (unsigned char) (key_handle[i]));
-        }
-        printf("\n");
+        // QKD_report("server_generate_key (server)");
+        // /* For now, we only specify the requested_lengh as a QoS parameter. For now, we don't
+        // specify max_bps or priority. */
+        // QKD_qos_t qos = {
+        //     .requested_length = 0,   /* TODO: This should be set */
+        //     .max_bps = 0,
+        //     .priority = 0,
+        //     .timeout = 0
+        // };
 
-        /* The server uses the key_handle as the DH public key. This public key will be included
-        in the Server-Hello message which plays the role of the SEND_KEY_HANDLE() operation in
-        the ETSI sequence diagram. Note that this is why the ETSI document requires that "no
-        key material can be derived from the handle" (top of page 9) */
-        BN_bin2bn((const unsigned char *) key_handle, sizeof(key_handle), pub_key);
+        // /* Calls QKD_open() with a NULL key_handle, which generates a new key_handle, which is 64 octets. */
+        // QKD_RC result;
+        // QKD_key_handle_t key_handle = key_handle_null;
+        // result = QKD_open("localhost", qos, &key_handle);
+        // QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_open failed");
+        // QKD_report("sizeof key_handle: %ld\n", sizeof(key_handle));
 
-        /* The server sets the DH private key to 1. The QKD exchange does not use any DH
-        private key on the server. */
-        BN_set_word(priv_key, 1);
+        // /* TODO: use convert to string and QKD_report */
+        // fprintf(stderr, "key_handle: ");
+        // for (int i=0; i<sizeof(key_handle); i++) {
+        //     printf("%02x", (unsigned char) (key_handle[i]));
+        // }
+        // printf("\n");
+
+        // /* The server uses the key_handle as the DH public key. This public key will be included
+        // in the Server-Hello message which plays the role of the SEND_KEY_HANDLE() operation in
+        // the ETSI sequence diagram. Note that this is why the ETSI document requires that "no
+        // key material can be derived from the handle" (top of page 9) */
+        // BN_bin2bn((const unsigned char *) key_handle, sizeof(key_handle), public_key);
+
+        // /* The server sets the DH private key to 1. The QKD exchange does not use any DH
+        // private key on the server. */
+        // BN_set_word(private_key, 1);
     }
 
-    QKD_report("DH public key: %s", BN_bn2hex(pub_key));
-    QKD_report("DH private key: %s", BN_bn2hex(priv_key));
+    QKD_report("DH public key: %s", BN_bn2hex(public_key));
+    QKD_report("DH private key: %s", BN_bn2hex(private_key));
 
-    int result = DH_set0_key(dh, pub_key, priv_key);
+    int result = DH_set0_key(dh, public_key, private_key);
     QKD_fatal_if(result == 0, "DH_set0_key failed");
 
     QKD_exit();
     return 1;
 }
 
-static int server_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
+static int server_compute_key(unsigned char *key, const BIGNUM *public_key, DH *dh)
 {
     QKD_enter();
 

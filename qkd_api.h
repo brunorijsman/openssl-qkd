@@ -1,9 +1,9 @@
 #ifndef QKD_API_H
 #define QKD_API_H
 
-#include <sys/types.h>
+#include <stdbool.h>
+#include <stdint.h>
 
-#define KEY_HANDLE_SIZE 64
 
 /* TODO: Make sure all of these are used */
 typedef enum {
@@ -15,27 +15,30 @@ typedef enum {
     QKD_RC_NOT_SUPPORTED,
 } QKD_RC;
 
-typedef char key_handle_t[KEY_HANDLE_SIZE];
+#define QKD_KEY_HANDLE_SIZE 64
 
-#define key_handle_null {0}
+typedef struct QKD_key_handle_st {
+    char bytes[QKD_KEY_HANDLE_SIZE];
+} QKD_key_handle_t;
 
-typedef struct qkd_qos_t {
+extern const QKD_key_handle_t QKD_key_handle_null;
+
+void QKD_key_handle_set_null(QKD_key_handle_t *key_handle);
+bool QKD_key_handle_is_null(const QKD_key_handle_t *key_handle);
+void QKD_key_handle_set_random(QKD_key_handle_t *key_handle);
+char *QKD_key_handle_str(const QKD_key_handle_t *key_handle);
+
+typedef struct QKD_qos_st {
     uint32_t requested_length;
     uint32_t max_bps;
     uint32_t priority;
     uint32_t timeout;
-} QKD_QOS;
+} QKD_qos_t;
 
-/* TODO: More consistent type naming, uppercase or not, prefix or not, _t vs _st */
-
-QKD_RC QKD_open(char *destination, QKD_QOS qos, key_handle_t *key_handle);
-
-QKD_RC QKD_connect_nonblock(const key_handle_t *key_handle);
-
-QKD_RC QKD_connect_blocking(const key_handle_t *key_handle, uint32_t timeout);
-
-QKD_RC QKD_get_key(const key_handle_t *key_handle, char *key_buffer);
-
-QKD_RC QKD_close(key_handle_t *key_handle);
+QKD_RC QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle);
+QKD_RC QKD_connect_nonblock(const QKD_key_handle_t *key_handle);
+QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout);
+QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char *key_buffer);
+QKD_RC QKD_close(const QKD_key_handle_t *key_handle);
 
 #endif

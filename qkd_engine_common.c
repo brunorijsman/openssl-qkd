@@ -1,11 +1,20 @@
+#include "qkd_engine_common.h"
+
 #include <stdbool.h>
 #include <string.h>
 #include <openssl/bn.h>
 #include <openssl/dh.h>
 #include <openssl/engine.h>
 #include <openssl/types.h>
-#include "qkd_common.h"
 #include "qkd_debug.h"
+
+
+bool QKD_return_fixed_key_for_testing = true;
+const unsigned long QKD_fixed_public_key = 1111;
+const unsigned long QKD_fixed_private_key = 2222;
+
+bool running_on_simulaqron = false;
+
 
 int shared_secret_nr_bytes(DH *dh)
 {

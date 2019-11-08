@@ -1,28 +1,28 @@
+#include "qkd_engine_common.h"
+
 #include <assert.h>
 #include <string.h>
 #include <openssl/engine.h>
 #include "qkd_api.h"
-#include "qkd_common.h"
 #include "qkd_debug.h"
 
 static int client_generate_key(DH *dh)
 {
     QKD_enter();
 
-    BIGNUM *pub_key = BN_secure_new();
-    QKD_fatal_if(pub_key == NULL, "BN_secure_new (pub_key) failed");
+    BIGNUM *public_key = BN_secure_new();
+    QKD_fatal_if(public_key == NULL, "BN_secure_new (public_key) failed");
 
-    BIGNUM *priv_key = BN_secure_new();
-    QKD_fatal_if(priv_key == NULL, "BN_secure_new (priv_key) failed");
+    BIGNUM *private_key = BN_secure_new();
+    QKD_fatal_if(private_key == NULL, "BN_secure_new (private_key) failed");
 
-    if (return_fixed_key_for_testing) {
-        /* TODO: Move this to common */
-        printf("client_generate_key (fixed number)\n");
-        BN_set_word(priv_key, 11111);
-        BN_set_word(pub_key, 22222);
+    if (QKD_return_fixed_key_for_testing) {
+        QKD_report("Return fixed key");
+        BN_set_word(private_key, QKD_fixed_private_key);
+        BN_set_word(public_key, QKD_fixed_public_key);
     } else {
-        BN_set_word(priv_key, 1);
-        BN_set_word(pub_key, 1);
+        BN_set_word(private_key, 1);
+        BN_set_word(public_key, 1);
         /* TODO: Client side processing
         - The client uses the received DH public key as the ETSI API key_handle
         - The client calls QKD_open() with the key_handle obtained it this way.
@@ -35,35 +35,34 @@ static int client_generate_key(DH *dh)
             does not use any DH private key on the client. */
     }
 
-    int result = DH_set0_key(dh, pub_key, priv_key);
+    QKD_report("DH public key: %s", BN_bn2hex(public_key));
+    QKD_report("DH private key: %s", BN_bn2hex(private_key));
+
+    int result = DH_set0_key(dh, public_key, private_key);
     QKD_fatal_if(result != 1, "DH_set0_key failed");
 
     QKD_exit();
     return 1;
 }
 
-static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
+static int client_compute_key(unsigned char *key, const BIGNUM *public_key, DH *dh)
 {
     /* TODO: Replace all fatals with error returns (but keep report) */
     QKD_enter();
     
     // We get the key handle from the public key of the server.
-    key_handle_t key_handle = key_handle_null;
-    int size = BN_bn2bin(pub_key, (unsigned char *)key_handle);
-    assert(size == KEY_HANDLE_SIZE);
+    QKD_key_handle_t key_handle = QKD_key_handle_null;
 
-    /* TODO: Remove this */
-    printf("KEY HANDLE: ");
-    int i;
-    for (i = 0; i < sizeof(key_handle); i++) {
-        printf("%02x", (unsigned char) (key_handle[i]));
-    }
-    printf("\n");
+    // int size = BN_bn2bin(public_key, (unsigned char *)key_handle);
+    // TODO    assert(size == QKD_KEY_HANDLE_SIZE);
+
+    QKD_report("Key handle = %s", QKD_key_handle_str(&key_handle));
+
+    int key_size = DH_size(dh);
 
     /* TODO: For now, set QoS to dummy values */
-    int key_size = DH_size(dh);
-    QKD_QOS qos = {
-        .requested_length = key_size,   /* TODO: This one we should probably set */
+    QKD_qos_t qos = {
+        .requested_length = key_size,
         .max_bps = 0,
         .priority = 0,
         .timeout = 0
@@ -82,12 +81,6 @@ static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
 
     result = QKD_get_key(&key_handle, (char *)key);
     QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_get_key failed");
-
-    printf("KEY: ");
-    for (int i = 0; i < sizeof(key); i++) {
-        printf("%02x", (unsigned char) (key[i]));
-    }
-    printf("\n");
 
     result = QKD_close(&key_handle);
     QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_close failed");

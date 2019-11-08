@@ -13,10 +13,12 @@ int engine_bind_common(ENGINE *engine, const char *engine_id, const char *engine
 
 /* We can control a "fixed" key (instead of an actual QKD-negotiated key) to allow end-to-end
 testing before the interaction with the QKD-API has actually been implemented. */
-static bool return_fixed_key_for_testing = false;
+extern bool QKD_return_fixed_key_for_testing;
+extern const unsigned long QKD_fixed_public_key;
+extern const unsigned long QKD_fixed_private_key;
 
 /* When we run on SimulaQron, we do certain things differently than "in real life" (see below) */
-static bool running_on_simulaqron = false;
+extern bool QKD_running_on_simulaqron;
 
 /* The DH_METHOD struct definition is not provided in a public OpenSSL header */
 /* TODO: Can we avoid this with a get function? */
