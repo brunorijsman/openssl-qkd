@@ -54,5 +54,6 @@ QKD_RC QKD_connect_nonblock(const QKD_key_handle_t *key_handle);
 QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout);
 QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char *key_buffer);
 QKD_RC QKD_close(const QKD_key_handle_t *key_handle);
+/* TODO: Also add QKD_finish function and register it in OpenSSL using ENGINE_set_finish_function */
 
 #endif
