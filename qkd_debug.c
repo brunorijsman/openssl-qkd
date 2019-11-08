@@ -36,7 +36,6 @@ void _QKD_report(const char *file, int line, const char *func, const char *forma
     print_location(file, line, func);
     va_list argptr;
     va_start(argptr, format);
-    fprintf(stderr, "[%s]", func);
     vfprintf(stderr, format, argptr);
     fprintf(stderr, "\n");
     va_end(argptr);

@@ -3,16 +3,17 @@
 #include <openssl/engine.h>
 #include "qkd_api.h"
 #include "qkd_common.h"
+#include "qkd_debug.h"
 
 static int client_generate_key(DH *dh)
 {
-    printf("client_generate_key [enter]\n");
-    
+    QKD_enter();
+
     BIGNUM *pub_key = BN_secure_new();
-    report_progress("client_generate_key: BN_secure_new (priv_key)", pub_key != NULL);
+    QKD_fatal_if(pub_key == NULL, "BN_secure_new (pub_key) failed");
 
     BIGNUM *priv_key = BN_secure_new();
-    report_progress("client_generate_key: BN_secure_new (pub_key)", priv_key != NULL);
+    QKD_fatal_if(priv_key == NULL, "BN_secure_new (priv_key) failed");
 
     if (return_fixed_key_for_testing) {
         /* TODO: Move this to common */
@@ -35,21 +36,23 @@ static int client_generate_key(DH *dh)
     }
 
     int result = DH_set0_key(dh, pub_key, priv_key);
-    report_progress("dh_generate_key: DH_set0_key", result == 1);
+    QKD_fatal_if(result != 1, "DH_set0_key failed");
 
-    printf("client_generate_key [exit]\n");
+    QKD_exit();
     return 1;
 }
 
 static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
 {
-    printf("client_compute_key [enter]\n");
+    /* TODO: Replace all fatals with error returns (but keep report) */
+    QKD_enter();
     
     // We get the key handle from the public key of the server.
     key_handle_t key_handle = key_handle_null;
     int size = BN_bn2bin(pub_key, (unsigned char *)key_handle);
     assert(size == KEY_HANDLE_SIZE);
 
+    /* TODO: Remove this */
     printf("KEY HANDLE: ");
     int i;
     for (i = 0; i < sizeof(key_handle); i++) {
@@ -66,19 +69,19 @@ static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
         .timeout = 0
     };
     QKD_RC result = QKD_open("localhost", qos, &key_handle);
-    report_progress("QKD_open", QKD_RC_SUCCESS == result);
+    QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_open failed");
 
     result = QKD_connect_blocking(&key_handle, 0);
-    report_progress("QKD_connect_blocking", QKD_RC_SUCCESS == result);
+    QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_connect_blocking failed");
+    
+    QKD_report("Allocated size=%d\n", key_size);
+    QKD_fatal_if(key == NULL, "Key is NULL");
 
-    printf("Allocated size=%d\n", key_size);
-    report_progress("client_compute_key: allocate shared secret memory", key != NULL);
     // /* TODO: put somthing in the key */
     // memset(key, 3, size);
-    printf("Before QKD_get_key\n");
+
     result = QKD_get_key(&key_handle, (char *)key);
-    printf("After QKD_get_key\n");
-    report_progress("QKD_get_key", QKD_RC_SUCCESS == result);
+    QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_get_key failed");
 
     printf("KEY: ");
     for (int i = 0; i < sizeof(key); i++) {
@@ -87,7 +90,7 @@ static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
     printf("\n");
 
     result = QKD_close(&key_handle);
-    report_progress("QKD_close", QKD_RC_SUCCESS == result);
+    QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_close failed");
 
     /* TODO: The overloaded compute_key function on the client does the following:
     - The client calls QKD_connect_blocking.
@@ -99,10 +102,11 @@ static int client_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
     - The client calls QKD_get_key which returns a key_buffer. This is used as 
       the shared secret and returned. */
 
-    
 
-    printf("client_compute_key [exit]\n");
 
+    /* TODO: Report return value in exit */
+    /* TODO: Rename to QKD_DBG_... */
+    QKD_exit();
     return key_size;
 }
 

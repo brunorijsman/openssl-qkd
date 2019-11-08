@@ -5,24 +5,7 @@
 #include <openssl/engine.h>
 #include <openssl/types.h>
 #include "qkd_common.h"
-
-void fatal(const char *format, ...)
-{
-    va_list argptr;
-    va_start(argptr, format);
-    vfprintf(stderr, format, argptr);
-    va_end(argptr);
-    exit(1);
-}
-
-void report_progress(const char *what, bool okay)
-{
-    if (okay) {
-        fprintf(stderr, "%s: OK\n", what);
-    } else {
-        fatal("%s: FAILED\n", what);
-    }
-}
+#include "qkd_debug.h"
 
 int shared_secret_nr_bytes(DH *dh)
 {
@@ -42,26 +25,28 @@ int shared_secret_nr_bytes(DH *dh)
 
 int engine_init(ENGINE *engine)
 {
-    printf("engine_init\n");
+    QKD_enter();
+    QKD_exit();
     return 1;
 }
 
 int engine_bind_common(ENGINE *engine, const char *engine_id, const char *engine_name, 
                        DH_METHOD *dh_method)
 {
-    printf("example_engine_bind\n");
+    QKD_enter();
 
     int result = ENGINE_set_id(engine, engine_id);
-    report_progress("ENGINE_set_id", result != 0);
+    QKD_fatal_if(result == 0, "ENGINE_set_id failed");
     
     result = ENGINE_set_name(engine, engine_name);
-    report_progress("ENGINE_set_name", result != 0);
+    QKD_fatal_if(result == 0, "ENGINE_set_name failed");
 
     result = ENGINE_set_DH(engine, dh_method);
-    report_progress("ENGINE_set_DH", result != 0);
+    QKD_fatal_if(result == 0, "ENGINE_set_DH failed");
 
     result = ENGINE_set_init_function(engine, engine_init);
-    report_progress("ENGINE_set_init_function", result != 0);
+    QKD_fatal_if(result == 0, "ENGINE_set_init_function failed");
 
+    QKD_exit();
     return 1;
 }

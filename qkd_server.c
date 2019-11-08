@@ -6,21 +6,20 @@
 
 static int server_generate_key(DH *dh)
 {
-    QKD_report("server_generate_key [enter]");
-    /* QKD_report WITH FILENAME AND FUNCTION AND LINE */
+    QKD_enter();
     
     BIGNUM *pub_key = BN_secure_new();
-    report_progress("server_generate_key: BN_secure_new (priv_key)", pub_key != NULL);
+    QKD_fatal_if(pub_key == NULL, "BN_secure_new (pub_key) failed");
 
     BIGNUM *priv_key = BN_secure_new();
-    report_progress("server_generate_key: BN_secure_new (pub_key)", priv_key != NULL);
+    QKD_fatal_if(priv_key == NULL, "BN_secure_new (priv_key) failed");
 
     if (return_fixed_key_for_testing) {
-        printf("server_generate_key (fixed number)\n");
+        QKD_report("server_generate_key (fixed number)");
         BN_set_word(priv_key, 11111);
         BN_set_word(pub_key, 22222);
     } else {
-        printf("server_generate_key (server)\n");
+        QKD_report("server_generate_key (server)");
         /* For now, we only specify the requested_lengh as a QoS parameter. For now, we don't
         specify max_bps or priority. */
         QKD_QOS qos = {
@@ -34,8 +33,10 @@ static int server_generate_key(DH *dh)
         QKD_RC result;
         key_handle_t key_handle = key_handle_null;
         result = QKD_open("localhost", qos, &key_handle);
-        report_progress("QKD_open", QKD_RC_SUCCESS == result);
-        fprintf(stderr, "sizeof key_handle: %ld\n", sizeof(key_handle));
+        QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_open failed");
+        QKD_report("sizeof key_handle: %ld\n", sizeof(key_handle));
+
+        /* TODO: use convert to string and QKD_report */
         fprintf(stderr, "key_handle: ");
         for (int i=0; i<sizeof(key_handle); i++) {
             printf("%02x", (unsigned char) (key_handle[i]));
@@ -53,19 +54,19 @@ static int server_generate_key(DH *dh)
         BN_set_word(priv_key, 1);
     }
 
-    fprintf(stderr, "DH public key: %s\n", BN_bn2hex(pub_key));
-    fprintf(stderr, "DH private key: %s\n", BN_bn2hex(priv_key));
+    QKD_report("DH public key: %s", BN_bn2hex(pub_key));
+    QKD_report("DH private key: %s", BN_bn2hex(priv_key));
 
     int result = DH_set0_key(dh, pub_key, priv_key);
-    report_progress("server_generate_key: DH_set0_key", result == 1);
+    QKD_fatal_if(result == 0, "DH_set0_key failed");
 
-    printf("server_generate_key [exit]\n");
+    QKD_exit();
     return 1;
 }
 
 static int server_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
 {
-    printf("server_compute_key [enter]\n");
+    QKD_enter();
 
     /* TODO: The overloaded compute_key function on the server does the following:
     - The server verifies that the received client public key is equal to its 
@@ -80,12 +81,12 @@ static int server_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
       as that which was return on the client side, so it is indeed a shared secret.s */
 
     int size = DH_size(dh);
-    printf("Allocated size=%d\n", size);
-    report_progress("server_compute_key: allocate shared secret memory", key != NULL);
+    QKD_report("Allocated size=%d", size);
+    QKD_fatal_if(key == NULL, "Key is null");
     /* TODO: put somthing in the key */
     memset(key, 3, size);
 
-    printf("server_compute_key [exit]\n");
+    QKD_exit();
     return size;
 }
 

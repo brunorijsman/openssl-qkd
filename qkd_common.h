@@ -4,8 +4,9 @@
 #include <stdbool.h>
 #include <openssl/dh.h>
 
-void fatal(const char *format, ...);
-void report_progress(const char *what, bool okay);
+/* TODO: Rename this to client_server_common */
+/* TODO: Follow QKD_ naming convention */
+
 int shared_secret_nr_bytes(DH *dh);
 int engine_bind_common(ENGINE *engine, const char *engine_id, const char *engine_name, 
                        DH_METHOD *dh_method);
@@ -18,6 +19,7 @@ static bool return_fixed_key_for_testing = false;
 static bool running_on_simulaqron = false;
 
 /* The DH_METHOD struct definition is not provided in a public OpenSSL header */
+/* TODO: Can we avoid this with a get function? */
 struct dh_method {
     char *name;
     int (*generate_key) (DH *dh);

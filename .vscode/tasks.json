@@ -6,11 +6,14 @@
         {
             "type": "shell",
             "label": "make",
-            "command": "cd example-engine; make",
+            "command": "make",
             "args": [],
             "options": {},
             "problemMatcher": [],
-            "group": "build"
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
