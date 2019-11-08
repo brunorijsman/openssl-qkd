@@ -50,50 +50,51 @@ static int client_compute_key(unsigned char *key, const BIGNUM *public_key, DH *
     /* TODO: Replace all fatals with error returns (but keep report) */
     QKD_enter();
     
-    // We get the key handle from the public key of the server.
+    // Convert the public key provided by the server into an ETSI API key handle.
     QKD_key_handle_t key_handle = QKD_key_handle_null;
-
-    // int size = BN_bn2bin(public_key, (unsigned char *)key_handle);
-    // TODO    assert(size == QKD_KEY_HANDLE_SIZE);
-
+    int convert_result = QKD_bignum_to_key_handle(public_key, &key_handle);
+    QKD_fatal_if(convert_result != 1, "QKD_bignum_to_key_handle failed");
     QKD_report("Key handle = %s", QKD_key_handle_str(&key_handle));
 
+    /* TODO: for now, set the shared secret to some fixed value */
     int key_size = DH_size(dh);
+    memset(key, 1, key_size);
+    QKD_report("shared secret = %s", QKD_shared_secret_str(key, key_size));
 
-    /* TODO: For now, set QoS to dummy values */
-    QKD_qos_t qos = {
-        .requested_length = key_size,
-        .max_bps = 0,
-        .priority = 0,
-        .timeout = 0
-    };
-    QKD_RC result = QKD_open("localhost", qos, &key_handle);
-    QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_open failed");
+    // /* TODO: For now, set QoS to dummy values */
+    // QKD_qos_t qos = {
+    //     .requested_length = key_size,
+    //     .max_bps = 0,
+    //     .priority = 0,
+    //     .timeout = 0
+    // };
+    // QKD_RC result = QKD_open("localhost", qos, &key_handle);
+    // QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_open failed");
 
-    result = QKD_connect_blocking(&key_handle, 0);
-    QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_connect_blocking failed");
+    // result = QKD_connect_blocking(&key_handle, 0);
+    // QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_connect_blocking failed");
     
-    QKD_report("Allocated size=%d\n", key_size);
-    QKD_fatal_if(key == NULL, "Key is NULL");
+    // QKD_report("Allocated size=%d\n", key_size);
+    // QKD_fatal_if(key == NULL, "Key is NULL");
 
-    // /* TODO: put somthing in the key */
-    // memset(key, 3, size);
+    // // /* TODO: put somthing in the key */
+    // // memset(key, 3, size);
 
-    result = QKD_get_key(&key_handle, (char *)key);
-    QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_get_key failed");
+    // result = QKD_get_key(&key_handle, (char *)key);
+    // QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_get_key failed");
 
-    result = QKD_close(&key_handle);
-    QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_close failed");
+    // result = QKD_close(&key_handle);
+    // QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_close failed");
 
-    /* TODO: The overloaded compute_key function on the client does the following:
-    - The client calls QKD_connect_blocking.
-    - This call requires the IP address of the peer (the server in this case). 
-      Does OpenSSL provide some API to get the IP address of the peer?
-    - Once again, is OpenSSL tolerant to doing a blocking call here? I don't 
-      think we can use the non-blocking variation (which is not well-defined in 
-      the ETSI API document; there is no sequence diagram for it).
-    - The client calls QKD_get_key which returns a key_buffer. This is used as 
-      the shared secret and returned. */
+    // /* TODO: The overloaded compute_key function on the client does the following:
+    // - The client calls QKD_connect_blocking.
+    // - This call requires the IP address of the peer (the server in this case). 
+    //   Does OpenSSL provide some API to get the IP address of the peer?
+    // - Once again, is OpenSSL tolerant to doing a blocking call here? I don't 
+    //   think we can use the non-blocking variation (which is not well-defined in 
+    //   the ETSI API document; there is no sequence diagram for it).
+    // - The client calls QKD_get_key which returns a key_buffer. This is used as 
+    //   the shared secret and returned. */
 
 
 
@@ -117,7 +118,7 @@ static DH_METHOD client_dh_method = {
 
 int client_engine_bind(ENGINE *engine, const char *engine_id)
 {
-    return engine_bind_common(engine, 
+    return QKD_engine_bind(engine, 
                               "qkd_client",
                               "ETSI QKD Client Engine",
                               &client_dh_method);

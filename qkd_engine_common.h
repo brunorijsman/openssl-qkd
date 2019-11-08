@@ -1,15 +1,25 @@
 #ifndef ETSI_KQD_COMMON_H
 #define ETSI_KQD_COMMON_H
 
+#include "qkd_api.h"
 #include <stdbool.h>
+#include <openssl/bn.h>
 #include <openssl/dh.h>
 
 /* TODO: Rename this to client_server_common */
 /* TODO: Follow QKD_ naming convention */
 
 int shared_secret_nr_bytes(DH *dh);
-int engine_bind_common(ENGINE *engine, const char *engine_id, const char *engine_name, 
-                       DH_METHOD *dh_method);
+
+int QKD_engine_bind(ENGINE *engine, const char *engine_id, const char *engine_name, 
+                    DH_METHOD *dh_method);
+
+
+int QKD_bignum_to_key_handle(const BIGNUM *bn, QKD_key_handle_t *key_handle);
+
+int QKD_key_handle_to_bignum(const QKD_key_handle_t *key_handle, BIGNUM *bn);
+
+char *QKD_shared_secret_str(unsigned char *shared_secret, size_t shared_secret_size);
 
 /* We can control a "fixed" key (instead of an actual QKD-negotiated key) to allow end-to-end
 testing before the interaction with the QKD-API has actually been implemented. */

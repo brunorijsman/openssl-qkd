@@ -73,6 +73,11 @@ static int server_compute_key(unsigned char *key, const BIGNUM *public_key, DH *
 {
     QKD_enter();
 
+    /* TODO: for now, set the shared secret to some fixed value */
+    int key_size = DH_size(dh);
+    memset(key, 1, key_size);
+    QKD_report("shared secret = %s", QKD_shared_secret_str(key, key_size));
+
     /* TODO: The overloaded compute_key function on the server does the following:
     - The server verifies that the received client public key is equal to its 
       own server public key. If not, it fails. This is just a sanity check and 
@@ -85,14 +90,8 @@ static int server_compute_key(unsigned char *key, const BIGNUM *public_key, DH *
       the shared secret and returned. Note that this returns the same key_buffer 
       as that which was return on the client side, so it is indeed a shared secret.s */
 
-    int size = DH_size(dh);
-    QKD_report("Allocated size=%d", size);
-    QKD_fatal_if(key == NULL, "Key is null");
-    /* TODO: put somthing in the key */
-    memset(key, 3, size);
-
     QKD_exit();
-    return size;
+    return key_size;
 }
 
 static DH_METHOD server_dh_method = {
@@ -109,7 +108,7 @@ static DH_METHOD server_dh_method = {
 
 int server_engine_bind(ENGINE *engine, const char *engine_id)
 {
-    return engine_bind_common(engine, 
+    return QKD_engine_bind(engine, 
                               "qkd_server",
                               "ETSI QKD Server Engine",
                               &server_dh_method);

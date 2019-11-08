@@ -1,6 +1,7 @@
 #include "qkd_engine_common.h"
-
+#include <assert.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 #include <openssl/bn.h>
 #include <openssl/dh.h>
@@ -15,6 +16,67 @@ const unsigned long QKD_fixed_private_key = 2222;
 
 bool running_on_simulaqron = false;
 
+/**
+ * Convert an OpenSSL public key (which is stored as a big number) to an ETSI API key handle.
+ * 
+ * Returns 1 on success, 0 on failure (public key is too big for key handle).
+ */
+int QKD_bignum_to_key_handle(const BIGNUM *bn, QKD_key_handle_t *key_handle)
+{
+    int bn_num_bytes = BN_num_bytes(bn);
+    if (bn_num_bytes > QKD_KEY_HANDLE_SIZE) {
+        return 0;
+    }
+    int copied_bytes = BN_bn2bin(bn, (unsigned char *) key_handle->bytes);
+    assert(copied_bytes == bn_num_bytes);
+    int num_padding_bytes = QKD_KEY_HANDLE_SIZE - copied_bytes;
+    memset((unsigned char *) key_handle->bytes + copied_bytes, 0, num_padding_bytes);
+    return 1;
+}
+
+/**
+ * Convert an ETSI API key handle to an OpenSSL public key (which is stored as a big number).
+ *
+ * Returns 1 on success, 0 on failure.
+ */
+int QKD_key_handle_to_bignum(const QKD_key_handle_t *key_handle, BIGNUM *bn)
+{
+    BIGNUM *result_bn = BN_bin2bn((unsigned char *) key_handle->bytes, QKD_KEY_HANDLE_SIZE, bn);
+    assert(result_bn == bn);
+    return 1;
+}
+
+/**
+ * Convert a shared secret to a human readable string.
+ * 
+ * Returns a pointer to the human readable string on success, NULL on failure (memory allocation
+ * failed)
+ * 
+ * Note: returns a pointer to a string that is overwritten on the next call to this function.
+ */
+char *QKD_shared_secret_str(unsigned char *shared_secret, size_t shared_secret_size)
+{
+    static char *str = NULL;
+    static size_t str_size = 0;
+    size_t needed_str_size = 2 * shared_secret_size + 1;
+    if (str == NULL || str_size < needed_str_size) {
+        str = realloc(str, needed_str_size);
+        if (!str) {
+            return NULL;
+        }
+        str_size = needed_str_size;
+
+    }
+    char *str_p = str;
+    unsigned char *shared_secret_p = shared_secret;
+    for (int i = 0; i < shared_secret_size; i++) {
+        snprintf(str_p, 3, "%02x", *shared_secret_p);
+        str_p += 2;
+        shared_secret_p += 1;
+    }
+    *str_p = '\0';
+    return str;
+}
 
 int shared_secret_nr_bytes(DH *dh)
 {
@@ -39,7 +101,7 @@ int engine_init(ENGINE *engine)
     return 1;
 }
 
-int engine_bind_common(ENGINE *engine, const char *engine_id, const char *engine_name, 
+int QKD_engine_bind(ENGINE *engine, const char *engine_id, const char *engine_name, 
                        DH_METHOD *dh_method)
 {
     QKD_enter();
