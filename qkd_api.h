@@ -1,9 +1,22 @@
+/**
+ * qkd_api.h
+ * 
+ * The ETSI Quantum Key Distribution (QKD) Application Programming Interface (API) as defined in
+ * ETSI GS QKD 004 V.1.1.1 (2012-12).
+ * https://www.etsi.org/deliver/etsi_gs/QKD/001_099/004/01.01.01_60/gs_qkd004v010101p.pdf
+ * This repository contains two imlpementations of this API:
+ * (1) A mock implementation (see qkd_api_mock.c)
+ * (2) TODO: A simulated BB84 implementation on top of SimulaQron (see qkd_api_bb84_simulaqron.c)
+ * 
+ * (c) 2019 Bruno Rijsman, All Rights Reserved.
+ * See LICENSE for licensing information.
+ */
+
 #ifndef QKD_API_H
 #define QKD_API_H
 
 #include <stdbool.h>
 #include <stdint.h>
-
 
 /* TODO: Make sure all of these are used */
 typedef enum {
