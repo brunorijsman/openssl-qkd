@@ -9,25 +9,10 @@
  */
 
 #include "qkd_api.h"
-
-#include <time.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <netdb.h>
-#include <errno.h>
-#include <strings.h> 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/random.h>
 #include <assert.h>
-#include <qkd_debug.h>
-
-/* TODO: Remove superfluous header files */
+#include <stdio.h>
+#include <stdlib.h>
+#include <strings.h> 
 
 /**
  * Null key handle constant.

@@ -1,29 +1,25 @@
-#include <time.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <netdb.h>
-#include <errno.h>
-#include <strings.h> 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/random.h>
-#include "qkd_api.h"
-#include <assert.h>
-#include "qkd_debug.h"
-
-/* TODO: Remove superfluous header files */
-
-/* Current limitations in this mock:
- * - More than one concurrent connection not yet supported
- * - Pre-defined key handles (section 6.1.3 and 6.1.4) not yet supported
- * - IPv6 is not yet supported (only IPv4)
- * - Timeout on blocking connect is not yet supported (timeout is ignored)
+/**
+ * qkd_api_mock.c
+ * 
+ * A mock implementation of the ETSI QKD API. Instead of really using QKD to exchange a key, the
+ * server picks a key at random and sends it to the client over an insecure classical channel. This
+ * is for testing only.
+ * 
+ * (c) 2019 Bruno Rijsman, All Rights Reserved.
+ * See LICENSE for licensing information.
  */
+
+#include "qkd_api.h"
+#include "qkd_debug.h"
+#include <unistd.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <strings.h> 
+#include <arpa/inet.h>
+
+/* TODO: Server can have more than one simultanious client */
+
+/* TODO: Add support for non-blocking connect */
 
 #define BUFSIZE 1024
 
