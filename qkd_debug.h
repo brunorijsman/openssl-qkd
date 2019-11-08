@@ -1,3 +1,12 @@
+/**
+ * qkd_debug.h
+ * 
+ * Common code for debugging.
+ * 
+ * (c) 2019 Bruno Rijsman, All Rights Reserved.
+ * See LICENSE for licensing information.
+ */
+
 #ifndef QKD_DEBUG_H
 #define QKD_DEBUG_H
 

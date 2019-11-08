@@ -1,4 +1,13 @@
-#include "qkd_debug.h"    /* TODO: always own header first */
+/**
+ * qkd_debug.c
+ * 
+ * Common code for debugging.
+ * 
+ * (c) 2019 Bruno Rijsman, All Rights Reserved.
+ * See LICENSE for licensing information.
+ */
+
+#include "qkd_debug.h"
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
