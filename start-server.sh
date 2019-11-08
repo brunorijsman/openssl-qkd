@@ -1,4 +1,14 @@
 #! /bin/bash
+#
+# start-server.sh
+#
+# A bash script for starting the OpenSSL demonstration web server using the ETSI QKD API for QKD
+# key agreement. The server servers HTTP GET requests from the OpenSSL demonstration web client
+# (see run-client.sh). The output of the server is written to server.out.
+# 
+# (c) 2019 Bruno Rijsman, All Rights Reserved.
+# See LICENSE for licensing information.
+#
 echo -n "Starting server in background... "
 source set-platform-dependent-variables.sh
 rm -f server.out

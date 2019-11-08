@@ -1,4 +1,14 @@
 #! /bin/bash
+#
+# run-client.sh
+#
+# A bash script for running OpenSSL demonstration client to get a web page from the OpenSSL
+# demonstration server, using the ETSI QKD API for QKD key agreement. The output of the client is
+# written to client.out.
+# 
+# (c) 2019 Bruno Rijsman, All Rights Reserved.
+# See LICENSE for licensing information.
+#
 echo -n "Running client... "
 source set-platform-dependent-variables.sh
 rm -f client.out

@@ -1,9 +1,17 @@
+/**
+ * qkd_engine_common.h
+ * 
+ * Code that is common to both OpenSSL engines: the server engine (qkd_server.c) and the client
+ * engine (qkd_client.c).
+ * 
+ * (c) 2019 Bruno Rijsman, All Rights Reserved.
+ * See LICENSE for licensing information.
+ */
+
 #ifndef ETSI_KQD_COMMON_H
 #define ETSI_KQD_COMMON_H
 
 #include "qkd_api.h"
-#include <stdbool.h>
-#include <openssl/bn.h>
 #include <openssl/dh.h>
 
 /* TODO: Rename this to client_server_common */

@@ -1,8 +1,19 @@
+/**
+ * qkd_server.c
+ * 
+ * An OpenSSL Engine for OpenSSL servers that "hijacks" the existing Diffie-Helman key agreement
+ * protocol in OpenSSL to implement a QKD key agreement on top of the ETSI QKD API.
+ * There is a separate engine for OpenSSL clients (see qkd_client.c).
+ * See qkd_api.h for the definition of the ETSI QKD API.
+ * 
+ * (c) 2019 Bruno Rijsman, All Rights Reserved.
+ * See LICENSE for licensing information.
+ */
+
 #include "qkd_engine_common.h"
+#include "qkd_debug.h"
 #include <string.h>
 #include <openssl/engine.h>
-#include "qkd_api.h"
-#include "qkd_debug.h"
 
 static int server_generate_key(DH *dh)
 {

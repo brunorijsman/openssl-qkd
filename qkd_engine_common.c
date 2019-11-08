@@ -1,14 +1,18 @@
-#include "qkd_engine_common.h"
-#include <assert.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
-#include <openssl/bn.h>
-#include <openssl/dh.h>
-#include <openssl/engine.h>
-#include <openssl/types.h>
-#include "qkd_debug.h"
+/**
+ * qkd_engine_common.c
+ * 
+ * Code that is common to both OpenSSL engines: the server engine (qkd_server.c) and the client
+ * engine (qkd_client.c).
+ * 
+ * (c) 2019 Bruno Rijsman, All Rights Reserved.
+ * See LICENSE for licensing information.
+ */
 
+#include "qkd_engine_common.h"
+#include "qkd_debug.h"
+#include <assert.h>
+#include <string.h>
+#include <openssl/engine.h>
 
 bool QKD_return_fixed_key_for_testing = true;
 const unsigned long QKD_fixed_public_key = 1111;

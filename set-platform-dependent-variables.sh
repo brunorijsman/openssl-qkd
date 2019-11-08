@@ -1,4 +1,13 @@
 #! /bin/bash
+#
+# set-platform-dependent-variables.sh
+#
+# A bash script that sets environment variables to account for the differences between the two
+# supported development environments: Apple MacOS and Ubuntu Linux.
+# 
+# (c) 2019 Bruno Rijsman, All Rights Reserved.
+# See LICENSE for licensing information.
+#
 
 # Keep this consistent with the equivalent code in Makefile
 
