@@ -13,9 +13,11 @@
 #include "qkd_debug.h"
 #include <unistd.h>
 #include <assert.h>
+#include <netdb.h>
 #include <stdlib.h>
 #include <strings.h> 
 #include <arpa/inet.h>
+
 
 /* TODO: Server can have more than one simultanious client */
 
@@ -24,6 +26,7 @@
 #define BUFSIZE 1024
 
 #define QKD_PORT 8080
+#define STRINGIFY(N) #N
 
 static int listen_sock = -1;
 
@@ -36,12 +39,12 @@ typedef struct qkd_session_t {
 } QKD_SESSION;
 
 /** 
- * Create a listen socket.
+ * Listen for incoming connections.
  *
  * Create a listen socket to receive incoming connections from the clients.
  * Returns listen socket on success, or -1 on failure.
  */
-static int create_listen_socket()
+static int listen_for_incoming_connections()
 {
     QKD_enter();
 
@@ -73,6 +76,39 @@ static int create_listen_socket()
     return sock;
 }
 
+/** 
+ * Connect to server.
+ *
+ * Create a TCP connection to the server.
+ * Returns connection socket on success, or -1 on failure.
+ */
+static int connect_to_server(char *destination)
+{
+    assert(destination != NULL);
+
+    /* Resolve the destination to an address. */
+    /* TODO: for now, ignode the destination and just hard-code localhost */
+    const char *host_str = "localhost";
+    const char *port_str = STRINGIFY(QKD_PORT);
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = 0;
+    hints.ai_flags = AI_ADDRCONFIG;
+    struct addrinfo* res = 0;
+    int result = getaddrinfo(host_str, port_str, &hints, &res);
+    QKD_fatal_if(result != 0, "getaddrinfo failed");
+
+    /* TODO: Finish this, and return sock */
+    return 0;
+}
+
+/** 
+ * Allocate and initialize a new QKD session.
+ *
+ * Returns pointer to new session, or NULL on failure.
+ */
 QKD_SESSION *qkd_session_new(char *destination, QKD_qos_t qos)
 {
     QKD_enter();
@@ -102,8 +138,8 @@ static QKD_SESSION *qkd_session = NULL;  /* TODO: For now this is the one and on
 QKD_RC QKD_init(void)
 {
     QKD_enter();
-    listen_sock = create_listen_socket();
-    QKD_fatal_if(listen_sock == -1, "create_listen_socket failed");
+    listen_sock = listen_for_incoming_connections();
+    QKD_fatal_if(listen_sock == -1, "listen_for_incoming_connections failed");
     QKD_exit();
     return QKD_RC_SUCCESS;
 }
@@ -127,7 +163,11 @@ QKD_RC QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle)
         /* We have a destination. That means we are the client that is going to connect to the
          * server specified in the destination. */
         QKD_report("Have destination: we are client connecting to server");
+
         /* TODO: connect */
+        int connection_sock = connect_to_server(destination);
+        QKD_fatal_if(connection_sock == -1, "connect_to_server failed");
+        /* TODO: do someting with sock */
 
     } else {
 
