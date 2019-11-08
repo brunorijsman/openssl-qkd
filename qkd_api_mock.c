@@ -25,22 +25,26 @@
 
 #define QKD_PORT 8080
 
+static int listen_sock = -1;
+
 QKD_qos_t current_qos;
 
 typedef struct qkd_session_t {
     char *destination;
     QKD_key_handle_t key_handle;
     QKD_qos_t qos;
-    int listen_sock;
 } QKD_SESSION;
 
 /** 
- * Create a listening socket.
- * Create a listening socket to receive incoming connections from the remote QKD peer. Both QKD
- * peers create a listening socket.
+ * Create a listen socket.
+ *
+ * Create a listen socket to receive incoming connections from the clients.
+ * Returns listen socket on success, or -1 on failure.
  */
 static int create_listen_socket()
 {
+    QKD_enter();
+
     /* Create the socket. */
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     QKD_fatal_with_errno_if(sock == -1, "socket failed");
@@ -65,61 +69,88 @@ static int create_listen_socket()
     result = bind(sock, (const struct sockaddr *) &listen_address, sizeof(listen_address));
     QKD_fatal_with_errno_if(result != 0, "bind failed");
 
+    QKD_exit();
     return sock;
 }
 
 QKD_SESSION *qkd_session_new(char *destination, QKD_qos_t qos)
 {
+    QKD_enter();
     QKD_SESSION *session = malloc(sizeof(QKD_SESSION));
     QKD_fatal_if(session == NULL, "malloc failed");
-    session->destination = strdup(destination);
-    QKD_key_handle_set_random(&session->key_handle);  /* TODO: support chosen key_handle */
+    if (destination) {
+        session->destination = strdup(destination);
+    } else {
+        session->destination = NULL;
+    }
+    QKD_key_handle_set_random(&session->key_handle);
     session->qos = qos;
-    session->listen_sock = create_listen_socket();
+    QKD_exit();
     return session;
 }
 
 void qkd_session_delete(QKD_SESSION *session)
 {
+    QKD_enter();
     assert(session != NULL);
-    int result = close(session->listen_sock);
-    QKD_fatal_with_errno_if(result == -1, "close failed");
     free(session);
+    QKD_exit();
 }
 
 static QKD_SESSION *qkd_session = NULL;  /* TODO: For now this is the one and only session */
 
 QKD_RC QKD_init(void)
 {
+    QKD_enter();
+    listen_sock = create_listen_socket();
+    QKD_fatal_if(listen_sock == -1, "create_listen_socket failed");
+    QKD_exit();
     return QKD_RC_SUCCESS;
 }
 
 QKD_RC QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle)
 {
+    QKD_enter();
     assert(key_handle != NULL);
     assert(qkd_session == NULL);   /* TODO: For now we only support one session */
+
+    /* TODO: document that we allow destination to be NULL which means that we don't care who
+    the remoet application is - we rely on TLS authentication. */
+
+    /* Create a new QKD session */
+    /* TODO: Allow key_handle for session to be chosen by caller; for now we always allocate a new
+    key handle. */
     qkd_session = qkd_session_new(destination, qos);
+
+    /* Return the key handle for the session */
     *key_handle = qkd_session->key_handle;
+    QKD_exit();
     return QKD_RC_SUCCESS;
 }
 
 QKD_RC QKD_connect_nonblock(const QKD_key_handle_t *key_handle)
 {
+    QKD_enter();
     /* TODO: Not yet implemented. */
+    QKD_exit();
     return QKD_RC_NOT_SUPPORTED;
 }
 
 QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout)
 {
+    QKD_enter();
+    QKD_exit();
     return QKD_RC_SUCCESS;
 }
 
 QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* key_buffer) {
+    QKD_enter();
     /* TODO: Implement this; fixed shared secret for now */
     assert(key_buffer != NULL);
     for (size_t i = 0; i < current_qos.requested_length; i++) {
         key_buffer[i] = i;
     }
+    QKD_exit();
     return QKD_RC_SUCCESS;
 }
 

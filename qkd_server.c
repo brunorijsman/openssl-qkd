@@ -26,48 +26,40 @@ static int server_generate_key(DH *dh)
     QKD_fatal_if(private_key == NULL, "BN_secure_new (private_key) failed");
 
     if (QKD_return_fixed_key_for_testing) {
-        QKD_report("Return fixed key");
+
+        QKD_report("Use fixed private public key (for testing)");
+
         BN_set_word(private_key, QKD_fixed_private_key);
         BN_set_word(public_key, QKD_fixed_public_key);
+
     } else {
 
-        BN_set_word(private_key, 1);
-        BN_set_word(public_key, 1);
-        /* TODO */
+        QKD_report("Use ETSI QKD API key handle as public key and private key");
 
-        // QKD_report("server_generate_key (server)");
-        // /* For now, we only specify the requested_lengh as a QoS parameter. For now, we don't
-        // specify max_bps or priority. */
-        // QKD_qos_t qos = {
-        //     .requested_length = 0,   /* TODO: This should be set */
-        //     .max_bps = 0,
-        //     .priority = 0,
-        //     .timeout = 0
-        // };
+        /* Use fixed QoS parameters. */
+        QKD_qos_t qos = {
+            .requested_length = 0,   /* TODO: This should be set */
+            .max_bps = 0,
+            .priority = 0,
+            .timeout = 0
+        };
 
-        // /* Calls QKD_open() with a NULL key_handle, which generates a new key_handle, which is 64 octets. */
-        // QKD_RC result;
-        // QKD_key_handle_t key_handle = key_handle_null;
-        // result = QKD_open("localhost", qos, &key_handle);
-        // QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_open failed");
-        // QKD_report("sizeof key_handle: %ld\n", sizeof(key_handle));
+        /* TODO: Use this style for ALL multiline comments */
+        /* Call QKD_open with a null key handle. This will cause a new key handle to be allocated.
+         * Set destination to NULL, which means we don't care who the remote peer is (we rely on 
+         * SSL authentication). */
+        QKD_key_handle_t key_handle = QKD_key_handle_null;
+        QKD_RC open_result = QKD_open(NULL, qos, &key_handle);
+        QKD_fatal_if(QKD_RC_SUCCESS != open_result, "QKD_open failed");
+        QKD_report("Allocated key handle: %s", QKD_key_handle_str(&key_handle));
 
-        // /* TODO: use convert to string and QKD_report */
-        // fprintf(stderr, "key_handle: ");
-        // for (int i=0; i<sizeof(key_handle); i++) {
-        //     printf("%02x", (unsigned char) (key_handle[i]));
-        // }
-        // printf("\n");
-
-        // /* The server uses the key_handle as the DH public key. This public key will be included
-        // in the Server-Hello message which plays the role of the SEND_KEY_HANDLE() operation in
-        // the ETSI sequence diagram. Note that this is why the ETSI document requires that "no
-        // key material can be derived from the handle" (top of page 9) */
-        // BN_bin2bn((const unsigned char *) key_handle, sizeof(key_handle), public_key);
-
-        // /* The server sets the DH private key to 1. The QKD exchange does not use any DH
-        // private key on the server. */
-        // BN_set_word(private_key, 1);
+        /* Convert allocated key handle to bignum and use it as the public key as well as the
+         * private key (it really doesn't matter what the private key is, as we don't use it for
+         * anything.) */
+        int result = QKD_key_handle_to_bignum(&key_handle, public_key);
+        QKD_fatal_if(result != 1, "QKD_key_handle_to_bignum failed");
+        BIGNUM *result_bn = BN_copy(private_key, public_key);
+        QKD_fatal_if(result_bn == NULL, "BN_copy failed");
     }
 
     QKD_report("DH public key: %s", BN_bn2hex(public_key));
@@ -108,6 +100,8 @@ static int server_compute_key(unsigned char *key, const BIGNUM *public_key, DH *
 static int server_engine_init(ENGINE *engine)
 {
     QKD_enter();
+    QKD_RC result = QKD_init();
+    QKD_fatal_if(result != QKD_RC_SUCCESS, "QKD_init failed");
     QKD_exit();
     return 1;
 }

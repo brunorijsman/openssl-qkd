@@ -14,7 +14,7 @@
 #include <string.h>
 #include <openssl/engine.h>
 
-bool QKD_return_fixed_key_for_testing = true;
+bool QKD_return_fixed_key_for_testing = false; /* Use command line option orenvironment variable */
 const unsigned long QKD_fixed_public_key = 1111;
 const unsigned long QKD_fixed_private_key = 2222;
 
