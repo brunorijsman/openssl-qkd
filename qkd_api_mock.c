@@ -89,6 +89,11 @@ void qkd_session_delete(QKD_SESSION *session)
 
 static QKD_SESSION *qkd_session = NULL;  /* TODO: For now this is the one and only session */
 
+QKD_RC QKD_init(void)
+{
+    return QKD_RC_SUCCESS;
+}
+
 QKD_RC QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle)
 {
     assert(key_handle != NULL);

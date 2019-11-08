@@ -61,7 +61,7 @@ $(ENGINE_DIR)/$(SERVER): $(SERVER)
 test: all
 	./stop-server.sh
 	./start-tshark.sh
-	sleep 1
+	sleep 2
 	./start-server.sh
 	./run-client.sh
 	sleep 1

@@ -48,6 +48,7 @@ typedef struct QKD_qos_st {
     uint32_t timeout;
 } QKD_qos_t;
 
+QKD_RC QKD_init(void);   /* Not in ETSI API document */
 QKD_RC QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle);
 QKD_RC QKD_connect_nonblock(const QKD_key_handle_t *key_handle);
 QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout);
