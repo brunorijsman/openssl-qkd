@@ -18,23 +18,26 @@
 static int server_generate_key(DH *dh)
 {
     QKD_enter();
-    
+
+    /* Always use a fixed private key (it is not actually used for anything.) */    
+    BIGNUM *private_key = BN_secure_new();
+    QKD_fatal_if(private_key == NULL, "BN_secure_new (private_key) failed");
+    BN_set_word(private_key, QKD_fixed_private_key);
+
+    /* Choose a public key. */
     BIGNUM *public_key = BN_secure_new();
     QKD_fatal_if(public_key == NULL, "BN_secure_new (public_key) failed");
 
-    BIGNUM *private_key = BN_secure_new();
-    QKD_fatal_if(private_key == NULL, "BN_secure_new (private_key) failed");
-
     if (QKD_return_fixed_key_for_testing) {
 
-        QKD_report("Use fixed private public key (for testing)");
-
-        BN_set_word(private_key, QKD_fixed_private_key);
+        QKD_report("Use fixed ppublic key (for testing)");
         BN_set_word(public_key, QKD_fixed_public_key);
 
     } else {
 
-        QKD_report("Use ETSI QKD API key handle as public key and private key");
+        QKD_report("Encode the ETSI QKD API key handle into the public key");
+
+        /* TODO: Also encode the local address of the listening socket into the public key */
 
         /* Use fixed QoS parameters. */
         QKD_qos_t qos = {
@@ -53,13 +56,9 @@ static int server_generate_key(DH *dh)
         QKD_fatal_if(QKD_RC_SUCCESS != open_result, "QKD_open failed");
         QKD_report("Allocated key handle: %s", QKD_key_handle_str(&key_handle));
 
-        /* Convert allocated key handle to bignum and use it as the public key as well as the
-         * private key (it really doesn't matter what the private key is, as we don't use it for
-         * anything.) */
+        /* Convert allocated key handle to bignum and use it as the public key */
         int result = QKD_key_handle_to_bignum(&key_handle, public_key);
         QKD_fatal_if(result != 1, "QKD_key_handle_to_bignum failed");
-        BIGNUM *result_bn = BN_copy(private_key, public_key);
-        QKD_fatal_if(result_bn == NULL, "BN_copy failed");
     }
 
     QKD_report("DH public key: %s", BN_bn2hex(public_key));

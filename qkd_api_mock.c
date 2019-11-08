@@ -114,8 +114,29 @@ QKD_RC QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle)
     assert(key_handle != NULL);
     assert(qkd_session == NULL);   /* TODO: For now we only support one session */
 
-    /* TODO: document that we allow destination to be NULL which means that we don't care who
-    the remoet application is - we rely on TLS authentication. */
+    /* TODO: For now (maybe forever) we don't support predefined key handles. Hence we insist
+     * that the provded key handle is a null key handle (which is not the same thing as a null
+     * pointer.) */
+    bool is_null_handle = QKD_key_handle_is_null(key_handle);
+    QKD_fatal_if(!is_null_handle, "Key handle must be null");
+
+    /* Do we have a destination? In our implementation, the destination is optional, even though
+     * the ETSI QKD API document doesn't say anything about the destination being optional. */
+    if (destination) {
+
+        /* We have a destination. That means we are the client that is going to connect to the
+         * server specified in the destination. */
+        QKD_report("Have destination: we are client connecting to server");
+        /* TODO: connect */
+
+    } else {
+
+        /* We do not have a destination. That means that we are a server that is going to wait for
+         * incoming connections from clients. We already created the listen socket in QKD_init,
+         * so we don't have anything more to do here. */
+        QKD_report("No destination: we are server waiting for incoming connections from clients");
+
+    }
 
     /* Create a new QKD session */
     /* TODO: Allow key_handle for session to be chosen by caller; for now we always allocate a new
