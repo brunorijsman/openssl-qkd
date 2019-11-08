@@ -105,24 +105,18 @@ static int server_compute_key(unsigned char *key, const BIGNUM *public_key, DH *
     return key_size;
 }
 
-static DH_METHOD server_dh_method = {
-    .name = "ETSI QKD Server Method",
-    .generate_key = server_generate_key,
-    .compute_key = server_compute_key,
-    .bn_mod_exp = NULL,
-    .init = NULL,
-    .finish = NULL,
-    .flags = 0,
-    .app_data = NULL,
-    .generate_params = NULL
-};
-
 int server_engine_bind(ENGINE *engine, const char *engine_id)
 {
-    return QKD_engine_bind(engine, 
-                              "qkd_server",
-                              "ETSI QKD Server Engine",
-                              &server_dh_method);
+    /* TODO: should we use init or app_data for anything? */
+    /* TODO: Move the common stuff into QKD_engine_bind */
+    int flags = 0;
+    DH_METHOD *dh_method = DH_meth_new("ETSI QKD Server Method", flags);
+    QKD_fatal_if(dh_method == NULL, "DH_new_method failed");
+    int result = DH_meth_set_generate_key(dh_method, server_generate_key);
+    QKD_fatal_if(result != 1, "DH_meth_set_generate_key failed");
+    result = DH_meth_set_compute_key(dh_method, server_compute_key);
+    QKD_fatal_if(result != 1, "DH_meth_set_compute_key failed");
+    return QKD_engine_bind(engine, "qkd_client", "ETSI QKD Server Engine", dh_method);
 }
 
 IMPLEMENT_DYNAMIC_CHECK_FN();

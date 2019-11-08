@@ -22,7 +22,6 @@ int shared_secret_nr_bytes(DH *dh);
 int QKD_engine_bind(ENGINE *engine, const char *engine_id, const char *engine_name, 
                     DH_METHOD *dh_method);
 
-
 int QKD_bignum_to_key_handle(const BIGNUM *bn, QKD_key_handle_t *key_handle);
 
 int QKD_key_handle_to_bignum(const QKD_key_handle_t *key_handle, BIGNUM *bn);
@@ -37,22 +36,5 @@ extern const unsigned long QKD_fixed_private_key;
 
 /* When we run on SimulaQron, we do certain things differently than "in real life" (see below) */
 extern bool QKD_running_on_simulaqron;
-
-/* The DH_METHOD struct definition is not provided in a public OpenSSL header */
-/* TODO: Can we avoid this with a get function? */
-struct dh_method {
-    char *name;
-    int (*generate_key) (DH *dh);
-    int (*compute_key) (unsigned char *key, const BIGNUM *pub_key, DH *dh);
-    int (*bn_mod_exp) (const DH *dh, BIGNUM *r, const BIGNUM *a,
-                       const BIGNUM *p, const BIGNUM *m, BN_CTX *ctx,
-                       BN_MONT_CTX *m_ctx);
-    int (*init) (DH *dh);
-    int (*finish) (DH *dh);
-    int flags;
-    char *app_data;
-    int (*generate_params) (DH *dh, int prime_len, int generator,
-                            BN_GENCB *cb);
-};
 
 #endif

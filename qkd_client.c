@@ -105,32 +105,24 @@ static int client_compute_key(unsigned char *key, const BIGNUM *public_key, DH *
     // - The client calls QKD_get_key which returns a key_buffer. This is used as 
     //   the shared secret and returned. */
 
-
-
     /* TODO: Report return value in exit */
     /* TODO: Rename to QKD_DBG_... */
     QKD_exit();
     return key_size;
 }
 
-static DH_METHOD client_dh_method = {
-    .name = "ETSI QKD Client Method",
-    .generate_key = client_generate_key,
-    .compute_key = client_compute_key,
-    .bn_mod_exp = NULL,
-    .init = NULL,
-    .finish = NULL,
-    .flags = 0,
-    .app_data = NULL,
-    .generate_params = NULL
-};
-
 int client_engine_bind(ENGINE *engine, const char *engine_id)
 {
-    return QKD_engine_bind(engine, 
-                              "qkd_client",
-                              "ETSI QKD Client Engine",
-                              &client_dh_method);
+    /* TODO: should we use init or app_data for anything? */
+    /* TODO: Move the common stuff into QKD_engine_bind */
+    int flags = 0;
+    DH_METHOD *dh_method = DH_meth_new("ETSI QKD Client Method", flags);
+    QKD_fatal_if(dh_method == NULL, "DH_new_method failed");
+    int result = DH_meth_set_generate_key(dh_method, client_generate_key);
+    QKD_fatal_if(result != 1, "DH_meth_set_generate_key failed");
+    result = DH_meth_set_compute_key(dh_method, client_compute_key);
+    QKD_fatal_if(result != 1, "DH_meth_set_compute_key failed");
+    return QKD_engine_bind(engine, "qkd_client", "ETSI QKD Client Engine", dh_method);
 }
 
 IMPLEMENT_DYNAMIC_CHECK_FN();
