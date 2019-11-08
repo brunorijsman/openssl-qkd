@@ -20,17 +20,17 @@ ENGINE_DIR = /usr/local/lib/engines-3
 
 CFLAGS = -Wall -Werror -I. -I$(OPENSSL_INCLUDE) -L$(OPENSSL_LIB) -g -fPIC
 
-CLIENT = etsi_qkd_client$(SHARED_EXT)
-SERVER = etsi_qkd_server$(SHARED_EXT)
+CLIENT = qkd_client$(SHARED_EXT)
+SERVER = qkd_server$(SHARED_EXT)
 
 all: $(CLIENT) $(SERVER) key.pem cert.pem $(ENGINE_DIR)/$(CLIENT) $(ENGINE_DIR)/$(SERVER)
 
-CLIENT_C = etsi_qkd_client.c etsi_qkd_common.c etsi_qkd_debug.c qkd_api.c 
-$(CLIENT): $(CLIENT_C) etsi_qkd_common.h
+CLIENT_C = qkd_client.c qkd_common.c qkd_debug.c qkd_api.c 
+$(CLIENT): $(CLIENT_C) qkd_common.h
 	$(LINK.c) -shared -o $@ $(CLIENT_C) -lcrypto
 
-SERVER_C = etsi_qkd_server.c etsi_qkd_common.c etsi_qkd_debug.c qkd_api.c 
-$(SERVER): $(SERVER_C) etsi_qkd_common.h
+SERVER_C = qkd_server.c qkd_common.c qkd_debug.c qkd_api.c 
+$(SERVER): $(SERVER_C) qkd_common.h
 	$(LINK.c) -shared -o $@ $(SERVER_C) -lcrypto
 
 key.pem cert.pem:
@@ -54,15 +54,15 @@ $(ENGINE_DIR)/$(SERVER): $(SERVER)
 	ln -sf ${CURDIR}/$(SERVER) $(ENGINE_DIR)/$(SERVER)
 
 test: all
-	@./stop-server.sh
-	@./start-tshark.sh
-	@sleep 1
-	@./start-server.sh
-	@./run-client.sh
-	@sleep 1
-	@./stop-server.sh
-	@sleep 1
-	@./stop-tshark.sh
+	./stop-server.sh
+	./start-tshark.sh
+	sleep 1
+	./start-server.sh
+	./run-client.sh
+	sleep 1
+	./stop-server.sh
+	sleep 1
+	./stop-tshark.sh
 
 clean: clean-test
 	rm -f $(CLIENT) $(SERVER)

@@ -4,9 +4,9 @@ openssl_conf = openssl_def
 engines = engine_section
 
 [engine_section]
-etsi_qkd_server = etsi_qkd_server_section
+qkd_server = qkd_server_section
 
-[etsi_qkd_server_section]
-engine_id = etsi_qkd_server
+[qkd_server_section]
+engine_id = qkd_server
 default_algorithms = ALL
 init = 0

@@ -14,9 +14,9 @@
 #include <sys/random.h>
 #include "qkd_api.h"
 #include <assert.h>
-#include <etsi_qkd_debug.h>
+#include <qkd_debug.h>
 
-/* TODO: consistent file names: etsi_qkd_... */
+/* TODO: consistent file names: qkd_... */
 
 /* Current limitations in this stub:
  * - More than one concurrent connection not yet supported
@@ -28,7 +28,7 @@
 
 #define BUFSIZE 1024
 
-#define ETSI_QKD_PORT 8080
+#define QKD_PORT 8080
 
 QKD_QOS current_qos;
 key_handle_t zeros_array = {0};
@@ -82,27 +82,27 @@ static int create_listen_socket()
 {
     /* Create the socket. */
     int sock = socket(AF_INET, SOCK_STREAM, 0);
-    QKD_error_if(sock == -1, "socket failed");
+    QKD_fatal_with_errno_if(sock == -1, "socket failed");
 
     /* The client and server may run on the same host. In that case we want to allow both of them
     to create a listening socket for the same port. */
     int on = 1;
     int result = setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&on, sizeof(on));
-    QKD_error_if(result != 0, "setsockopt SO_REUSEPORT failed");
+    QKD_fatal_with_errno_if(result != 0, "setsockopt SO_REUSEPORT failed");
 
     /* We want to be able to bind again while a previous socket for the same port is still in the
     lingering state. */
     result = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
-    QKD_error_if(result != 0, "setsockopt SO_REUSEADDR failed");
+    QKD_fatal_with_errno_if(result != 0, "setsockopt SO_REUSEADDR failed");
 
     /* Bind the socket to the QKD port and the wildcard address. */
     struct sockaddr_in listen_address; 
     bzero(&listen_address, sizeof(listen_address));
     listen_address.sin_family = AF_INET; 
     listen_address.sin_addr.s_addr = htonl(INADDR_ANY); 
-    listen_address.sin_port = htons(ETSI_QKD_PORT);
+    listen_address.sin_port = htons(QKD_PORT);
     result = bind(sock, (const struct sockaddr *) &listen_address, sizeof(listen_address));
-    QKD_error_if(result != 0, "bind failed");
+    QKD_fatal_with_errno_if(result != 0, "bind failed");
 
     return sock;
 }
@@ -129,7 +129,7 @@ void qkd_session_delete(QKD_SESSION *session)
 {
     assert(session != NULL);
     int result = close(session->listen_sock);
-    QKD_error_if(result == -1, "close failed");
+    QKD_fatal_with_errno_if(result == -1, "close failed");
     free(session);
 }
 
