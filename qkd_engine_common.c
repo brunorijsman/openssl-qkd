@@ -98,19 +98,26 @@ int shared_secret_nr_bytes(DH *dh)
     }
 }
 
-int engine_init(ENGINE *engine)
-{
-    QKD_enter();
-    QKD_exit();
-    return 1;
-}
-
-int QKD_engine_bind(ENGINE *engine, const char *engine_id, const char *engine_name, 
-                       DH_METHOD *dh_method)
+int QKD_engine_bind(ENGINE *engine, const char *engine_id, const char *engine_name,
+                    int (*generate_key) (DH *),
+                    int (*compute_key) (unsigned char *key, const BIGNUM *pub_key, DH *dh),
+                    ENGINE_GEN_INT_FUNC_PTR engine_init)
 {
     QKD_enter();
 
-    int result = ENGINE_set_id(engine, engine_id);
+    /* TODO: should we use init or app_data for anything? */
+    /* TODO: Move the common stuff into QKD_engine_bind */
+    int flags = 0;
+    DH_METHOD *dh_method = DH_meth_new("ETSI QKD Client Method", flags);
+    QKD_fatal_if(dh_method == NULL, "DH_new_method failed");
+
+    int result = DH_meth_set_generate_key(dh_method, generate_key);
+    QKD_fatal_if(result != 1, "DH_meth_set_generate_key failed");
+
+    result = DH_meth_set_compute_key(dh_method, compute_key);
+    QKD_fatal_if(result != 1, "DH_meth_set_compute_key failed");
+
+    result = ENGINE_set_id(engine, engine_id);
     QKD_fatal_if(result == 0, "ENGINE_set_id failed");
     
     result = ENGINE_set_name(engine, engine_name);

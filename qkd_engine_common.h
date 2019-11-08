@@ -13,14 +13,16 @@
 
 #include "qkd_api.h"
 #include <openssl/dh.h>
+#include <openssl/engine.h>
 
-/* TODO: Rename this to client_server_common */
 /* TODO: Follow QKD_ naming convention */
 
 int shared_secret_nr_bytes(DH *dh);
 
-int QKD_engine_bind(ENGINE *engine, const char *engine_id, const char *engine_name, 
-                    DH_METHOD *dh_method);
+int QKD_engine_bind(ENGINE *engine, const char *engine_id, const char *engine_name,
+                    int (*generate_key) (DH *),
+                    int (*compute_key) (unsigned char *key, const BIGNUM *pub_key, DH *dh),
+                    ENGINE_GEN_INT_FUNC_PTR engine_init);
 
 int QKD_bignum_to_key_handle(const BIGNUM *bn, QKD_key_handle_t *key_handle);
 
