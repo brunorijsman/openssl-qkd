@@ -26,13 +26,14 @@
 #define BUFSIZE 1024
 
 #define QKD_PORT 8080
-#define STRINGIFY(N) #N
+#define QKD_PORT_STR "8080"
 
 static int listen_sock = -1;
 
 QKD_qos_t current_qos;
 
 typedef struct qkd_session_t {
+    bool am_client;
     char *destination;
     QKD_key_handle_t key_handle;
     QKD_qos_t qos;
@@ -72,6 +73,10 @@ static int listen_for_incoming_connections()
     result = bind(sock, (const struct sockaddr *) &listen_address, sizeof(listen_address));
     QKD_fatal_with_errno_if(result != 0, "bind failed");
 
+    /* Listen for incoming connections. */
+    result = listen(sock, SOMAXCONN);
+    QKD_fatal_with_errno_if(result != 0, "listen failed");
+
     QKD_exit();
     return sock;
 }
@@ -89,19 +94,32 @@ static int connect_to_server(char *destination)
     /* Resolve the destination to an address. */
     /* TODO: for now, ignode the destination and just hard-code localhost */
     const char *host_str = "localhost";
-    const char *port_str = STRINGIFY(QKD_PORT);
+    const char *port_str = QKD_PORT_STR;
     struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = 0;
     hints.ai_flags = AI_ADDRCONFIG;
     struct addrinfo* res = 0;
     int result = getaddrinfo(host_str, port_str, &hints, &res);
-    QKD_fatal_if(result != 0, "getaddrinfo failed");
+    QKD_fatal_with_errno_if(result != 0, "getaddrinfo failed");
 
-    /* TODO: Finish this, and return sock */
-    return 0;
+    /* Create the socket. */
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    QKD_fatal_with_errno_if(sock == -1, "socket failed");
+
+    /* Create the outgoing TCP connection. */
+    result = connect(sock, res->ai_addr, res->ai_addrlen);
+    QKD_fatal_with_errno_if(result != 0, "connect failed");
+    return sock;
+}
+
+static int accept_connection_from_client()
+{
+    QKD_report("Listen socket is %d", listen_sock); // @@@
+    assert(listen_sock != -1);
+    return accept(listen_sock, NULL, NULL);
 }
 
 /** 
@@ -109,11 +127,12 @@ static int connect_to_server(char *destination)
  *
  * Returns pointer to new session, or NULL on failure.
  */
-QKD_SESSION *qkd_session_new(char *destination, QKD_qos_t qos)
+QKD_SESSION *qkd_session_new(bool am_client, char *destination, QKD_qos_t qos)
 {
     QKD_enter();
     QKD_SESSION *session = malloc(sizeof(QKD_SESSION));
     QKD_fatal_if(session == NULL, "malloc failed");
+    session->am_client = am_client;
     if (destination) {
         session->destination = strdup(destination);
     } else {
@@ -148,40 +167,35 @@ QKD_RC QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle)
 {
     QKD_enter();
     assert(key_handle != NULL);
-    assert(qkd_session == NULL);   /* TODO: For now we only support one session */
-
-    /* TODO: For now (maybe forever) we don't support predefined key handles. Hence we insist
-     * that the provded key handle is a null key handle (which is not the same thing as a null
-     * pointer.) */
-    bool is_null_handle = QKD_key_handle_is_null(key_handle);
-    QKD_fatal_if(!is_null_handle, "Key handle must be null");
 
     /* Do we have a destination? In our implementation, the destination is optional, even though
-     * the ETSI QKD API document doesn't say anything about the destination being optional. */
-    if (destination) {
+     * the ETSI QKD API document doesn't say anything about the destination being optional. If the
+     * destination is NULL it means we will accept incoming QKD connections from any client, and
+     * if the destination is not NULL it means that we are a client and that destination contains
+     * the address of the server. */
+    bool am_client = (destination != NULL);
+    if (am_client) {
 
-        /* We have a destination. That means we are the client that is going to connect to the
-         * server specified in the destination. */
-        QKD_report("Have destination: we are client connecting to server");
+        /* We are client, remote side is server */
 
-        /* TODO: connect */
-        int connection_sock = connect_to_server(destination);
-        QKD_fatal_if(connection_sock == -1, "connect_to_server failed");
-        /* TODO: do someting with sock */
+
+        /* TODO: Get a key over the connection */
 
     } else {
 
-        /* We do not have a destination. That means that we are a server that is going to wait for
-         * incoming connections from clients. We already created the listen socket in QKD_init,
-         * so we don't have anything more to do here. */
-        QKD_report("No destination: we are server waiting for incoming connections from clients");
+        /* We are server, remote side is client */
+
+        /* TODO: For now (maybe forever) we don't support predefined key handles on the server.
+         * Hence we insist that the provded key handle is a null key handle (which is not the same * thing as a null pointer.) */
+        bool is_null_handle = QKD_key_handle_is_null(key_handle);
+        QKD_fatal_if(!is_null_handle, "Key handle must be null");
 
     }
 
     /* Create a new QKD session */
-    /* TODO: Allow key_handle for session to be chosen by caller; for now we always allocate a new
-    key handle. */
-    qkd_session = qkd_session_new(destination, qos);
+    /* TODO: for now we only allow one concurrent session. */
+    assert(qkd_session == NULL);
+    qkd_session = qkd_session_new(am_client, destination, qos);
 
     /* Return the key handle for the session */
     *key_handle = qkd_session->key_handle;
@@ -200,6 +214,36 @@ QKD_RC QKD_connect_nonblock(const QKD_key_handle_t *key_handle)
 QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout)
 {
     QKD_enter();
+
+    /* TODO: For now there is only one concurrent session. */
+    assert(qkd_session != NULL);
+    if (qkd_session->am_client) {
+
+        /* Client */
+
+        /* Initiate a TCP connection to the server. */
+        QKD_report("Initiate TCP connection to server");
+        assert(qkd_session->destination != NULL);
+        int connection_sock = connect_to_server(qkd_session->destination);
+        QKD_fatal_if(connection_sock == -1, "connect_to_server failed");
+        QKD_report("TCP connected to server");
+
+        /* TODO: store sock */
+
+    } else {
+
+        /* Server */
+
+        /* Accept an incoming TCP connection from the client. */
+        QKD_report("Accept an incoming TCP connection from the client");
+        int connection_sock = accept_connection_from_client();
+        QKD_fatal_with_errno_if(connection_sock == -1, "accept failed");
+        QKD_report("TCP connected to client");
+
+        /* TODO: store sock */
+
+    }
+
     QKD_exit();
     return QKD_RC_SUCCESS;
 }

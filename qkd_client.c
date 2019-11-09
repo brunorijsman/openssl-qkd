@@ -41,7 +41,7 @@ static int client_generate_key(DH *dh)
     return 1;
 }
 
-static int client_compute_key(unsigned char *key, const BIGNUM *public_key, DH *dh)
+static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public_key, DH *dh)
 {
     /* TODO: Replace all fatals with error returns (but keep report) */
     QKD_enter();
@@ -57,30 +57,33 @@ static int client_compute_key(unsigned char *key, const BIGNUM *public_key, DH *
     // - The client sets its DH private key to NULL. Just as on the server, the QKD exchange
     //     does not use any DH private key on the client. */
 
-    // Convert the public key provided by the server into an ETSI API key handle.
+    /* Convert the public key provided by the server into an ETSI API key handle. */
     QKD_key_handle_t key_handle = QKD_key_handle_null;
     int convert_result = QKD_bignum_to_key_handle(public_key, &key_handle);
     QKD_fatal_if(convert_result != 1, "QKD_bignum_to_key_handle failed");
     QKD_report("Key handle = %s", QKD_key_handle_str(&key_handle));
 
+    /* Use fixed QoS parameters. */
+    int shared_secret_size = DH_size(dh);
+    QKD_qos_t qos = {
+        .requested_length = shared_secret_size,
+        .max_bps = 0,
+        .priority = 0,
+        .timeout = 0
+    };
+
+    /* TODO: Extract the destination from the handle. For now, hard-code localhost. */
+    QKD_RC qkd_result = QKD_open("localhost", qos, &key_handle);
+    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_open failed");
+
+    /* Connect to the QKD peer. */
+    qkd_result = QKD_connect_blocking(&key_handle, 0);   /* TODO: right value for timeout? */
+    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_connect_blocking failed");
+
     /* TODO: for now, set the shared secret to some fixed value */
-    int key_size = DH_size(dh);
-    memset(key, 1, key_size);
-    QKD_report("shared secret = %s", QKD_shared_secret_str(key, key_size));
+    memset(shared_secret, 1, shared_secret_size);
+    QKD_report("shared secret = %s", QKD_shared_secret_str(shared_secret, shared_secret_size));
 
-    // /* TODO: For now, set QoS to dummy values */
-    // QKD_qos_t qos = {
-    //     .requested_length = key_size,
-    //     .max_bps = 0,
-    //     .priority = 0,
-    //     .timeout = 0
-    // };
-    // QKD_RC result = QKD_open("localhost", qos, &key_handle);
-    // QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_open failed");
-
-    // result = QKD_connect_blocking(&key_handle, 0);
-    // QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_connect_blocking failed");
-    
     // QKD_report("Allocated size=%d\n", key_size);
     // QKD_fatal_if(key == NULL, "Key is NULL");
 
@@ -106,7 +109,7 @@ static int client_compute_key(unsigned char *key, const BIGNUM *public_key, DH *
     /* TODO: Report return value in exit */
     /* TODO: Rename to QKD_DBG_... */
     QKD_exit();
-    return key_size;
+    return shared_secret_size;
 }
 
 static int client_engine_init(ENGINE *engine)

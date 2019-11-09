@@ -12,6 +12,7 @@
 
 #include "qkd_engine_common.h"
 #include "qkd_debug.h"
+#include <assert.h>
 #include <string.h>
 #include <openssl/engine.h>
 
@@ -40,8 +41,10 @@ static int server_generate_key(DH *dh)
         /* TODO: Also encode the local address of the listening socket into the public key */
 
         /* Use fixed QoS parameters. */
+        /* TODO: Move this to common. */
+        int shared_secret_size = DH_size(dh);
         QKD_qos_t qos = {
-            .requested_length = 0,   /* TODO: This should be set */
+            .requested_length = shared_secret_size,
             .max_bps = 0,
             .priority = 0,
             .timeout = 0
@@ -52,8 +55,8 @@ static int server_generate_key(DH *dh)
          * Set destination to NULL, which means we don't care who the remote peer is (we rely on 
          * SSL authentication). */
         QKD_key_handle_t key_handle = QKD_key_handle_null;
-        QKD_RC open_result = QKD_open(NULL, qos, &key_handle);
-        QKD_fatal_if(QKD_RC_SUCCESS != open_result, "QKD_open failed");
+        QKD_RC qkd_result = QKD_open(NULL, qos, &key_handle);
+        QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_open failed");
         QKD_report("Allocated key handle: %s", QKD_key_handle_str(&key_handle));
 
         /* Convert allocated key handle to bignum and use it as the public key */
@@ -71,14 +74,31 @@ static int server_generate_key(DH *dh)
     return 1;
 }
 
-static int server_compute_key(unsigned char *key, const BIGNUM *public_key, DH *dh)
+static int server_compute_key(unsigned char *shared_secret, const BIGNUM *client_public_key, DH *dh)
 {
     QKD_enter();
 
+    /* Retrieve the key handle, which is stored in our own (i.e. the server's) public key. */
+    const BIGNUM *server_public_key = NULL;
+    DH_get0_key(dh, &server_public_key, NULL);
+    assert(server_public_key != NULL);
+    QKD_key_handle_t key_handle = QKD_key_handle_null;
+    int convert_result = QKD_bignum_to_key_handle(server_public_key, &key_handle);
+    QKD_fatal_if(convert_result != 1, "QKD_bignum_to_key_handle failed");
+    QKD_report("Key handle = %s", QKD_key_handle_str(&key_handle));
+
+    /* Connect to the QKD peer. We cannot do this earlier (specifically we cannot not do this in
+     * server_generate_key) because the connection can only be completed *after* the client has
+     * already received the TLS Server Hello message, which contains the key handle in the
+     * Diffie-Hellman public key. The client needs the key handle to be able to complete the
+     * connection. */
+    QKD_RC qkd_result = QKD_connect_blocking(&key_handle, 0);   /* TODO: right value for timeout? */
+    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_connect_blocking failed");
+
     /* TODO: for now, set the shared secret to some fixed value */
-    int key_size = DH_size(dh);
-    memset(key, 1, key_size);
-    QKD_report("shared secret = %s", QKD_shared_secret_str(key, key_size));
+    int shared_secret_size = DH_size(dh);
+    memset(shared_secret, 1, shared_secret_size);
+    QKD_report("shared secret = %s", QKD_shared_secret_str(shared_secret, shared_secret_size));
 
     /* TODO: The overloaded compute_key function on the server does the following:
     - The server verifies that the received client public key is equal to its 
@@ -93,7 +113,7 @@ static int server_compute_key(unsigned char *key, const BIGNUM *public_key, DH *
       as that which was return on the client side, so it is indeed a shared secret.s */
 
     QKD_exit();
-    return key_size;
+    return shared_secret_size;
 }
 
 static int server_engine_init(ENGINE *engine)
