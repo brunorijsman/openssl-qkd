@@ -40,6 +40,8 @@ void QKD_key_handle_set_null(QKD_key_handle_t *key_handle);
 bool QKD_key_handle_is_null(const QKD_key_handle_t *key_handle);
 void QKD_key_handle_set_random(QKD_key_handle_t *key_handle);
 char *QKD_key_handle_str(const QKD_key_handle_t *key_handle);
+int QKD_key_handle_compare(const QKD_key_handle_t *key_handle_1,
+                           const QKD_key_handle_t *key_handle_2);
 
 typedef struct QKD_qos_st {
     uint32_t requested_length;

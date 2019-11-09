@@ -117,9 +117,24 @@ static int connect_to_server(char *destination)
 
 static int accept_connection_from_client()
 {
-    QKD_report("Listen socket is %d", listen_sock); // @@@
     assert(listen_sock != -1);
     return accept(listen_sock, NULL, NULL);
+}
+
+static int send_key_handle(int sock, const QKD_key_handle_t *key_handle)
+{
+    assert(key_handle != NULL);
+    int result = write(sock, key_handle->bytes, QKD_KEY_HANDLE_SIZE);
+    QKD_fatal_with_errno_if(result != QKD_KEY_HANDLE_SIZE, "write failed");
+    return QKD_RC_SUCCESS;
+}
+
+static int receive_key_handle(int sock, QKD_key_handle_t *key_handle)
+{
+    assert(key_handle != NULL);
+    int result = read(sock, key_handle->bytes, QKD_KEY_HANDLE_SIZE);
+    QKD_fatal_with_errno_if(result != QKD_KEY_HANDLE_SIZE, "read failed");
+    return QKD_RC_SUCCESS;
 }
 
 /** 
@@ -228,6 +243,11 @@ QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout
         QKD_fatal_if(connection_sock == -1, "connect_to_server failed");
         QKD_report("TCP connected to server");
 
+        /* Send our (the client's) key handle to the server. */
+        QKD_RC qkd_result = send_key_handle(connection_sock, key_handle);
+        QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "send_key_handle failed");
+        QKD_report("Sent key handle to server");
+
         /* TODO: store sock */
 
     } else {
@@ -242,6 +262,16 @@ QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout
 
         /* TODO: store sock */
 
+        /* Receive the client's key handle. */
+        QKD_key_handle_t client_key_handle;
+        QKD_RC qkd_result = receive_key_handle(connection_sock, &client_key_handle);
+        QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "receive_key_handle failed");
+        QKD_report("Received key handle from client");
+
+        /* The client's key handle must be the same as ours. */
+        bool same = QKD_key_handle_compare(&client_key_handle, key_handle) == 0;
+        QKD_fatal_if(!same, "Client's key handle is different from server's key handle");
+        QKD_report("Client's key handle is same as server's key handle");
     }
 
     QKD_exit();

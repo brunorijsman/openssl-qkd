@@ -79,3 +79,18 @@ char *QKD_key_handle_str(const QKD_key_handle_t *key_handle)
     *p = '\0';
     return str;
 }
+
+/**
+ * Compare two key handles.
+ * 
+ * Returns: -1 if key_handle_1 < key_handle_2
+ *           0 if key_handle_1 == key_handle_2
+ *          +1 if key_handle_1 > key_handle_2
+ */
+int QKD_key_handle_compare(const QKD_key_handle_t *key_handle_1,
+                           const QKD_key_handle_t *key_handle_2)
+{
+    assert(key_handle_1 != NULL);
+    assert(key_handle_2 != NULL);
+    return memcmp(key_handle_1->bytes, key_handle_2->bytes, QKD_KEY_HANDLE_SIZE);
+}
