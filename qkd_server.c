@@ -30,7 +30,7 @@ static int server_generate_key(DH *dh)
 
     if (QKD_return_fixed_key_for_testing) {
 
-        QKD_report("Use fixed ppublic key (for testing)");
+        QKD_report("Use fixed public key (for testing)");
         BN_set_word(public_key, QKD_fixed_public_key);
 
     } else {
@@ -61,8 +61,8 @@ static int server_generate_key(DH *dh)
         QKD_fatal_if(result != 1, "QKD_key_handle_to_bignum failed");
     }
 
-    QKD_report("DH public key: %s", BN_bn2hex(public_key));
     QKD_report("DH private key: %s", BN_bn2hex(private_key));
+    QKD_report("DH public key: %s", BN_bn2hex(public_key));
 
     int result = DH_set0_key(dh, public_key, private_key);
     QKD_fatal_if(result == 0, "DH_set0_key failed");

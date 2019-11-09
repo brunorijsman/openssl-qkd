@@ -70,6 +70,8 @@ test: all
 	./stop-tshark.sh
 
 clean: clean-test
+	# TODO: Use run-test (run-mock-test run-simulaqron-test) script
+	# TODO: Add pass/fail to test, based on observing encrypted user data in tshark decode
 	rm -f $(CLIENT) $(SERVER)
 	rm -rf $(ENGINE_DIR)/$(CLIENT) $(ENGINE_DIR)/$(SERVER)
 	rm -f key.pem cert.pem

@@ -19,33 +19,20 @@ static int client_generate_key(DH *dh)
 {
     QKD_enter();
 
-    BIGNUM *public_key = BN_secure_new();
-    QKD_fatal_if(public_key == NULL, "BN_secure_new (public_key) failed");
-
+    /* On the client side, always use a fixed public key and private key. The only thing we need to
+     * to generate the shared secret is the address of the server and key handle chosen by the
+     * server. The server only needs the key handle (which it chose itself) and our address (which
+     * it will find out when we, the client, connect to it). The server does not need any public key
+     * from us. The net result is that we (the client) don't need to compute a private nor a public
+     * key; we just use fixed values to give *something* to DH. */
     BIGNUM *private_key = BN_secure_new();
     QKD_fatal_if(private_key == NULL, "BN_secure_new (private_key) failed");
-
-    if (QKD_return_fixed_key_for_testing) {
-        QKD_report("Return fixed key");
-        BN_set_word(private_key, QKD_fixed_private_key);
-        BN_set_word(public_key, QKD_fixed_public_key);
-    } else {
-        BN_set_word(private_key, 1);
-        BN_set_word(public_key, 1);
-        /* TODO: Client side processing
-        - The client uses the received DH public key as the ETSI API key_handle
-        - The client calls QKD_open() with the key_handle obtained it this way.
-        - Note that the overloaded generate_key function does different things on the server
-            side and the client side. Thus, there needs to be some way for the overloaded function
-            to "know" whether it is being called in a server role or a client role. (How?)
-        - The client uses the key_handle as it's own DH public key. In other words, the client's
-            DH public key is the same as the server's DH public key.
-        - The client sets its DH private key to NULL. Just as on the server, the QKD exchange
-            does not use any DH private key on the client. */
-    }
-
-    QKD_report("DH public key: %s", BN_bn2hex(public_key));
+    BN_set_word(private_key, QKD_fixed_private_key);
     QKD_report("DH private key: %s", BN_bn2hex(private_key));
+    BIGNUM *public_key = BN_secure_new();
+    QKD_fatal_if(public_key == NULL, "BN_secure_new (public_key) failed");
+    BN_set_word(public_key, QKD_fixed_public_key);
+    QKD_report("DH public key: %s", BN_bn2hex(public_key));
 
     int result = DH_set0_key(dh, public_key, private_key);
     QKD_fatal_if(result != 1, "DH_set0_key failed");
@@ -58,7 +45,18 @@ static int client_compute_key(unsigned char *key, const BIGNUM *public_key, DH *
 {
     /* TODO: Replace all fatals with error returns (but keep report) */
     QKD_enter();
-    
+
+    // /* TODO: Client side processing
+    // - The client uses the received DH public key as the ETSI API key_handle
+    // - The client calls QKD_open() with the key_handle obtained it this way.
+    // - Note that the overloaded generate_key function does different things on the server
+    //     side and the client side. Thus, there needs to be some way for the overloaded function
+    //     to "know" whether it is being called in a server role or a client role. (How?)
+    // - The client uses the key_handle as it's own DH public key. In other words, the client's
+    //     DH public key is the same as the server's DH public key.
+    // - The client sets its DH private key to NULL. Just as on the server, the QKD exchange
+    //     does not use any DH private key on the client. */
+
     // Convert the public key provided by the server into an ETSI API key handle.
     QKD_key_handle_t key_handle = QKD_key_handle_null;
     int convert_result = QKD_bignum_to_key_handle(public_key, &key_handle);
