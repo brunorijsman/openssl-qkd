@@ -17,6 +17,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 /* TODO: Make sure all of these are used */
 typedef enum {
@@ -35,6 +36,8 @@ typedef struct QKD_key_handle_st {
 } QKD_key_handle_t;
 
 extern const QKD_key_handle_t QKD_key_handle_null;
+
+char *QKD_shared_secret_str(char *shared_secret, size_t shared_secret_size);
 
 void QKD_key_handle_set_null(QKD_key_handle_t *key_handle);
 bool QKD_key_handle_is_null(const QKD_key_handle_t *key_handle);

@@ -11,8 +11,39 @@
 #include "qkd_api.h"
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <strings.h> 
+
+/**
+ * Convert a shared secret to a human readable string.
+ * 
+ * Returns a pointer to the human readable string on success, NULL on failure (memory allocation
+ * failed)
+ * 
+ * Note: returns a pointer to a string that is overwritten on the next call to this function.
+ */
+char *QKD_shared_secret_str(char *shared_secret, size_t shared_secret_size)
+{
+    static char *str = NULL;
+    static size_t str_size = 0;
+    size_t needed_str_size = 2 * shared_secret_size + 1;
+    if (str == NULL || str_size < needed_str_size) {
+        str = realloc(str, needed_str_size);
+        if (!str) {
+            return NULL;
+        }
+        str_size = needed_str_size;
+
+    }
+    char *str_p = str;
+    char *shared_secret_p = shared_secret;
+    for (int i = 0; i < shared_secret_size; i++) {
+        snprintf(str_p, 3, "%02x", (unsigned char) *shared_secret_p);
+        str_p += 2;
+        shared_secret_p += 1;
+    }
+    *str_p = '\0';
+    return str;
+}
 
 /**
  * Null key handle constant.

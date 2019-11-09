@@ -95,22 +95,17 @@ static int server_compute_key(unsigned char *shared_secret, const BIGNUM *client
     QKD_RC qkd_result = QKD_connect_blocking(&key_handle, 0);   /* TODO: right value for timeout? */
     QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_connect_blocking failed");
 
-    /* TODO: for now, set the shared secret to some fixed value */
+    /* Get the shared key from the QKD provider. Note that the ETSI API wants the key to be signed
+     * chars, but OpenSSL wants it to be unsigned chars. */
+    qkd_result = QKD_get_key(&key_handle, (char *) shared_secret);
+    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_get_key failed");
     int shared_secret_size = DH_size(dh);
-    memset(shared_secret, 1, shared_secret_size);
-    QKD_report("shared secret = %s", QKD_shared_secret_str(shared_secret, shared_secret_size));
+    QKD_report("shared secret = %s", QKD_shared_secret_str((char *)shared_secret,
+                                                           shared_secret_size));
 
-    /* TODO: The overloaded compute_key function on the server does the following:
-    - The server verifies that the received client public key is equal to its 
-      own server public key. If not, it fails. This is just a sanity check and 
-      this step is not essential for guaranteeing the security of the procedure 
-      (any attacker can easily spoof the public key).
-    - The server calls QKD_connect_blocking. (See considerations on the client 
-      side about needing the IP address of the peer, the client in this case, 
-      and this call being blocking.)
-    - The server calls QKD_get_key which returns a key_buffer. This is used as 
-      the shared secret and returned. Note that this returns the same key_buffer 
-      as that which was return on the client side, so it is indeed a shared secret.s */
+    /* Close the QKD session. */
+    qkd_result = QKD_close(&key_handle);
+    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_close failed");
 
     QKD_exit();
     return shared_secret_size;

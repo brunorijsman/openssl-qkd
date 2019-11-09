@@ -50,38 +50,6 @@ int QKD_key_handle_to_bignum(const QKD_key_handle_t *key_handle, BIGNUM *bn)
     return 1;
 }
 
-/**
- * Convert a shared secret to a human readable string.
- * 
- * Returns a pointer to the human readable string on success, NULL on failure (memory allocation
- * failed)
- * 
- * Note: returns a pointer to a string that is overwritten on the next call to this function.
- */
-char *QKD_shared_secret_str(unsigned char *shared_secret, size_t shared_secret_size)
-{
-    static char *str = NULL;
-    static size_t str_size = 0;
-    size_t needed_str_size = 2 * shared_secret_size + 1;
-    if (str == NULL || str_size < needed_str_size) {
-        str = realloc(str, needed_str_size);
-        if (!str) {
-            return NULL;
-        }
-        str_size = needed_str_size;
-
-    }
-    char *str_p = str;
-    unsigned char *shared_secret_p = shared_secret;
-    for (int i = 0; i < shared_secret_size; i++) {
-        snprintf(str_p, 3, "%02x", *shared_secret_p);
-        str_p += 2;
-        shared_secret_p += 1;
-    }
-    *str_p = '\0';
-    return str;
-}
-
 int shared_secret_nr_bytes(DH *dh)
 {
     /* In real life the shared secret is a number between 1 and P-1, where P is the prime number

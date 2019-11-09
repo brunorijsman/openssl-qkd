@@ -46,17 +46,6 @@ static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public
     /* TODO: Replace all fatals with error returns (but keep report) */
     QKD_enter();
 
-    // /* TODO: Client side processing
-    // - The client uses the received DH public key as the ETSI API key_handle
-    // - The client calls QKD_open() with the key_handle obtained it this way.
-    // - Note that the overloaded generate_key function does different things on the server
-    //     side and the client side. Thus, there needs to be some way for the overloaded function
-    //     to "know" whether it is being called in a server role or a client role. (How?)
-    // - The client uses the key_handle as it's own DH public key. In other words, the client's
-    //     DH public key is the same as the server's DH public key.
-    // - The client sets its DH private key to NULL. Just as on the server, the QKD exchange
-    //     does not use any DH private key on the client. */
-
     /* Convert the public key provided by the server into an ETSI API key handle. */
     QKD_key_handle_t key_handle = QKD_key_handle_null;
     int convert_result = QKD_bignum_to_key_handle(public_key, &key_handle);
@@ -80,31 +69,17 @@ static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public
     qkd_result = QKD_connect_blocking(&key_handle, 0);   /* TODO: right value for timeout? */
     QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_connect_blocking failed");
 
-    /* TODO: for now, set the shared secret to some fixed value */
-    memset(shared_secret, 1, shared_secret_size);
-    QKD_report("shared secret = %s", QKD_shared_secret_str(shared_secret, shared_secret_size));
+    /* Get the QKD-generated shared secret. Note that the ETSI API wants the key to be signed chars,
+     * but OpenSSL wants it to be unsigned chars. */
+    qkd_result = QKD_get_key(&key_handle, (char *) shared_secret);
+    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_get_key failed");
+    /* TODO: decide whether the caller or callee logs */
+    QKD_report("shared secret = %s", QKD_shared_secret_str((char *) shared_secret,
+                                                           shared_secret_size));
 
-    // QKD_report("Allocated size=%d\n", key_size);
-    // QKD_fatal_if(key == NULL, "Key is NULL");
-
-    // // /* TODO: put somthing in the key */
-    // // memset(key, 3, size);
-
-    // result = QKD_get_key(&key_handle, (char *)key);
-    // QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_get_key failed");
-
-    // result = QKD_close(&key_handle);
-    // QKD_fatal_if(QKD_RC_SUCCESS != result, "QKD_close failed");
-
-    // /* TODO: The overloaded compute_key function on the client does the following:
-    // - The client calls QKD_connect_blocking.
-    // - This call requires the IP address of the peer (the server in this case). 
-    //   Does OpenSSL provide some API to get the IP address of the peer?
-    // - Once again, is OpenSSL tolerant to doing a blocking call here? I don't 
-    //   think we can use the non-blocking variation (which is not well-defined in 
-    //   the ETSI API document; there is no sequence diagram for it).
-    // - The client calls QKD_get_key which returns a key_buffer. This is used as 
-    //   the shared secret and returned. */
+    /* Close the QKD session. */
+    qkd_result = QKD_close(&key_handle);
+    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_close failed");
 
     /* TODO: Report return value in exit */
     /* TODO: Rename to QKD_DBG_... */

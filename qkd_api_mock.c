@@ -18,12 +18,8 @@
 #include <strings.h> 
 #include <arpa/inet.h>
 
-
 /* TODO: Server can have more than one simultanious client */
-
 /* TODO: Add support for non-blocking connect */
-
-#define BUFSIZE 1024
 
 #define QKD_PORT 8080
 #define QKD_PORT_STR "8080"
@@ -37,6 +33,7 @@ typedef struct qkd_session_t {
     char *destination;
     QKD_key_handle_t key_handle;
     QKD_qos_t qos;
+    int connection_sock;
 } QKD_SESSION;
 
 /** 
@@ -124,18 +121,34 @@ static int accept_connection_from_client()
 static int send_key_handle(int sock, const QKD_key_handle_t *key_handle)
 {
     assert(key_handle != NULL);
-    int result = write(sock, key_handle->bytes, QKD_KEY_HANDLE_SIZE);
-    QKD_fatal_with_errno_if(result != QKD_KEY_HANDLE_SIZE, "write failed");
+    int bytes_written = write(sock, key_handle->bytes, QKD_KEY_HANDLE_SIZE);
+    QKD_fatal_with_errno_if(bytes_written != QKD_KEY_HANDLE_SIZE, "write failed");
     return QKD_RC_SUCCESS;
 }
 
 static int receive_key_handle(int sock, QKD_key_handle_t *key_handle)
 {
     assert(key_handle != NULL);
-    int result = read(sock, key_handle->bytes, QKD_KEY_HANDLE_SIZE);
-    QKD_fatal_with_errno_if(result != QKD_KEY_HANDLE_SIZE, "read failed");
+    int bytes_read = read(sock, key_handle->bytes, QKD_KEY_HANDLE_SIZE);
+    QKD_fatal_with_errno_if(bytes_read != QKD_KEY_HANDLE_SIZE, "read failed");
     return QKD_RC_SUCCESS;
 }
+
+// static int send_shared_secret(int sock, const char *shared_secret, size_t shared_secret_size)
+// {
+//     int bytes_written = write(sock, shared_secret, shared_secret_size);
+//     QKD_fatal_with_errno_if(bytes_written != shared_secret_size, "write failed");
+//     return QKD_RC_SUCCESS;
+// }
+
+// /* Caller is responsible for allocating memory. */
+// static int receive_shared_secret(int sock, char *shared_secret, size_t shared_secret_size)
+// {
+//     assert(shared_secret != NULL);
+//     int bytes_read = read(sock, shared_secret, shared_secret_size);
+//     QKD_fatal_with_errno_if(bytes_read != shared_secret_size, "read failed");
+//     return QKD_RC_SUCCESS;
+// }
 
 /** 
  * Allocate and initialize a new QKD session.
@@ -155,6 +168,7 @@ QKD_SESSION *qkd_session_new(bool am_client, char *destination, QKD_qos_t qos)
     }
     QKD_key_handle_set_random(&session->key_handle);
     session->qos = qos;
+    session->connection_sock = -1;
     QKD_exit();
     return session;
 }
@@ -232,6 +246,7 @@ QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout
 
     /* TODO: For now there is only one concurrent session. */
     assert(qkd_session != NULL);
+    int connection_sock = -1;
     if (qkd_session->am_client) {
 
         /* Client */
@@ -239,7 +254,7 @@ QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout
         /* Initiate a TCP connection to the server. */
         QKD_report("Initiate TCP connection to server");
         assert(qkd_session->destination != NULL);
-        int connection_sock = connect_to_server(qkd_session->destination);
+        connection_sock = connect_to_server(qkd_session->destination);
         QKD_fatal_if(connection_sock == -1, "connect_to_server failed");
         QKD_report("TCP connected to server");
 
@@ -248,19 +263,15 @@ QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout
         QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "send_key_handle failed");
         QKD_report("Sent key handle to server");
 
-        /* TODO: store sock */
-
     } else {
 
         /* Server */
 
         /* Accept an incoming TCP connection from the client. */
         QKD_report("Accept an incoming TCP connection from the client");
-        int connection_sock = accept_connection_from_client();
+        connection_sock = accept_connection_from_client();
         QKD_fatal_with_errno_if(connection_sock == -1, "accept failed");
         QKD_report("TCP connected to client");
-
-        /* TODO: store sock */
 
         /* Receive the client's key handle. */
         QKD_key_handle_t client_key_handle;
@@ -268,135 +279,55 @@ QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout
         QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "receive_key_handle failed");
         QKD_report("Received key handle from client");
 
-        /* The client's key handle must be the same as ours. */
+        /* The client's key handle must be the same as ours. This is just a sanity check does
+         * not provide any level of security since the key handle was sent in the clear, namely
+         * in the public key of the Diffie-Hellman exchange. (Anyway this mock implementation is
+         * not intended to be secure in the first place.) */ 
         bool same = QKD_key_handle_compare(&client_key_handle, key_handle) == 0;
         QKD_fatal_if(!same, "Client's key handle is different from server's key handle");
         QKD_report("Client's key handle is same as server's key handle");
     }
 
+    /* Store connection socket in QKD session */
+    qkd_session->connection_sock = connection_sock;
+
     QKD_exit();
     return QKD_RC_SUCCESS;
 }
 
-QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* key_buffer) {
+QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* key_buffer)
+{
     QKD_enter();
-    /* TODO: Implement this; fixed shared secret for now */
-    assert(key_buffer != NULL);
-    for (size_t i = 0; i < current_qos.requested_length; i++) {
-        key_buffer[i] = i;
+
+    /* TODO: For now there is only one concurrent session. */
+    assert(qkd_session != NULL);
+    assert(qkd_session->connection_sock != -1);    /* TODO: Keep track of connected in session. */
+    if (qkd_session->am_client) {
+
+        /* Client */
+
+    } else {
+
+        /* Server */
+
+        /* Choose a random shared secret. */
+
+
     }
+
+    /* TODO: For now, set the shared secret to some fixed value (remove this) */
+    int shared_secret_size = qkd_session->qos.requested_length;
+    QKD_report("Shared secret size is %d", shared_secret_size);
+    assert(key_buffer != NULL);
+    memset(key_buffer, 1, shared_secret_size);
+    QKD_report("shared secret = %s", QKD_shared_secret_str(key_buffer, shared_secret_size));
+
     QKD_exit();
     return QKD_RC_SUCCESS;
 }
 
-QKD_RC QKD_PLACEHOLDER_FOR_OLD_CODE(const QKD_key_handle_t *key_handle, char* key_buffer) {
-    // const char* hostname = "localhost";
-    // const char* portname = "8080";
-    // char buf[BUFSIZE];
-    // struct addrinfo hints;
-    // memset(&hints, 0, sizeof(hints));
-    // hints.ai_family = AF_UNSPEC;
-    // hints.ai_socktype = SOCK_STREAM;
-    // hints.ai_protocol = 0;
-    // hints.ai_flags = AI_ADDRCONFIG;
-    // struct addrinfo* res = 0;
-    // int err = getaddrinfo(hostname, portname, &hints, &res);
-    // if (err != 0) {
-    //     error("ERROR with getaddrinfo");
-    // }
-
-    // printf("create socket...\n");
-    // int sd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    // if (sd == -1) {
-    //     error("ERROR opening socket");
-    // }
-
-    // int optval = 1;
-    // setsockopt(sd, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
-
-    // int reuseaddr = 1;
-    // if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof(reuseaddr)) == -1) {
-    //     error("ERROR with setsockopt");
-    // }
-
-    // if (bind(sd, res->ai_addr, res->ai_addrlen) == -1) {
-    //     /************
-    //      *  CLIENT  *
-    //      ************/
-    //     if (connect(sd, res->ai_addr, res->ai_addrlen) < 0) {
-    //         error("ERROR connecting");
-    //     }
-
-    //     /* Send key_handle first */
-    //     int n = write(sd, key_handle, QKD_KEY_HANDLE_SIZE);
-    //     if (n < 0) {
-    //         error("ERROR writing to socket");
-    //     }
-
-    //     /* Check whether key_handle was accepted */
-    //     n = read(sd, buf, sizeof(char));
-    //     if (n < 0) {
-    //         error("ERROR reading from socket");
-    //     }
-
-    //     if (buf[0] != 0) {
-    //         /* key_handle is different from what was expected */
-    //         printf("--> WRONG key_handle\n");
-    //         freeaddrinfo(res);
-    //         close(sd);
-    //         return QKD_RC_GET_KEY_FAILED;
-    //     }
-
-    //     /* key_handle is correct */
-    //     n = read(sd, key_buffer, current_qos.requested_length);
-    //     if (n < 0) {
-    //         error("ERROR reading from socket");
-    //     }
-    //     freeaddrinfo(res);
-    //     close(sd);
-    //     return QKD_RC_SUCCESS;
-    // } else {
-    //     /************
-    //      *  SERVER  *
-    //      ************/
-    //     if (listen(sd, SOMAXCONN)) {
-    //         error("FAILED to listen for connections");
-    //     }
-    //     int session_fd = accept(sd, 0, 0);
-
-    //     /* Check whether key_handle is correct */
-    //     int n = read(session_fd, buf, BUFSIZE);
-    //     if (n < 0) {
-    //         error("ERROR reading from socket");
-    //     }
-
-    //     if (memcmp(key_handle, buf, QKD_KEY_HANDLE_SIZE) != 0) {
-    //         /* key_handle is different from what was expected */
-    //         n = write(session_fd, &(char){ 1 }, sizeof(char));
-    //         if (n < 0) {
-    //             error("ERROR writing to socket");
-    //         }
-    //         freeaddrinfo(res);
-    //         close(sd);
-    //         close(session_fd);
-    //         return QKD_RC_GET_KEY_FAILED;
-    //     }
-
-    //     /* key_handle is correct */
-    //     n = write(session_fd, &(char){ 0 }, sizeof(char));
-    //     if (n < 0) {
-    //         error("ERROR writing to socket");
-    //     }
-
-    //     /* Key generation */
-    //     for (size_t i = 0; i < current_qos.requested_length; i++) {
-    //         key_buffer[i] = (char) (rand() % 256);
-    //     }
-
-    //     n = write(session_fd, key_buffer, current_qos.requested_length);
-    //     if (n < 0) {
-    //         error("ERROR writing to socket");
-    //     }
+QKD_RC QKD_PLACEHOLDER_FOR_OLD_CODE(const QKD_key_handle_t *key_handle, char* key_buffer) 
+{
     //     close(session_fd);
     //     freeaddrinfo(res);
     //     close(sd);

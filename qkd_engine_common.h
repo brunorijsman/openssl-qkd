@@ -28,8 +28,6 @@ int QKD_bignum_to_key_handle(const BIGNUM *bn, QKD_key_handle_t *key_handle);
 
 int QKD_key_handle_to_bignum(const QKD_key_handle_t *key_handle, BIGNUM *bn);
 
-char *QKD_shared_secret_str(unsigned char *shared_secret, size_t shared_secret_size);
-
 /* We can control a "fixed" key (instead of an actual QKD-negotiated key) to allow end-to-end
 testing before the interaction with the QKD-API has actually been implemented. */
 extern bool QKD_return_fixed_key_for_testing;
