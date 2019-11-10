@@ -99,7 +99,7 @@ static int connect_to_server(char *destination)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = 0;
     hints.ai_flags = AI_ADDRCONFIG;
-    struct addrinfo* res = 0;
+    struct addrinfo *res = NULL;
     int result = getaddrinfo(host_str, port_str, &hints, &res);
     QKD_fatal_with_errno_if(result != 0, "getaddrinfo failed");
 
@@ -110,6 +110,8 @@ static int connect_to_server(char *destination)
     /* Create the outgoing TCP connection. */
     result = connect(sock, res->ai_addr, res->ai_addrlen);
     QKD_fatal_with_errno_if(result != 0, "connect failed");
+
+    freeaddrinfo(res);
     return sock;
 }
 
@@ -322,7 +324,7 @@ QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret)
          * because it can only be sent in step (5).
          * This implementation is a hack because it makes assumptions about in which order
          * QKD_get_key will called on the server and the client. */
-        
+
         /* Choose a random shared secret. */
         assert(shared_secret != NULL);
         srand(time(NULL));
@@ -338,7 +340,7 @@ QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret)
         QKD_report("Sent shared secret to server");
 
 
-    } else {
+    } elsze {
 
         /* Server */
 
@@ -356,18 +358,20 @@ QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret)
     return QKD_RC_SUCCESS;
 }
 
-QKD_RC QKD_PLACEHOLDER_FOR_OLD_CODE(const QKD_key_handle_t *key_handle, char* key_buffer) 
-{
-    //     close(session_fd);
-    //     freeaddrinfo(res);
-    //     close(sd);
-    //     return QKD_RC_SUCCESS;
-    // }
-    return 0;
-}
-
+/* TODO: Call this somewhere */
 QKD_RC QKD_close(const QKD_key_handle_t *key_handle)
 {
-    /* TODO */
+    QKD_enter();
+    assert(key_handle);
+
+    /* TODO: For now there is only one concurrent session. */
+    assert(qkd_session != NULL);
+    assert(qkd_session->connection_sock != -1);
+    close(qkd_session->connection_sock);
+    qkd_session->connection_sock = -1;
+    free(qkd_session);
+    qkd_session = NULL;
+
+    QKD_exit();
     return QKD_RC_SUCCESS;
 }
