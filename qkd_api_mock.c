@@ -246,32 +246,32 @@ QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout
         /* Client */
 
         /* Initiate a TCP connection to the server. */
-        QKD_report("Initiate TCP connection to server");
+        QKD_debug("Initiate TCP connection to server");
         assert(qkd_session->destination != NULL);
         connection_sock = connect_to_server(qkd_session->destination);
         QKD_fatal_if(connection_sock == -1, "connect_to_server failed");
-        QKD_report("TCP connected to server");
+        QKD_debug("TCP connected to server");
 
         /* Send our (the client's) key handle to the server. */
         QKD_RC qkd_result = send_key_handle(connection_sock, key_handle);
         QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "send_key_handle failed");
-        QKD_report("Sent key handle to server");
+        QKD_debug("Sent key handle to server");
 
     } else {
 
         /* Server */
 
         /* Accept an incoming TCP connection from the client. */
-        QKD_report("Accept an incoming TCP connection from the client");
+        QKD_debug("Accept an incoming TCP connection from the client");
         connection_sock = accept_connection_from_client();
         QKD_fatal_with_errno_if(connection_sock == -1, "accept failed");
-        QKD_report("TCP connected to client");
+        QKD_debug("TCP connected to client");
 
         /* Receive the client's key handle. */
         QKD_key_handle_t client_key_handle;
         QKD_RC qkd_result = receive_key_handle(connection_sock, &client_key_handle);
         QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "receive_key_handle failed");
-        QKD_report("Received key handle from client");
+        QKD_debug("Received key handle from client");
 
         /* The client's key handle must be the same as ours. This is just a sanity check does
          * not provide any level of security since the key handle was sent in the clear, namely
@@ -279,7 +279,7 @@ QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout
          * not intended to be secure in the first place.) */ 
         bool same = QKD_key_handle_compare(&client_key_handle, key_handle) == 0;
         QKD_fatal_if(!same, "Client's key handle is different from server's key handle");
-        QKD_report("Client's key handle is same as server's key handle");
+        QKD_debug("Client's key handle is same as server's key handle");
     }
 
     /* Store connection socket in QKD session */
@@ -298,7 +298,7 @@ QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret)
     assert(qkd_session->connection_sock != -1);    /* TODO: Keep track of connected in session. */
 
     int shared_secret_size = qkd_session->qos.requested_length;
-    QKD_report("Shared secret size is %d", shared_secret_size);
+    QKD_debug("Shared secret size is %d", shared_secret_size);
 
     if (qkd_session->am_client) {
 
@@ -331,13 +331,13 @@ QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret)
         for (int i = 0; i < shared_secret_size; ++i) {
             shared_secret[i] = rand();
         }
-        QKD_report("Shared secret = %s", QKD_shared_secret_str(shared_secret, shared_secret_size));
+        QKD_debug("Shared secret = %s", QKD_shared_secret_str(shared_secret, shared_secret_size));
 
         /* Send the shared secret to the server. */
         QKD_RC qkd_result = send_shared_secret(qkd_session->connection_sock, shared_secret,
                                                shared_secret_size);
         QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "send_shared_secret failed");
-        QKD_report("Sent shared secret to server");
+        QKD_debug("Sent shared secret to server");
 
 
     } else {
@@ -345,12 +345,12 @@ QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret)
         /* Server */
 
         /* Receive the shared secret chosen by the client. */
-        QKD_report("Waiting for shared_secret from client");
+        QKD_debug("Waiting for shared_secret from client");
         QKD_RC qkd_result = receive_shared_secret(qkd_session->connection_sock, shared_secret,
                                                   shared_secret_size);
         QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "receive_shared_secret failed");
-        QKD_report("Received shared secret from client");
-        QKD_report("Shared secret = %s", QKD_shared_secret_str(shared_secret, shared_secret_size));
+        QKD_debug("Received shared secret from client");
+        QKD_debug("Shared secret = %s", QKD_shared_secret_str(shared_secret, shared_secret_size));
 
     }
 

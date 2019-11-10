@@ -31,12 +31,12 @@ static int server_generate_key(DH *dh)
 
     if (QKD_return_fixed_key_for_testing) {
 
-        QKD_report("Use fixed public key (for testing)");
+        QKD_debug("Use fixed public key (for testing)");
         BN_set_word(public_key, QKD_fixed_public_key);
 
     } else {
 
-        QKD_report("Encode the ETSI QKD API key handle into the public key");
+        QKD_debug("Encode the ETSI QKD API key handle into the public key");
 
         /* TODO: Also encode the local address of the listening socket into the public key */
 
@@ -57,15 +57,15 @@ static int server_generate_key(DH *dh)
         QKD_key_handle_t key_handle = QKD_key_handle_null;
         QKD_RC qkd_result = QKD_open(NULL, qos, &key_handle);
         QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_open failed");
-        QKD_report("Allocated key handle: %s", QKD_key_handle_str(&key_handle));
+        QKD_debug("Allocated key handle: %s", QKD_key_handle_str(&key_handle));
 
         /* Convert allocated key handle to bignum and use it as the public key */
         int result = QKD_key_handle_to_bignum(&key_handle, public_key);
         QKD_fatal_if(result != 1, "QKD_key_handle_to_bignum failed");
     }
 
-    QKD_report("DH private key: %s", BN_bn2hex(private_key));
-    QKD_report("DH public key: %s", BN_bn2hex(public_key));
+    QKD_debug("DH private key: %s", BN_bn2hex(private_key));
+    QKD_debug("DH public key: %s", BN_bn2hex(public_key));
 
     int result = DH_set0_key(dh, public_key, private_key);
     QKD_fatal_if(result == 0, "DH_set0_key failed");
@@ -85,7 +85,7 @@ static int server_compute_key(unsigned char *shared_secret, const BIGNUM *client
     QKD_key_handle_t key_handle = QKD_key_handle_null;
     int convert_result = QKD_bignum_to_key_handle(server_public_key, &key_handle);
     QKD_fatal_if(convert_result != 1, "QKD_bignum_to_key_handle failed");
-    QKD_report("Key handle = %s", QKD_key_handle_str(&key_handle));
+    QKD_debug("Key handle = %s", QKD_key_handle_str(&key_handle));
 
     /* Connect to the QKD peer. We cannot do this earlier (specifically we cannot not do this in
      * server_generate_key) because the connection can only be completed *after* the client has
@@ -100,7 +100,7 @@ static int server_compute_key(unsigned char *shared_secret, const BIGNUM *client
     qkd_result = QKD_get_key(&key_handle, (char *) shared_secret);
     QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_get_key failed");
     int shared_secret_size = DH_size(dh);
-    QKD_report("shared secret = %s", QKD_shared_secret_str((char *)shared_secret,
+    QKD_debug("shared secret = %s", QKD_shared_secret_str((char *)shared_secret,
                                                            shared_secret_size));
 
     /* Close the QKD session. */

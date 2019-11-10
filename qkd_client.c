@@ -28,11 +28,11 @@ static int client_generate_key(DH *dh)
     BIGNUM *private_key = BN_secure_new();
     QKD_fatal_if(private_key == NULL, "BN_secure_new (private_key) failed");
     BN_set_word(private_key, QKD_fixed_private_key);
-    QKD_report("DH private key: %s", BN_bn2hex(private_key));
+    QKD_debug("DH private key: %s", BN_bn2hex(private_key));
     BIGNUM *public_key = BN_secure_new();
     QKD_fatal_if(public_key == NULL, "BN_secure_new (public_key) failed");
     BN_set_word(public_key, QKD_fixed_public_key);
-    QKD_report("DH public key: %s", BN_bn2hex(public_key));
+    QKD_debug("DH public key: %s", BN_bn2hex(public_key));
 
     int result = DH_set0_key(dh, public_key, private_key);
     QKD_fatal_if(result != 1, "DH_set0_key failed");
@@ -50,7 +50,7 @@ static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public
     QKD_key_handle_t key_handle = QKD_key_handle_null;
     int convert_result = QKD_bignum_to_key_handle(public_key, &key_handle);
     QKD_fatal_if(convert_result != 1, "QKD_bignum_to_key_handle failed");
-    QKD_report("Key handle = %s", QKD_key_handle_str(&key_handle));
+    QKD_debug("Key handle = %s", QKD_key_handle_str(&key_handle));
 
     /* Use fixed QoS parameters. */
     int shared_secret_size = DH_size(dh);
@@ -74,7 +74,7 @@ static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public
     qkd_result = QKD_get_key(&key_handle, (char *) shared_secret);
     QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_get_key failed");
     /* TODO: decide whether the caller or callee logs */
-    QKD_report("shared secret = %s", QKD_shared_secret_str((char *) shared_secret,
+    QKD_debug("shared secret = %s", QKD_shared_secret_str((char *) shared_secret,
                                                            shared_secret_size));
 
     /* Close the QKD session. */
