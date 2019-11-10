@@ -32,6 +32,15 @@ void _QKD_debug(const char *file, int line, const char *func, const char *format
 
 #define QKD_enter(void) QKD_debug("Enter")
 
+/* TODO: get rid of this */
 #define QKD_exit(void) QKD_debug("Exit")
+
+#define QKD_return() QKD_debug("Return")
+
+#define QKD_return_success(format, value) \
+do { QKD_debug("Return success " format, value); return value; } while(0)
+
+#define QKD_return_error(format, value) \
+do { QKD_error("Return error " format, value); return value; } while (0)
 
 #endif /* QKD_DEBUG_H */

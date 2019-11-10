@@ -15,6 +15,12 @@
 #include <string.h>
 #include <openssl/engine.h>
 
+/**
+ * Callback which registered in the client OpenSSL engine to be called when OpenSSL needs the engine
+ * to generate a Diffie-Hellman private key and to derive the Diffie-Hellman public key from it.
+ * 
+ * Returns 1 on success, 0 on failure.
+ */
 static int client_generate_key(DH *dh)
 {
     QKD_enter();
@@ -25,31 +31,53 @@ static int client_generate_key(DH *dh)
      * it will find out when we, the client, connect to it). The server does not need any public key
      * from us. The net result is that we (the client) don't need to compute a private nor a public
      * key; we just use fixed values to give *something* to DH. */
+
+    /* Generate the private key. */
     BIGNUM *private_key = BN_secure_new();
-    QKD_fatal_if(private_key == NULL, "BN_secure_new (private_key) failed");
+    if (NULL == private_key) {
+        QKD_error("BN_secure_new (private_key) failed");
+        QKD_return_error("%d", 0);
+    }
     BN_set_word(private_key, QKD_fixed_private_key);
     QKD_debug("DH private key: %s", BN_bn2hex(private_key));
+
+    /* Generate the public key. */
     BIGNUM *public_key = BN_secure_new();
-    QKD_fatal_if(public_key == NULL, "BN_secure_new (public_key) failed");
+    if (public_key == NULL) {
+        QKD_error("BN_secure_new (public_key) failed");
+        QKD_return_error("%d", 0);
+    }
     BN_set_word(public_key, QKD_fixed_public_key);
     QKD_debug("DH public key: %s", BN_bn2hex(public_key));
 
+    /* Return the private and public key to OpenSSL by storing them in the DH context. */
     int result = DH_set0_key(dh, public_key, private_key);
-    QKD_fatal_if(result != 1, "DH_set0_key failed");
+    if (result != 1) {
+        QKD_error("DH_set0_key failed (return code %d)", result);
+        QKD_return_error("%d", 0);
+    }
 
-    QKD_exit();
-    return 1;
+    QKD_return_success("%d", 1);
 }
 
+/**
+ * Callback which registered in the client OpenSSL engine to be called when OpenSSL needs the engine
+ * to compute the Diffie-Hellman shared secret based on Diffie-Hellman parameters, the server public
+ * key, and our own (the client's) private key.
+ * 
+ * Returns the size of the generated shared secret on success, -1 on failure.
+ */
 static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public_key, DH *dh)
 {
-    /* TODO: Replace all fatals with error returns (but keep report) */
     QKD_enter();
 
     /* Convert the public key provided by the server into an ETSI API key handle. */
     QKD_key_handle_t key_handle = QKD_key_handle_null;
     int convert_result = QKD_bignum_to_key_handle(public_key, &key_handle);
-    QKD_fatal_if(convert_result != 1, "QKD_bignum_to_key_handle failed");
+    if (convert_result != 1) {
+        QKD_error("QKD_bignum_to_key_handle failed (return code %d)", convert_result);
+        QKD_return_error("%d", -1);
+    }
     QKD_debug("Key handle = %s", QKD_key_handle_str(&key_handle));
 
     /* Use fixed QoS parameters. */
@@ -63,28 +91,37 @@ static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public
 
     /* TODO: Extract the destination from the handle. For now, hard-code localhost. */
     QKD_RC qkd_result = QKD_open("localhost", qos, &key_handle);
-    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_open failed");
+    if (QKD_RC_SUCCESS != qkd_result) {
+        QKD_error("QKD_open failed (return code %d)", qkd_result);
+        QKD_return_error("%d", -1);
+    }
 
     /* Connect to the QKD peer. */
     qkd_result = QKD_connect_blocking(&key_handle, 0);   /* TODO: right value for timeout? */
-    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_connect_blocking failed");
+    if (QKD_RC_SUCCESS != qkd_result) {
+        QKD_error("QKD_connect_blocking failed (return code %d)", qkd_result);
+        QKD_return_error("%d", -1);
+    }
 
     /* Get the QKD-generated shared secret. Note that the ETSI API wants the key to be signed chars,
      * but OpenSSL wants it to be unsigned chars. */
     qkd_result = QKD_get_key(&key_handle, (char *) shared_secret);
-    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_get_key failed");
+    if (QKD_RC_SUCCESS != qkd_result) {
+        QKD_error("QKD_get_key failed (return code %d)", qkd_result);
+        QKD_return_error("%d", -1);
+    }
     /* TODO: decide whether the caller or callee logs */
     QKD_debug("shared secret = %s", QKD_shared_secret_str((char *) shared_secret,
                                                            shared_secret_size));
 
     /* Close the QKD session. */
     qkd_result = QKD_close(&key_handle);
-    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_close failed");
+    if (QKD_RC_SUCCESS != qkd_result) {
+        QKD_error("QKD_close failed (return code %d)", qkd_result);
+        QKD_return_error("%d", -1);
+    }
 
-    /* TODO: Report return value in exit */
-    /* TODO: Rename to QKD_DBG_... */
-    QKD_exit();
-    return shared_secret_size;
+    QKD_return_success("%d", shared_secret_size);
 }
 
 static int client_engine_init(ENGINE *engine)
@@ -93,7 +130,6 @@ static int client_engine_init(ENGINE *engine)
     QKD_exit();
     return 1;
 }
-
 
 int QKD_engine_bind(ENGINE *engine, const char *engine_id, const char *engine_name,
                     int (*generate_key) (DH *),
