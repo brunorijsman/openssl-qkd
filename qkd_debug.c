@@ -40,7 +40,7 @@ void _QKD_fatal_with_errno_if(const char *file, int line, const char *func, bool
     }
 }
 
-void _QKD_report(const char *file, int line, const char *func, const char *format, ...) 
+void _QKD_debug(const char *file, int line, const char *func, const char *format, ...) 
 {
     print_location(file, line, func);
     va_list argptr;

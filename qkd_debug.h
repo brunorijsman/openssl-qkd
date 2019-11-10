@@ -22,9 +22,9 @@ void _QKD_fatal_with_errno_if(const char *file, int line, const char *func, bool
 #define QKD_fatal_with_errno_if(is_error, msg) _QKD_fatal_with_errno_if(__FILE__, __LINE__, \
                                                                         __func__, is_error, msg)
 
-void _QKD_report(const char *file, int line, const char *func, const char *format, ...);
+void _QKD_debug(const char *file, int line, const char *func, const char *format, ...);
 
-#define QKD_debug(format, ...) _QKD_report(__FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
+#define QKD_debug(format, ...) _QKD_debug(__FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
 
 #define QKD_enter(void) QKD_debug("Enter")
 
