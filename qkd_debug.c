@@ -14,8 +14,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* TODO: Add progress function */
 /* TODO: format instead of msg everwhere */
+
+/* TODO: Turn debug on or off using environment variable */
+static bool debug = true;
 
 static void print_location(const char *file, int line, const char *func)
 {
@@ -40,12 +42,28 @@ void _QKD_fatal_with_errno_if(const char *file, int line, const char *func, bool
     }
 }
 
-void _QKD_debug(const char *file, int line, const char *func, const char *format, ...) 
+void report(const char *file, int line, const char *func, const char *format, va_list args)
 {
     print_location(file, line, func);
-    va_list argptr;
-    va_start(argptr, format);
-    vfprintf(stderr, format, argptr);
+    vfprintf(stderr, format, args);
     fprintf(stderr, "\n");
-    va_end(argptr);
+    va_end(args);
+}
+
+void _QKD_error(const char *file, int line, const char *func, const char *format, ...) 
+{
+    va_list args;
+    va_start(args, format);
+    report(file, line, func, format, args);
+    va_end(args);
+}
+
+void _QKD_debug(const char *file, int line, const char *func, const char *format, ...) 
+{
+    if (debug) {
+        va_list args;
+        va_start(args, format);
+        report(file, line, func, format, args);
+        va_end(args);
+    }
 }
