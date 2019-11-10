@@ -302,8 +302,27 @@ QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret)
 
         /* Client */
 
-        /* TODO: Explain WHY the client has to choose it */
-
+        /* There is a subtle hack here. It is necessary that the client chooses the shared secret
+         * and sends it to the server. If we do it the other way around, i.e. if the server chooses
+         * the shared secret and send it to the client, we will het a deadlock. This is because in
+         * the OpenSSL implementation of the client side is as follows
+         * (1) The client receives a Server Hello Message, which contains the Diffie-Hellman
+         *     parameters and public key from the server.
+         * (2) The client chooses its own Diffie-Hellman private key, using the received
+         *     Diffie-Hellman parameters.
+         * (3) The client calls generate_key to compute the shared secret based on (a) the received
+         *     Diffie-Hellman paramters, (b) the received server's public key, and (c) it's own,
+         *     i.e. the client's private key.
+         * (4) Then, and only then, does the client send the Client Key Exchange message to the
+         *     server, which contains the client's public key.
+         * (5) The server can only call generate_key after it has received the Client Key Exchange
+         *     message.
+         * Now, if the server chooses the key, then the client will do a blocking receive in step
+         * (3) to receive the shared secret from the server, but that message will never come
+         * because it can only be sent in step (5).
+         * This implementation is a hack because it makes assumptions about in which order
+         * QKD_get_key will called on the server and the client. */
+        
         /* Choose a random shared secret. */
         assert(shared_secret != NULL);
         srand(time(NULL));
