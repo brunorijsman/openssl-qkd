@@ -11,11 +11,12 @@
 
 #include "qkd_api.h"
 #include "qkd_debug.h"
-#include <unistd.h>
 #include <assert.h>
 #include <netdb.h>
 #include <stdlib.h>
 #include <strings.h> 
+#include <time.h>
+#include <unistd.h>
 #include <arpa/inet.h>
 
 /* TODO: Server can have more than one simultanious client */
@@ -134,21 +135,21 @@ static int receive_key_handle(int sock, QKD_key_handle_t *key_handle)
     return QKD_RC_SUCCESS;
 }
 
-// static int send_shared_secret(int sock, const char *shared_secret, size_t shared_secret_size)
-// {
-//     int bytes_written = write(sock, shared_secret, shared_secret_size);
-//     QKD_fatal_with_errno_if(bytes_written != shared_secret_size, "write failed");
-//     return QKD_RC_SUCCESS;
-// }
+static int send_shared_secret(int sock, const char *shared_secret, size_t shared_secret_size)
+{
+    int bytes_written = write(sock, shared_secret, shared_secret_size);
+    QKD_fatal_with_errno_if(bytes_written != shared_secret_size, "write failed");
+    return QKD_RC_SUCCESS;
+}
 
-// /* Caller is responsible for allocating memory. */
-// static int receive_shared_secret(int sock, char *shared_secret, size_t shared_secret_size)
-// {
-//     assert(shared_secret != NULL);
-//     int bytes_read = read(sock, shared_secret, shared_secret_size);
-//     QKD_fatal_with_errno_if(bytes_read != shared_secret_size, "read failed");
-//     return QKD_RC_SUCCESS;
-// }
+/* Caller is responsible for allocating memory. */
+static int receive_shared_secret(int sock, char *shared_secret, size_t shared_secret_size)
+{
+    assert(shared_secret != NULL);
+    int bytes_read = read(sock, shared_secret, shared_secret_size);
+    QKD_fatal_with_errno_if(bytes_read != shared_secret_size, "read failed");
+    return QKD_RC_SUCCESS;
+}
 
 /** 
  * Allocate and initialize a new QKD session.
@@ -203,22 +204,13 @@ QKD_RC QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle)
      * if the destination is not NULL it means that we are a client and that destination contains
      * the address of the server. */
     bool am_client = (destination != NULL);
-    if (am_client) {
 
-        /* We are client, remote side is server */
-
-
-        /* TODO: Get a key over the connection */
-
-    } else {
-
-        /* We are server, remote side is client */
-
-        /* TODO: For now (maybe forever) we don't support predefined key handles on the server.
-         * Hence we insist that the provded key handle is a null key handle (which is not the same * thing as a null pointer.) */
+    /* TODO: For now (maybe forever) we don't support predefined key handles on the server.
+     * Hence we insist that the provded key handle is a null key handle (which is not the same
+     * thing as a null pointer.) */
+    if (!am_client) {
         bool is_null_handle = QKD_key_handle_is_null(key_handle);
         QKD_fatal_if(!is_null_handle, "Key handle must be null");
-
     }
 
     /* Create a new QKD session */
@@ -295,32 +287,51 @@ QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout
     return QKD_RC_SUCCESS;
 }
 
-QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* key_buffer)
+QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret)
 {
     QKD_enter();
 
     /* TODO: For now there is only one concurrent session. */
     assert(qkd_session != NULL);
     assert(qkd_session->connection_sock != -1);    /* TODO: Keep track of connected in session. */
+
+    int shared_secret_size = qkd_session->qos.requested_length;
+    QKD_report("Shared secret size is %d", shared_secret_size);
+
     if (qkd_session->am_client) {
 
         /* Client */
+
+        /* TODO: Explain WHY the client has to choose it */
+
+        /* Choose a random shared secret. */
+        assert(shared_secret != NULL);
+        srand(time(NULL));
+        for (int i = 0; i < shared_secret_size; ++i) {
+            shared_secret[i] = rand();
+        }
+        QKD_report("Shared secret = %s", QKD_shared_secret_str(shared_secret, shared_secret_size));
+
+        /* Send the shared secret to the server. */
+        QKD_RC qkd_result = send_shared_secret(qkd_session->connection_sock, shared_secret,
+                                               shared_secret_size);
+        QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "send_shared_secret failed");
+        QKD_report("Sent shared secret to server");
+
 
     } else {
 
         /* Server */
 
-        /* Choose a random shared secret. */
-
+        /* Receive the shared secret chosen by the client. */
+        QKD_report("Waiting for shared_secret from client");
+        QKD_RC qkd_result = receive_shared_secret(qkd_session->connection_sock, shared_secret,
+                                                  shared_secret_size);
+        QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "receive_shared_secret failed");
+        QKD_report("Received shared secret from client");
+        QKD_report("Shared secret = %s", QKD_shared_secret_str(shared_secret, shared_secret_size));
 
     }
-
-    /* TODO: For now, set the shared secret to some fixed value (remove this) */
-    int shared_secret_size = qkd_session->qos.requested_length;
-    QKD_report("Shared secret size is %d", shared_secret_size);
-    assert(key_buffer != NULL);
-    memset(key_buffer, 1, shared_secret_size);
-    QKD_report("shared secret = %s", QKD_shared_secret_str(key_buffer, shared_secret_size));
 
     QKD_exit();
     return QKD_RC_SUCCESS;
