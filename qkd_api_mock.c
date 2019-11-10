@@ -340,7 +340,7 @@ QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret)
         QKD_report("Sent shared secret to server");
 
 
-    } elsze {
+    } else {
 
         /* Server */
 
