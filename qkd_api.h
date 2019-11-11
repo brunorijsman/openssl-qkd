@@ -20,7 +20,6 @@
 #include <stdlib.h>
 
 /* TODO: Make sure all of these are used */
-/* TODO: Function to convert to string */
 typedef enum {
     QKD_RESULT_SUCCESS = 0,
     QKD_RESULT_SEND_FAILED,

@@ -46,6 +46,7 @@ static QKD_SESSION *qkd_session = NULL;  /* TODO: For now this is the one and on
  * Listen for incoming connections.
  *
  * Create a listen socket to receive incoming connections from the clients.
+ * 
  * Returns listen socket on success, or -1 on failure.
  */
 static int listen_for_incoming_connections()
@@ -102,6 +103,7 @@ static int listen_for_incoming_connections()
  * Connect to server.
  *
  * Create a TCP connection to the server.
+ * 
  * Returns connection socket on success, or -1 on failure.
  */
 static int connect_to_server(char *destination)
@@ -171,7 +173,6 @@ static int accept_connection_from_client()
  * 
  * Returns QKD_result_t.
  */
-/* TODO: Return QKD_result_t everywhere instead of ints */
 static QKD_result_t send_key_handle(int sock, const QKD_key_handle_t *key_handle)
 {
     QKD_enter();
@@ -238,7 +239,7 @@ static QKD_result_t send_shared_secret(int sock, const char *shared_secret,
  * 
  * Returns QKD_result_t.
  */
-static int receive_shared_secret(int sock, char *shared_secret, size_t shared_secret_size)
+static QKD_result_t receive_shared_secret(int sock, char *shared_secret, size_t shared_secret_size)
 {
     QKD_enter();
     assert(shared_secret != NULL);
