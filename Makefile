@@ -68,7 +68,8 @@ test: all
 	./stop-server.sh
 	sleep 1
 	./stop-tshark.sh
-	# TODO: Kill lingering openssl process (lsof -nP -i4TCP:8080 | grep LISTEN)
+# TODO: Kill lingering openssl process (lsof -nP -i4TCP:8080 | grep LISTEN)
+	./check_tshark.py
 
 clean: clean-test
 	# TODO: Use run-test (run-mock-test run-simulaqron-test) script

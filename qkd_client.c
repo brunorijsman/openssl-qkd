@@ -124,22 +124,32 @@ static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public
     QKD_return_success("%d", shared_secret_size);
 }
 
+/**
+ * Initialize the engine.
+ * 
+ * Returns 1 on success, 0 on failure.
+ */
 static int client_engine_init(ENGINE *engine)
 {
     QKD_enter();
-    QKD_exit();
-    return 1;
+    QKD_return_success("%d", 1);
 }
 
-int QKD_engine_bind(ENGINE *engine, const char *engine_id, const char *engine_name,
-                    int (*generate_key) (DH *),
-                    int (*compute_key) (unsigned char *key, const BIGNUM *pub_key, DH *dh),
-                    ENGINE_GEN_INT_FUNC_PTR engine_init);
-
+/**
+ * Bind this client engine to OpenSSL.
+ * 
+ * Returns 1 on success, 0 on failure.
+ */
 int client_engine_bind(ENGINE *engine, const char *engine_id)
 {
-    return QKD_engine_bind(engine, "qkd_client", "QKD Client Engine", client_generate_key,
-                           client_compute_key, client_engine_init);
+    QKD_enter();
+    int result = QKD_engine_bind(engine, "qkd_client", "QKD Client Engine", client_generate_key,
+                                 client_compute_key, client_engine_init);
+    if (1 != result) {
+        QKD_error("QKD_engine_bind failed (return code %d)", result);
+        QKD_return_error("%d", 0);
+    }
+    QKD_return_success("%d", 1);
 }
 
 IMPLEMENT_DYNAMIC_CHECK_FN();
