@@ -78,7 +78,6 @@ int QKD_engine_bind(ENGINE *engine, const char *engine_id, const char *engine_na
     QKD_enter();
 
     /* TODO: should we use init or app_data for anything? */
-    /* TODO: Move the common stuff into QKD_engine_bind */
     int flags = 0;
     DH_METHOD *dh_method = DH_meth_new("ETSI QKD Client Method", flags);
     if (NULL == dh_method) {
