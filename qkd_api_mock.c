@@ -253,24 +253,40 @@ static int receive_shared_secret(int sock, char *shared_secret, size_t shared_se
 /** 
  * Allocate and initialize a new QKD session.
  *
+ * Destination is a string containing the host name or IP address (as a string) of the remote side
+ * of the QKD connection. For servers, destination may be NULL, which means that the server is
+ * willing to accept an incoming QKD connection from any client.
+ * 
  * Returns pointer to new session, or NULL on failure.
  */
 QKD_SESSION *qkd_session_new(bool am_client, char *destination, QKD_qos_t qos)
 {
     QKD_enter();
+
+    /* Allocate the session. */
     QKD_SESSION *session = malloc(sizeof(QKD_SESSION));
-    QKD_fatal_if(session == NULL, "malloc failed");
+    if (session == NULL) {
+        QKD_error("malloc failed");
+        QKD_return_error("%p", NULL);
+    }
+
+    /* Initialize the session. */
     session->am_client = am_client;
     if (destination) {
         session->destination = strdup(destination);
+        if (session->destination == NULL) {
+            QKD_error("malloc failed");
+            free(session);
+            QKD_return_error("%p", NULL);
+        }
     } else {
         session->destination = NULL;
     }
     QKD_key_handle_set_random(&session->key_handle);
     session->qos = qos;
     session->connection_sock = -1;
-    QKD_exit();
-    return session;
+
+    QKD_return_success("%p", session);
 }
 
 void qkd_session_delete(QKD_SESSION *session)
