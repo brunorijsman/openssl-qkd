@@ -40,6 +40,8 @@ typedef struct qkd_session_t {
     int connection_sock;
 } QKD_SESSION;
 
+static QKD_SESSION *qkd_session = NULL;  /* TODO: For now this is the one and only session */
+
 /** 
  * Listen for incoming connections.
  *
@@ -289,25 +291,45 @@ QKD_SESSION *qkd_session_new(bool am_client, char *destination, QKD_qos_t qos)
     QKD_return_success("%p", session);
 }
 
+/**
+ * Delete a QKD session.
+ */
 void qkd_session_delete(QKD_SESSION *session)
 {
     QKD_enter();
     assert(session != NULL);
     free(session);
-    QKD_exit();
+    QKD_return_success_void();
 }
 
-static QKD_SESSION *qkd_session = NULL;  /* TODO: For now this is the one and only session */
-
+/**
+ * Initialize the API.
+ * 
+ * Returns QKD_result_t.
+ */
 QKD_result_t QKD_init(void)
 {
     QKD_enter();
     listen_sock = listen_for_incoming_connections();
-    QKD_fatal_if(listen_sock == -1, "listen_for_incoming_connections failed");
-    QKD_exit();
-    return QKD_RESULT_SUCCESS;
+    if (-1 == listen_sock) {
+        QKD_error_with_errno("listen failed");
+        QKD_return_error_qkd(QKD_RESULT_CONNECTION_FAILED);
+    }
+    QKD_return_success_qkd();
 }
 
+/**
+ * Mock implementation of QKD_open, which is defined in the ETSI QKD API specification as follows:
+ * "Receive an association (key_handle) to a set of future keys at both ends of the QKD link through
+ * this distributed Key Management Layer and establish a set of parameters that define the expected
+ * levels of key service. This function shall return immediately and not block."
+ * 
+ * On the server side, the provided key handle may contain the QKD_key_handle_null value (which is
+ * different from the key_handle pointer being NULL), in which case this function will allocate a
+ * new handle and return it in the key_handle paramter.
+ * 
+ * Returns QKD_result_t.
+ */
 QKD_result_t QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle)
 {
     QKD_enter();
@@ -324,27 +346,27 @@ QKD_result_t QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_ha
      * Hence we insist that the provded key handle is a null key handle (which is not the same
      * thing as a null pointer.) */
     if (!am_client) {
-        bool is_null_handle = QKD_key_handle_is_null(key_handle);
-        QKD_fatal_if(!is_null_handle, "Key handle must be null");
+        assert(QKD_key_handle_is_null(key_handle));
     }
 
     /* Create a new QKD session */
     /* TODO: for now we only allow one concurrent session. */
     assert(qkd_session == NULL);
     qkd_session = qkd_session_new(am_client, destination, qos);
+    if (qkd_session == NULL) {
+        QKD_return_error_qkd(QKD_RESULT_OUT_OF_MEMORY);
+    }
 
-    /* Return the key handle for the session */
+    /* Return the key handle for the session (in the key_handle parameter) */
     *key_handle = qkd_session->key_handle;
-    QKD_exit();
-    return QKD_RESULT_SUCCESS;
+    QKD_return_success_qkd();
 }
 
 QKD_result_t QKD_connect_nonblock(const QKD_key_handle_t *key_handle)
 {
     QKD_enter();
     /* TODO: Not yet implemented. */
-    QKD_exit();
-    return QKD_RESULT_NOT_SUPPORTED;
+    QKD_return_error_qkd(QKD_RESULT_NOT_SUPPORTED);
 }
 
 QKD_result_t QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout)

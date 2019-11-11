@@ -29,12 +29,14 @@ const char *qkd_result_str(QKD_result_t result)
             return "receive failed";
         case QKD_RESULT_GET_KEY_FAILED:
             return "get key failed";
-        case QKD_RESULT_NO_CONNECTION:
-            return "no connection";
+        case QKD_RESULT_CONNECTION_FAILED:
+            return "connection failed";
         case QKD_RESULT_OPEN_FAILED:
             return "open failed";
         case QKD_RESULT_TIMEOUT:
             return "timeout";
+        case QKD_RESULT_OUT_OF_MEMORY:
+            return "out of memory";
         case QKD_RESULT_NOT_SUPPORTED:
             return "not supported";
         default:

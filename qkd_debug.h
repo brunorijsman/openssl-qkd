@@ -49,6 +49,9 @@ do { QKD_debug("Return success " format, value); return value; } while(0)
 #define QKD_return_success_qkd() \
 do { QKD_debug("Return success"); return QKD_RESULT_SUCCESS; } while(0)
 
+#define QKD_return_success_void() \
+do { QKD_debug("Return success"); return; } while(0)
+
 #define QKD_return_error(format, value) \
 do { QKD_error("Return error " format, value); return value; } while (0)
 
