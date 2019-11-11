@@ -6,6 +6,8 @@ Participants from six geographically distributed locations (Delft, Dublin, Genev
 
 I joined in Delft where the hackathon was hosted by [QuTech](https://qutech.nl/), a world-leading quantum technology research and development office within the [Delft University of Technology](https://www.tudelft.nl/).
 
+![Pan European Quantum Hackathon Logo](figures/pan-european-quantum-internet-hackathon.png)
+
 # The OpenSSL Integration Challenge
 
 In Delft, I joined a team working on one of the challenges suggested by the organizers. It was called the [_OpenSSL Integration Challenge_](https://github.com/PEQI19/PEQI-OpenSSL) and its goal was to enhance the [OpenSSL](https://www.openssl.org/) library with support for [Quantum Key Distribution (QKD)](https://en.wikipedia.org/wiki/Quantum_key_distribution) as the key agreement protocol.
