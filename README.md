@@ -259,17 +259,39 @@ In the following screenshot we see the _TLS Server Hello_ message that the serve
 
 It contains the _Cipher Suite_ that the server has chosen.
 
-It also 
-
 ![HTTPS WireShark Server Hello](figures/https-wireshark-server-hello.png)
 
+
+#### TLS Server Certificate Status
+
+In the following screenshot we see the _TLS Certificate Status_ message that the server sends to the client.
+
+The _Server Key Exchange_ field contains the public _Elliptic Curve (EC) Diffie-Hellman Parameters_ as well as the _Public Key_ chosen by the server.
+
+![HTTPS WireShark Certificate Status](figures/https-wireshark-server-certificate-status.png)
+
+#### TLS Server Client Key Exchange
+
 In the following screenshot we see the _TLS Client Key Exchange_ message that the client sends to the server.
+
+It contains the Diffie-Hellman _Public Key_ chosen by the client.
 
 ![HTTPS WireShark Client Key Exchange](figures/https-wireshark-client-key-exchange.png)
 
 
+#### Encrypted Application Data
 
-![HTTPS WireShark Client Encrypted Application Data](figures/https-wireshark-client-encrypted-application-data.png)
+At this point both the server and the client have all the information that they need to each compute the shared secret (which never appears on the wire).
+
+From here on out, both side use the shared secret to encrypt the application traffic.
+
+First we see a message with encrypted application data from the client to the server. This actually contains the encrypted HTTP GET request (we know that, but we cannot see that in the encrypted packet).
+
+![HTTPS WireShark Client Encrypted Application Data](figures/https-wireshark-client-application-data.png)
+
+Then we see a message with encrypted data going back from the server to the client. This actually contains the encrypted HTTP GET response (we know that, but we cannot see that in the encrypted packet).
+
+![HTTPS WireShark Server Encrypted Application Data](figures/https-wireshark-server-application-data.png)
 
 # Diffie-Hellman Can Be Broken By Quantum Computers
 
