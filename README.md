@@ -294,7 +294,6 @@ Then we see a message with encrypted data going back from the server to the clie
 
 # Diffie-Hellman Can Be Broken By Quantum Computers
 
-TODO: Does this reference work?
 [Earlier in the document](#the-diffie-hellman-algorithm-details) we described in detail how two communicating end-points can use the Diffie-Hellman algorithm to agree on a shared secret in such a manner that a malicious eavesdropper cannot discover what that shared secret is.
 
 This, however, assumes that the malicious eavesdropper only has the power of classical computers at here disposal.
