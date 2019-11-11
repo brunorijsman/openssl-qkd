@@ -163,8 +163,47 @@ Now that we are clear on modular math, we can explain the Diffie-Hellman algorit
 
     **client_public_key** = (g ^ client_private_key) mod p
 
+* Each side sends its computed public_key to the other side:
 
+  * The server sends the server_public_key to the client
 
+  * The client sends the client_public_key to the server
+
+  * Note that a malicious attacker can observe this messages. Thus the malicious attacker knows the values p, g, server_public_key, and client_public_key. But the malicious attacker does not know the value server_private_key or client_private_key because those values were never sent on the wire.
+
+* Each each side receives the peer's public_key it computes a **shared_secret** value.
+
+  * The shared_secret is computed as follows:
+
+    shared_secret = (peer_public_key ^ own_private_key) mod p
+
+ * Thus:
+
+   **server_shared_secret** = (client_public_key ^ server_private_key) mod p
+
+   **client_shared_secret** = (server_public_key ^ client_private_key) mod p
+
+* It is not difficult to see that the server and the client will arrive at the same shared secret value:
+
+   server_shared_secret = 
+   
+   (client_public_key ^ server_private_key) mod p =
+
+   ( (g ^ client_private_key) mod p) ^ server_private_key) mod p =
+
+   ( (g ^ client_private_key) ^ server_private_key) mod p =
+
+   ( g ^ (client_private_key * server_private_key) ) mod p =
+
+   ( g ^ (server_private_key * client_private_key) ) mod p =
+
+   ( (g ^ server_private_key) ^ client_private_key) mod p =
+
+   ( (g ^ server_private_key) mod p) ^ client_private_key) mod p =
+
+   (server_public_key ^ client_private_key) mod p =
+
+   client_shared_secret
 
 
 # Diffie-Hellman In Action
