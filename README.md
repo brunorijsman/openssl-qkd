@@ -189,17 +189,17 @@ Now that we are clear on modular math, we can explain the Diffie-Hellman algorit
    
    (client_public_key ^ server_private_key) mod p =
 
-   ( (g ^ client_private_key) mod p) ^ server_private_key) mod p =
+   ( (g ^ client_private_key) mod p) ^ server_private_key ) mod p =
 
-   ( (g ^ client_private_key) ^ server_private_key) mod p =
+   ( (g ^ client_private_key) ^ server_private_key ) mod p =
 
    ( g ^ (client_private_key * server_private_key) ) mod p =
 
    ( g ^ (server_private_key * client_private_key) ) mod p =
 
-   ( (g ^ server_private_key) ^ client_private_key) mod p =
+   ( (g ^ server_private_key) ^ client_private_key ) mod p =
 
-   ( (g ^ server_private_key) mod p) ^ client_private_key) mod p =
+   ( (g ^ server_private_key) mod p) ^ client_private_key ) mod p =
 
    (server_public_key ^ client_private_key) mod p =
 
@@ -208,11 +208,11 @@ Now that we are clear on modular math, we can explain the Diffie-Hellman algorit
 
 # Diffie-Hellman In Action
 
-Let's have a look at the Diffie-Hellman algorithm in action in the real world. I use a browser (Chrome in this example) to visit a secure website ([https://www.google.com/](https://www.google.com/) in this example). In this scenario, the browser acts as the TLS client, and the website acts as the TLS server. I use the [WireShark](https://www.wireshark.org/) protocol analyzer to capture and analyze the TLS traffic.
+Let's have a look at the Diffie-Hellman algorithm in action in the real world. I use a browser (Chrome in this example) to visit a secure website ([https://www.google.com/](https://xkcd.com/) in this example). In this scenario, the browser acts as the TLS client, and the website acts as the TLS server. I use the [WireShark](https://www.wireshark.org/) protocol analyzer to capture and analyze the TLS traffic.
 
 The following screenshot shows the TLS traffic between my browser and the Google website (I have filtered the traffic to show only a single TLS session).
 
-
+![HTTPS WireShark Entire Session](figures/https-wireshark-entire-session.png)
 
 TODO
 
