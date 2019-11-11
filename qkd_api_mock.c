@@ -22,6 +22,9 @@
 /* TODO: Server can have more than one simultanious client */
 /* TODO: Add support for non-blocking connect */
 
+/**
+ * TCP port number used for the "mock" replacement of the QKD protocol.
+ */
 #define QKD_PORT 8080
 #define QKD_PORT_STR "8080"
 
@@ -49,18 +52,27 @@ static int listen_for_incoming_connections()
 
     /* Create the socket. */
     int sock = socket(AF_INET, SOCK_STREAM, 0);
-    QKD_fatal_with_errno_if(sock == -1, "socket failed");
+    if (sock == -1) {
+        QKD_error_with_errno("socket failed");
+        QKD_return_error("%d", -1);
+    }
 
     /* The client and server may run on the same host. In that case we want to allow both of them
     to create a listening socket for the same port. */
     int on = 1;
     int result = setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&on, sizeof(on));
-    QKD_fatal_with_errno_if(result != 0, "setsockopt SO_REUSEPORT failed");
+    if (result != 0) {
+        QKD_error_with_errno("setsockopt SO_REUSEPORT failed");
+        QKD_return_error("%d", -1);
+    }
 
     /* We want to be able to bind again while a previous socket for the same port is still in the
     lingering state. */
     result = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
-    QKD_fatal_with_errno_if(result != 0, "setsockopt SO_REUSEADDR failed");
+    if (result != 0) {
+        QKD_error_with_errno("setsockopt SO_REUSEADDR failed");
+        QKD_return_error("%d", -1);
+    }
 
     /* Bind the socket to the QKD port and the wildcard address. */
     struct sockaddr_in listen_address; 
@@ -69,14 +81,19 @@ static int listen_for_incoming_connections()
     listen_address.sin_addr.s_addr = htonl(INADDR_ANY); 
     listen_address.sin_port = htons(QKD_PORT);
     result = bind(sock, (const struct sockaddr *) &listen_address, sizeof(listen_address));
-    QKD_fatal_with_errno_if(result != 0, "bind failed");
+    if (result != 0) {
+        QKD_error_with_errno("bind failed");
+        QKD_return_error("%d", -1);
+    }
 
     /* Listen for incoming connections. */
     result = listen(sock, SOMAXCONN);
-    QKD_fatal_with_errno_if(result != 0, "listen failed");
+    if (result != 0) {
+        QKD_error_with_errno("listen failed");
+        QKD_return_error("%d", -1);
+    }
 
-    QKD_exit();
-    return sock;
+    QKD_return_success("%d", sock);
 }
 
 /** 
@@ -101,18 +118,30 @@ static int connect_to_server(char *destination)
     hints.ai_flags = AI_ADDRCONFIG;
     struct addrinfo *res = NULL;
     int result = getaddrinfo(host_str, port_str, &hints, &res);
-    QKD_fatal_with_errno_if(result != 0, "getaddrinfo failed");
+    if (result != 0) {
+        QKD_error_with_errno("getaddrinfo failed");
+        QKD_return_error("%d", -1);
+    }
 
     /* Create the socket. */
     int sock = socket(AF_INET, SOCK_STREAM, 0);
-    QKD_fatal_with_errno_if(sock == -1, "socket failed");
+    if (sock == -1) {
+        QKD_error_with_errno("socket failed");
+        freeaddrinfo(res);
+        QKD_return_error("%d", -1);
+    }
 
-    /* Create the outgoing TCP connection. */
+    /* Connect the TCP connection. */
     result = connect(sock, res->ai_addr, res->ai_addrlen);
-    QKD_fatal_with_errno_if(result != 0, "connect failed");
+    if (result != 0) {
+        QKD_error_with_errno("connect failed");
+        freeaddrinfo(res);
+        close(sock);
+        QKD_return_error("%d", -1);
+    }
 
     freeaddrinfo(res);
-    return sock;
+    QKD_return_success("%d", sock);
 }
 
 static int accept_connection_from_client()
