@@ -151,7 +151,17 @@ Now that we are clear on modular math, we can explain the Diffie-Hellman algorit
 
    * The secret keys are, as the name implies, secret: they must never be sent on the wire or otherwise publicly exposed.
 
- * Step 3: Both the 
+ * Step 3: Both the server and the client derive a **public_key** from the combination of the public parameters p and g as well as their own private_key:
+
+  * The private_key is computed as follows (where ^ means exponentation):
+
+    private_key = (g ^ public_key) mod p
+
+  * Thus:
+
+    **server_public_key** = (g ^ server_public_key) mod p
+
+    **client_public_key** = (g ^ client_public_key) mod p
 
 
 
