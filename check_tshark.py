@@ -1,5 +1,11 @@
 #!/usr/bin/python
 
+# TODO: Fix intermittent test failure:
+# Did not match pattern #1: Connection establish acknowledge \(SYN\+ACK\): server port 44330
+# Maybe the sleep is not long enough?
+
+# TODO: Use underscores instead of dashes in all script file names.
+
 """Analyze the decoded tshark capture file tshark.out to determine whether a Diffie-Hellman exchange
 was completed as expected. Exits with success (0) a correct Diffie-Hellman exchange was completed,
 or exits with failure (1) if not. """

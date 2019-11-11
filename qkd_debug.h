@@ -25,11 +25,11 @@ void _QKD_fatal_with_errno_if(const char *file, int line, const char *func, bool
 
 void _QKD_error(const char *file, int line, const char *func, const char *format, ...);
 
-#define QKD_error(format, ...) _QKD_debug(__FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
+#define QKD_error(format, ...) _QKD_error(__FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
 
 void _QKD_error_with_errno(const char *file, int line, const char *func, const char *format, ...);
 
-#define QKD_error_with_errno(format, ...) _QKD_debug(__FILE__, __LINE__, __func__, format, \
+#define QKD_error_with_errno(format, ...) _QKD_error(__FILE__, __LINE__, __func__, format, \
                                                      ##__VA_ARGS__)
 
 void _QKD_debug(const char *file, int line, const char *func, const char *format, ...);

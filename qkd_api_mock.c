@@ -362,6 +362,14 @@ QKD_result_t QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_ha
     QKD_return_success_qkd();
 }
 
+/**
+ * Mock implementation of QKD_connect_nonblock, which is defined in the ETSI QKD API specification
+ * as follows: "Verifies that the QKD link is available and the key_handle association is
+ * synchronized at both ends of the link. This function shall not block and returns immediately
+ * indicating that both sides of the link have rendezvoused or an error has occured."
+ * 
+ * Returns QKD_result_t.
+ */
 QKD_result_t QKD_connect_nonblock(const QKD_key_handle_t *key_handle)
 {
     QKD_enter();
@@ -369,9 +377,18 @@ QKD_result_t QKD_connect_nonblock(const QKD_key_handle_t *key_handle)
     QKD_return_error_qkd(QKD_RESULT_NOT_SUPPORTED);
 }
 
+/**
+ * Mock implementation of QKD_connect_blocking, which is defined in the ETSI QKD API specification
+ * as follows: "Verifies that the QKD link is available and the key_handle association is
+ * synchronized at both ends of the link. This function shall block until both sides of the link
+ * have rendezvoused, an error is detected, or the specified TIMEOUT delay has been exceeded."
+ * 
+ * Returns QKD_result_t.
+ */
 QKD_result_t QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout)
 {
     QKD_enter();
+    /* TODO: Implement the timeout */
 
     /* TODO: For now there is only one concurrent session. */
     assert(qkd_session != NULL);
@@ -384,12 +401,18 @@ QKD_result_t QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t t
         QKD_debug("Initiate TCP connection to server");
         assert(qkd_session->destination != NULL);
         connection_sock = connect_to_server(qkd_session->destination);
-        QKD_fatal_if(connection_sock == -1, "connect_to_server failed");
+        if (-1 == connection_sock) {
+            QKD_error("connect_to_server failed");
+            QKD_return_error_qkd(QKD_RESULT_CONNECTION_FAILED);
+        }
         QKD_debug("TCP connected to server");
 
         /* Send our (the client's) key handle to the server. */
         QKD_result_t qkd_result = send_key_handle(connection_sock, key_handle);
-        QKD_fatal_if(QKD_RESULT_SUCCESS != qkd_result, "send_key_handle failed");
+        if (QKD_RESULT_SUCCESS != qkd_result) {
+            QKD_error("send_key_handle failed");
+            QKD_return_error_qkd(qkd_result);
+        }
         QKD_debug("Sent key handle to server");
 
     } else {
@@ -399,13 +422,19 @@ QKD_result_t QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t t
         /* Accept an incoming TCP connection from the client. */
         QKD_debug("Accept an incoming TCP connection from the client");
         connection_sock = accept_connection_from_client();
-        QKD_fatal_with_errno_if(connection_sock == -1, "accept failed");
+        if (-1 == connection_sock) {
+            QKD_error("accept_connection_from_client failed");
+            QKD_return_error_qkd(QKD_RESULT_CONNECTION_FAILED);
+        }
         QKD_debug("TCP connected to client");
 
         /* Receive the client's key handle. */
         QKD_key_handle_t client_key_handle;
         QKD_result_t qkd_result = receive_key_handle(connection_sock, &client_key_handle);
-        QKD_fatal_if(QKD_RESULT_SUCCESS != qkd_result, "receive_key_handle failed");
+        if (QKD_RESULT_SUCCESS != qkd_result) {
+            QKD_error("receive_key_handle failed");
+            QKD_return_error_qkd(qkd_result);
+        }
         QKD_debug("Received key handle from client");
 
         /* The client's key handle must be the same as ours. This is just a sanity check does
@@ -413,17 +442,33 @@ QKD_result_t QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t t
          * in the public key of the Diffie-Hellman exchange. (Anyway this mock implementation is
          * not intended to be secure in the first place.) */ 
         bool same = QKD_key_handle_compare(&client_key_handle, key_handle) == 0;
-        QKD_fatal_if(!same, "Client's key handle is different from server's key handle");
+        assert(same);
         QKD_debug("Client's key handle is same as server's key handle");
     }
 
     /* Store connection socket in QKD session */
     qkd_session->connection_sock = connection_sock;
 
-    QKD_exit();
-    return QKD_RESULT_SUCCESS;
+    QKD_return_success_qkd();
 }
 
+/**
+ * Mock implementation of QKD_get_key, which is defined in the ETSI QKD API specification as
+ * follows: "Obtain the required amount of key material requested for this key_handle. Each call
+ * shall return the fixed amount of requested key or an error message indicating why it failed.
+ * This function may be called as often as desired, but the key manager only needs to respond at the
+ * bit rate requested through the QOS parameters, or at the best rate the system can manage. The key
+ * manager is responsible for reserving and synchronizing the keys at the two ends of the QKD link
+ * through communication with its peer. This function may be blocking (wait for the key or an error)
+ * or non-blocking and always return with the status parameter indicating success or failure,
+ * depending on the request made via the QKD_OPEN function. The TIMEOUT value for this function is
+ * specified in the QKD_OPEN() function."
+ * 
+ * The key (i.e. the shared secret) is returned in the shared_secret parameter. The caller is
+ * responsible for allocating memory for shared secret.
+ * 
+ * Returns QKD_result_t.
+ */
 QKD_result_t QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret)
 {
     QKD_enter();
@@ -471,9 +516,11 @@ QKD_result_t QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret
         /* Send the shared secret to the server. */
         QKD_result_t qkd_result = send_shared_secret(qkd_session->connection_sock, shared_secret,
                                                shared_secret_size);
-        QKD_fatal_if(QKD_RESULT_SUCCESS != qkd_result, "send_shared_secret failed");
+        if (QKD_RESULT_SUCCESS != qkd_result) {
+            QKD_error("send_shared_secret failed: %s", qkd_result_str(qkd_result));
+            QKD_return_error_qkd(qkd_result);
+        }
         QKD_debug("Sent shared secret to server");
-
 
     } else {
 
@@ -483,17 +530,28 @@ QKD_result_t QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret
         QKD_debug("Waiting for shared_secret from client");
         QKD_result_t qkd_result = receive_shared_secret(qkd_session->connection_sock, shared_secret,
                                                   shared_secret_size);
-        QKD_fatal_if(QKD_RESULT_SUCCESS != qkd_result, "receive_shared_secret failed");
+        if (QKD_RESULT_SUCCESS != qkd_result) {
+            QKD_error("receive_shared_secret failed: %s", qkd_result_str(qkd_result));
+            QKD_return_error_qkd(qkd_result);
+        }
         QKD_debug("Received shared secret from client");
         QKD_debug("Shared secret = %s", QKD_shared_secret_str(shared_secret, shared_secret_size));
 
     }
 
-    QKD_exit();
-    return QKD_RESULT_SUCCESS;
+    QKD_return_success_qkd();
 }
 
 /* TODO: Call this somewhere */
+/**
+ * Mock implementation of QKD_close, which is defined in the ETSI QKD API specification as follows:
+ * "This terminates the association established for this key_handle and no further keys will be
+ * allocated for this key_handle. Due to timing differences at the other end of the link, the peer
+ * operation will happen at some other time and any unused keys shall be held until that occurs and
+ * then discarded."
+ * 
+ * Returns QKD_result_t.
+ */
 QKD_result_t QKD_close(const QKD_key_handle_t *key_handle)
 {
     QKD_enter();
@@ -507,6 +565,5 @@ QKD_result_t QKD_close(const QKD_key_handle_t *key_handle)
     free(qkd_session);
     qkd_session = NULL;
 
-    QKD_exit();
-    return QKD_RESULT_SUCCESS;
+    QKD_return_success_qkd();
 }
