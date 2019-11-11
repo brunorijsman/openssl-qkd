@@ -214,27 +214,38 @@ Let's have a look at the Diffie-Hellman algorithm in action in the real world. I
 
 The following screenshot shows the TLS traffic between my browser and the Google website (I have filtered the traffic to show only a single TLS session).
 
-![HTTPS WireShark Entire Session](figures/https-wireshark-entire-session.png)
+In this case the client and server negotiate the use of Elliptic Curve Diffie-Hellman Ephemeral (ECDHE) whose parameters are a little bit different than the g and p of regular Diffie-Hellman, the the flow of the messages is the same.
 
-TODO
+#### Session Overview
+
+![HTTPS WireShark Entire Session](figures/https-wireshark-entire-session.png)
 
 Let's zoom in on some specific packets to see the details of the Diffie-Hellman exchange.
 
-In the following screenshot we see the _TLS Client Hello_ message that the client sends to the server. It contains @@@.
+#### TLS Client Hello
+
+In the following screenshot we see the _TLS Client Hello_ message that the client sends to the server.
+
+It contains a list of proposed _Cipher Suites_ that the client supports from which the server can choose ()
 
 ![HTTPS WireShark Client Hello](figures/https-wireshark-client-hello.png)
 
-In the following screenshot we see the _TLS Server Hello_ message that the server sends to the client. It contains @@@.
+#### TLS Server Hello
+
+
+In the following screenshot we see the _TLS Server Hello_ message that the server sends to the client.
+
+It contains the _Cipher Suite_ that the server has chosen.
+
+It also 
 
 ![HTTPS WireShark Server Hello](figures/https-wireshark-server-hello.png)
 
-In the following screenshot we see the _TLS Client Key Exchange_ message that the client sends to the server. It contains @@@.
+In the following screenshot we see the _TLS Client Key Exchange_ message that the client sends to the server.
 
 ![HTTPS WireShark Client Key Exchange](figures/https-wireshark-client-key-exchange.png)
 
-TODO
 
-At this point, the client and the server have agreed
 
 ![HTTPS WireShark Client Encrypted Application Data](figures/https-wireshark-client-encrypted-application-data.png)
 
