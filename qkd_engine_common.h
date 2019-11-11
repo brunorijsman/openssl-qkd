@@ -26,7 +26,7 @@ int QKD_engine_bind(ENGINE *engine, const char *engine_id, const char *engine_na
 
 int QKD_bignum_to_key_handle(const BIGNUM *bn, QKD_key_handle_t *key_handle);
 
-int QKD_key_handle_to_bignum(const QKD_key_handle_t *key_handle, BIGNUM *bn);
+void QKD_key_handle_to_bignum(const QKD_key_handle_t *key_handle, BIGNUM *bn);
 
 /* We can control a "fixed" key (instead of an actual QKD-negotiated key) to allow end-to-end
 testing before the interaction with the QKD-API has actually been implemented. */

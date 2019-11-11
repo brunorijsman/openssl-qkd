@@ -16,19 +16,32 @@
 #include <string.h>
 #include <openssl/engine.h>
 
+/**
+ * Callback which registered in the client OpenSSL engine to be called when OpenSSL needs the engine
+ * to generate a Diffie-Hellman private key and to derive the Diffie-Hellman public key from it.
+ * 
+ * Returns 1 on success, 0 on failure.
+ */
 static int server_generate_key(DH *dh)
 {
     QKD_enter();
 
-    /* Always use a fixed private key (it is not actually used for anything.) */    
+    /* Generate the private key. Always use a fixed private key (it is not actually used for
+     * anything.) */
     BIGNUM *private_key = BN_secure_new();
-    QKD_fatal_if(private_key == NULL, "BN_secure_new (private_key) failed");
+    if (NULL == private_key) {
+        QKD_error("BN_secure_new (private_key) failed");
+        QKD_return_error("%d", 0);
+    }
     BN_set_word(private_key, QKD_fixed_private_key);
+    QKD_debug("DH private key: %s", BN_bn2hex(private_key));
 
-    /* Choose a public key. */
+    /* Generate the public key. */
     BIGNUM *public_key = BN_secure_new();
-    QKD_fatal_if(public_key == NULL, "BN_secure_new (public_key) failed");
-
+    if (public_key == NULL) {
+        QKD_error("BN_secure_new (public_key) failed");
+        QKD_return_error("%d", 0);
+    }
     if (QKD_return_fixed_key_for_testing) {
 
         QKD_debug("Use fixed public key (for testing)");
@@ -50,28 +63,30 @@ static int server_generate_key(DH *dh)
             .timeout = 0
         };
 
-        /* TODO: Use this style for ALL multiline comments */
         /* Call QKD_open with a null key handle. This will cause a new key handle to be allocated.
          * Set destination to NULL, which means we don't care who the remote peer is (we rely on 
          * SSL authentication). */
         QKD_key_handle_t key_handle = QKD_key_handle_null;
         QKD_result_t qkd_result = QKD_open(NULL, qos, &key_handle);
-        QKD_fatal_if(QKD_RESULT_SUCCESS != qkd_result, "QKD_open failed");
+        if (QKD_RESULT_SUCCESS != qkd_result) {
+            QKD_error("QKD_open failed: %s", qkd_result_str(qkd_result));
+            QKD_return_error_qkd(qkd_result);
+        }
         QKD_debug("Allocated key handle: %s", QKD_key_handle_str(&key_handle));
 
         /* Convert allocated key handle to bignum and use it as the public key */
-        int result = QKD_key_handle_to_bignum(&key_handle, public_key);
-        QKD_fatal_if(result != 1, "QKD_key_handle_to_bignum failed");
+        QKD_key_handle_to_bignum(&key_handle, public_key);
     }
 
-    QKD_debug("DH private key: %s", BN_bn2hex(private_key));
     QKD_debug("DH public key: %s", BN_bn2hex(public_key));
 
     int result = DH_set0_key(dh, public_key, private_key);
-    QKD_fatal_if(result == 0, "DH_set0_key failed");
+    if(1 != result) {
+        QKD_error("DH_set0_key failed");
+        QKD_return_error_qkd(QKD_STATUS_OPEN_SSL_ERROR);
+    }
 
-    QKD_exit();
-    return 1;
+    QKD_return_success("%d", 1);
 }
 
 static int server_compute_key(unsigned char *shared_secret, const BIGNUM *client_public_key, DH *dh)

@@ -37,6 +37,8 @@ const char *qkd_result_str(QKD_result_t result)
             return "timeout";
         case QKD_RESULT_OUT_OF_MEMORY:
             return "out of memory";
+        case QKD_STATUS_OPEN_SSL_ERROR:
+            return "openssl error";
         case QKD_RESULT_NOT_SUPPORTED:
             return "not supported";
         default:

@@ -40,14 +40,13 @@ int QKD_bignum_to_key_handle(const BIGNUM *bn, QKD_key_handle_t *key_handle)
 
 /**
  * Convert an ETSI API key handle to an OpenSSL public key (which is stored as a big number).
- *
- * Returns 1 on success, 0 on failure.
  */
-int QKD_key_handle_to_bignum(const QKD_key_handle_t *key_handle, BIGNUM *bn)
+void QKD_key_handle_to_bignum(const QKD_key_handle_t *key_handle, BIGNUM *bn)
 {
+    QKD_enter();
     BIGNUM *result_bn = BN_bin2bn((unsigned char *) key_handle->bytes, QKD_KEY_HANDLE_SIZE, bn);
     assert(result_bn == bn);
-    return 1;
+    QKD_return_success_void();
 }
 
 int shared_secret_nr_bytes(DH *dh)

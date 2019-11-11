@@ -32,7 +32,8 @@ static int client_generate_key(DH *dh)
      * from us. The net result is that we (the client) don't need to compute a private nor a public
      * key; we just use fixed values to give *something* to DH. */
 
-    /* Generate the private key. */
+    /* Generate the private key. Always use a fixed private key (it is not actually used for
+     * anything.) */
     BIGNUM *private_key = BN_secure_new();
     if (NULL == private_key) {
         QKD_error("BN_secure_new (private_key) failed");
