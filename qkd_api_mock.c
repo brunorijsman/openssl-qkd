@@ -25,8 +25,8 @@
 /**
  * TCP port number used for the "mock" replacement of the QKD protocol.
  */
-#define QKD_PORT 8080
-#define QKD_PORT_STR "8080"
+#define QKD_PORT 8999
+#define QKD_PORT_STR "8999"
 
 static int listen_sock = -1;
 

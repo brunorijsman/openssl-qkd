@@ -54,7 +54,6 @@ static int server_generate_key(DH *dh)
         /* TODO: Also encode the local address of the listening socket into the public key */
 
         /* Use fixed QoS parameters. */
-        /* TODO: Move this to common. */
         int shared_secret_size = DH_size(dh);
         QKD_qos_t qos = {
             .requested_length = shared_secret_size,

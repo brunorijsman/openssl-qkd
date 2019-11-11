@@ -80,8 +80,9 @@ def check_tshark_out():
                 return False
 
 if __name__ == "__main__":
+    print("Checking tshark output for correct Diffie-Helman exchange... ", end="", file=sys.stderr)
     if check_tshark_out():
-        print("PASS", file=sys.stderr)
+        print("OK", file=sys.stderr)
         sys.exit(0)
     else:
         print("FAIL", file=sys.stderr)

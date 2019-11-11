@@ -17,5 +17,5 @@ sleep 1
 ./stop_server.sh
 sleep 1
 ./stop_tshark.sh
-# TODO: Kill lingering openssl process (lsof -nP -i4TCP:8080 | grep LISTEN)
+./stop_openssl.sh
 ./check_tshark.py

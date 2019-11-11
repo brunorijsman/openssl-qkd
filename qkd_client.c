@@ -111,7 +111,6 @@ static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public
         QKD_error("QKD_get_key failed (return code %d)", qkd_result);
         QKD_return_error("%d", -1);
     }
-    /* TODO: decide whether the caller or callee logs */
     QKD_debug("shared secret = %s", QKD_shared_secret_str((char *) shared_secret,
                                                            shared_secret_size));
 
