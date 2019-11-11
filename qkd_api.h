@@ -55,12 +55,15 @@ typedef struct QKD_qos_st {
     uint32_t timeout;
 } QKD_qos_t;
 
-QKD_result_t QKD_init(bool am_server);   /* Not in ETSI API document */
+/* API functions as described in the ESTI QKD API document. */
 QKD_result_t QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle);
 QKD_result_t QKD_connect_nonblock(const QKD_key_handle_t *key_handle);
 QKD_result_t QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout);
 QKD_result_t QKD_get_key(const QKD_key_handle_t *key_handle, char *key_buffer);
 QKD_result_t QKD_close(const QKD_key_handle_t *key_handle);
+
+/* Additional API functions that are not mentioned in the ESTI API document. */
+QKD_result_t QKD_init(bool am_server);
 /* TODO: Also add QKD_finish function and register it in OpenSSL using ENGINE_set_finish_function */
 
 #endif
