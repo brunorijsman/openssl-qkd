@@ -112,7 +112,7 @@ static int connect_to_server(char *destination)
     assert(destination != NULL);
 
     /* Resolve the destination to an address. */
-    /* TODO: for now, ignode the destination and just hard-code localhost */
+    /* TODO: for now, ignore the destination and just hard-code localhost */
     const char *host_str = "localhost";
     const char *port_str = QKD_PORT_STR;
     struct addrinfo hints;
