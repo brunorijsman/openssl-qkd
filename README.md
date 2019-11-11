@@ -10,7 +10,7 @@ This document describes how I ([Bruno Rijsman](https://www.linkedin.com/in/bruno
  
  * This avoids any code changes in the OpenSSL library itself, in the client (e.g. the web browser), or the server (e.g. the web server). Thus, by using an appropriate SSL configuration file, we demonstrate a standard web browser binary (e.g. Chrome) talking to a standard web server binary (e.g. Apache) doing a quantum key exchange.
 
- * The implementation described of the OpenSSL QKD engine is based on "hacking" the existing OpenSSL Diffie-Hellman extensibility mechanism. A more proper solution would be to explicitly add the concept of a QKD key exchange protocol into OpenSSL with corresponding engine hooks. This, however, would require code changes in the OpenSSL core library itself.
+ * The current implementation of the OpenSSL QKD engine is based on "hacking" the existing OpenSSL Diffie-Hellman extensibility mechanism. A more proper solution would be to explicitly add the concept of a QKD key exchange protocol into OpenSSL with corresponding engine hooks. This, however, would require code changes in the OpenSSL core library itself.
 
  * I wrote two implementations of the ETSI QKD API:
 
