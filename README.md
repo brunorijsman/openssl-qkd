@@ -2,11 +2,11 @@
 
 On 5 and 6 November 2019 I ([Bruno Rijsman](https://www.linkedin.com/in/brunorijsman/)) took part in the [Pan-European Quantum Internet Hackathon](https://labs.ripe.net/Members/ulka_athale_1/take-part-in-pan-european-quantum-internet-hackathon) that was orgnaized by the [RIPE labs](https://labs.ripe.net/).
 
+![Pan European Quantum Hackathon Logo](figures/pan-european-quantum-internet-hackathon.png)
+
 Participants from six geographically distributed locations (Delft, Dublin, Geneva, Padua, Paris, and Sarajevo) formed teams and worked on various projects related to the [Quantum Internet](https://qutech.nl/wp-content/uploads/2018/10/Quantum-internet-A-vision.pdf).
 
 I joined in Delft where the hackathon was hosted by [QuTech](https://qutech.nl/), a world-leading quantum technology research and development office within the [Delft University of Technology](https://www.tudelft.nl/).
-
-![Pan European Quantum Hackathon Logo](figures/pan-european-quantum-internet-hackathon.png)
 
 # The OpenSSL Integration Challenge
 
@@ -15,6 +15,8 @@ In Delft, I joined a team working on one of the challenges suggested by the orga
 The open source OpenSSL library is widely used to provide security on the Internet. One of the main functions of the OpenSSL library is to implement the [Transport Layer Security (TLS)](https://en.wikipedia.org/wiki/Transport_Layer_Security) protocol, which forms the basis for the [Secure Hypertext Transfer Protocol (HTTPS)](https://en.wikipedia.org/wiki/HTTPS), which in turn enables secure and private browsing on the Internet.
 
 The name OpenSSL comes from the Secure Sockets Layer (SSL) protocol, a now outdated predecessor for the TLS protocol.
+
+![OpenSSL Logo](figures/openssl-logo.png)
 
 The TLS protocol performs multiple functions, including:
 
@@ -70,7 +72,7 @@ The amazing thing is that this statement ("the shared secret is only know to the
 
 When I first read about this it blew my mind. Think about it: two random strangers can meet for the first time. They talk a little bit, and at the end of the conversation they both agree on some secret number. I am standing right next to them, and I can hear everything they are saying, but I cannot figure out what the secret number is. And these are random strangers who have never met before and how don't know anything about each other (so they can't say "the secret number is my birth year" for example). How is that even possible?
 
-One widely used algorithm for dynamically agreeing on a shared secret is called the [Diffie-Hellman (DH) algorithm](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange). The mathematical details of how it works are surprisingly simple, but still beyond the scope of this blog.
+One widely used algorithm for dynamically agreeing on a shared secret is called the [Diffie-Hellman (DH) algorithm](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange). The mathematical details of how it works are surprisingly simple (see below for details).
 
 There are actually a number of variations on the Diffie-Hellman algorithm:
 
@@ -79,6 +81,111 @@ There are actually a number of variations on the Diffie-Hellman algorithm:
  * Both DH and ECDH have a so-called _ephemeral_ variation (DHE and ECDHE) that uses different shared secret (as opposed to a secret but fixed one) for each communication session. This provides [Perfect Forward Secrecy (PFS)](https://en.wikipedia.org/wiki/Forward_secrecy): if the shared secret is ever compromised, only the one communication session that used that key can be decoded, and not any future communication sessions.
 
 When your browser connects to a secure website, in most cases some variation of Diffie-Hellman (usually ECDHE) is used to implement key agreement. And in many cases, the OpenSSL library is used to implement Diffie-Hellman.
+
+
+# The Diffie-Hellman Algorithm Details
+
+The basic Diffie-Hellman algorthm (as opposed to the eliptic curve Diffie-Hellman algorithm) works as follows.
+
+First you have to understand the concept of modular arithmetic. In _modulo N_ math, there is only a finite set of numbers from zero to N-1. When you add one number to another number, and the result is greater or equal to N, then the result "rolls over".
+
+For example, in _modulo 7_ there are only 7 numbers, namely 0 through 6:
+
+<pre>
+    +---+---+---+---+---+---+---+
+    | 0 | 1 | 2 | 3 | 4 | 5 | 6 |
+    +---+---+---+---+---+---+---+
+</pre>
+
+If you start with the number 3 and you add 2, the result is 5:
+
+<pre>
+                    +1  +2
+                   +-+ +-+
+                   | | | |  
+                   | v | v 
+    +---+---+---+---+---+---+---+
+    | 0 | 1 | 2 | 3 | 4 | 5 | 6 |
+    +---+---+---+---+---+---+---+
+
+    (3 + 2) mod 7 = 5
+</pre>
+
+But if you start with the number 3 and you add 5, the result is 1 (we "rolled over"):
+
+<pre>
+    +4  +5          +1  +2  +3    
+ +---+ +-+         +-+ +-+ +-+ +---+
+ |   | | |         | | | | | | |   |
+ |   v | v         | v | v | v |   |
+ |  +---+---+---+---+---+---+---+  |
+ |  | 0 | 1 | 2 | 3 | 4 | 5 | 6 |  |
+ |  +---+---+---+---+---+---+---+  |
+ |                                 |
+ +---------------------------------+
+
+    (3 + 5) mod 7 = 1
+</pre>
+
+Once we have defined modular addition, it is straightforward to define modular subtraction (the inverse of addition), multiplication (repeated addition), division (the inverse of multiplication), etc. 
+
+Now that we are clear on modular math, we can explain the Diffie-Hellman algorithm:
+
+ * Step 1: The server and the client agree a-priori on two numbers:
+
+   * A large prime number **p**.
+
+   * A generator number **g** where 1 <= g <= p.
+
+   * There are some additional technical requirements on the values of p and g that we won't discuss in detail for the sake of simplicity.
+
+   * The numbers p and g are public, i.e. they do not need to be secret. In fact, good values for p and g that meet all the technical requirements are published in standard documents such as [RFC3526](https://www.ietf.org/rfc/rfc3526.txt).
+
+   * The TLS protocol includes steps to negotiate which variation of Diffie-Hellman is being used (DH, ECDH, DHE, ECDHE) and what set of parameters (p and g in the case of DH) are being used.
+
+ * Step 2: The server and client each pick a different **secret_key**:
+
+   * The secret_key must be in the range 1 <= secret_key < p
+
+   * Let's call the secret key chosen by the server **server_secret_key** and the secret key chosen by the client **client_secret_key**.
+
+   * The secret keys are, as the name implies, secret: they must never be sent on the wire or otherwise publicly exposed.
+
+ * Step 3: Both the 
+
+
+
+
+
+# Diffie-Hellman In Action
+
+Let's have a look at the Diffie-Hellman algorithm in action in the real world. I use a browser (Chrome in this example) to visit a secure website ([https://www.google.com/](https://www.google.com/) in this example). In this scenario, the browser acts as the TLS client, and the website acts as the TLS server. I use the [WireShark](https://www.wireshark.org/) protocol analyzer to capture and analyze the TLS traffic.
+
+The following screenshot shows the TLS traffic between my browser and the Google website (I have filtered the traffic to show only a single TLS session).
+
+
+
+TODO
+
+Let's zoom in on some specific packets to see the details of the Diffie-Hellman exchange.
+
+In the following screenshot we see the _TLS Client Hello_ message that the client sends to the server. It contains @@@.
+
+TODO
+
+In the following screenshot we see the _TLS Server Hello_ message that the server sends to the client. It contains @@@.
+
+TODO
+
+In the following screenshot we see the _TLS Client Key Exchange_ message that the client sends to the server. It contains @@@.
+
+TODO
+
+At this point, the client and the server have agreed
+
+
+
+
 
 # Diffie-Hellman Can Be Broken By Quantum Computers
 
