@@ -14,6 +14,35 @@
 #include <strings.h> 
 
 /**
+ * Convert a QKD result code to a human readable string.
+ * 
+ * Returns the humand readable string.
+ */
+const char *qkd_result_str(QKD_result_t result)
+{
+    switch (result) {
+        case QKD_RESULT_SUCCESS:
+            return "success";
+        case QKD_RESULT_SEND_FAILED:
+            return "send failed";
+        case QKD_RESULT_RECEIVE_FAILED:
+            return "receive failed";
+        case QKD_RESULT_GET_KEY_FAILED:
+            return "get key failed";
+        case QKD_RESULT_NO_CONNECTION:
+            return "no connection";
+        case QKD_RESULT_OPEN_FAILED:
+            return "open failed";
+        case QKD_RESULT_TIMEOUT:
+            return "timeout";
+        case QKD_RESULT_NOT_SUPPORTED:
+            return "not supported";
+        default:
+            assert(false);
+    }
+}
+
+/**
  * Convert a shared secret to a human readable string.
  * 
  * Returns a pointer to the human readable string on success, NULL on failure (memory allocation

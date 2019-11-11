@@ -90,15 +90,15 @@ static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public
     };
 
     /* TODO: Extract the destination from the handle. For now, hard-code localhost. */
-    QKD_RC qkd_result = QKD_open("localhost", qos, &key_handle);
-    if (QKD_RC_SUCCESS != qkd_result) {
+    QKD_result_t qkd_result = QKD_open("localhost", qos, &key_handle);
+    if (QKD_RESULT_SUCCESS != qkd_result) {
         QKD_error("QKD_open failed (return code %d)", qkd_result);
         QKD_return_error("%d", -1);
     }
 
     /* Connect to the QKD peer. */
     qkd_result = QKD_connect_blocking(&key_handle, 0);   /* TODO: right value for timeout? */
-    if (QKD_RC_SUCCESS != qkd_result) {
+    if (QKD_RESULT_SUCCESS != qkd_result) {
         QKD_error("QKD_connect_blocking failed (return code %d)", qkd_result);
         QKD_return_error("%d", -1);
     }
@@ -106,7 +106,7 @@ static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public
     /* Get the QKD-generated shared secret. Note that the ETSI API wants the key to be signed chars,
      * but OpenSSL wants it to be unsigned chars. */
     qkd_result = QKD_get_key(&key_handle, (char *) shared_secret);
-    if (QKD_RC_SUCCESS != qkd_result) {
+    if (QKD_RESULT_SUCCESS != qkd_result) {
         QKD_error("QKD_get_key failed (return code %d)", qkd_result);
         QKD_return_error("%d", -1);
     }
@@ -116,7 +116,7 @@ static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public
 
     /* Close the QKD session. */
     qkd_result = QKD_close(&key_handle);
-    if (QKD_RC_SUCCESS != qkd_result) {
+    if (QKD_RESULT_SUCCESS != qkd_result) {
         QKD_error("QKD_close failed (return code %d)", qkd_result);
         QKD_return_error("%d", -1);
     }

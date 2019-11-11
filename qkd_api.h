@@ -20,14 +20,19 @@
 #include <stdlib.h>
 
 /* TODO: Make sure all of these are used */
+/* TODO: Function to convert to string */
 typedef enum {
-    QKD_RC_SUCCESS = 0,
-    QKD_RC_GET_KEY_FAILED,
-    QKD_RC_NO_CONNECTION,
-    QKD_RC_OPEN_FAILED,
-    QKD_RC_TIMEOUT,
-    QKD_RC_NOT_SUPPORTED,
-} QKD_RC;
+    QKD_RESULT_SUCCESS = 0,
+    QKD_RESULT_SEND_FAILED,
+    QKD_RESULT_RECEIVE_FAILED,
+    QKD_RESULT_GET_KEY_FAILED,
+    QKD_RESULT_NO_CONNECTION,
+    QKD_RESULT_OPEN_FAILED,
+    QKD_RESULT_TIMEOUT,
+    QKD_RESULT_NOT_SUPPORTED
+} QKD_result_t;
+
+const char *qkd_result_str(QKD_result_t result);
 
 #define QKD_KEY_HANDLE_SIZE 64
 
@@ -53,12 +58,12 @@ typedef struct QKD_qos_st {
     uint32_t timeout;
 } QKD_qos_t;
 
-QKD_RC QKD_init(void);   /* Not in ETSI API document */
-QKD_RC QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle);
-QKD_RC QKD_connect_nonblock(const QKD_key_handle_t *key_handle);
-QKD_RC QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout);
-QKD_RC QKD_get_key(const QKD_key_handle_t *key_handle, char *key_buffer);
-QKD_RC QKD_close(const QKD_key_handle_t *key_handle);
+QKD_result_t QKD_init(void);   /* Not in ETSI API document */
+QKD_result_t QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle);
+QKD_result_t QKD_connect_nonblock(const QKD_key_handle_t *key_handle);
+QKD_result_t QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout);
+QKD_result_t QKD_get_key(const QKD_key_handle_t *key_handle, char *key_buffer);
+QKD_result_t QKD_close(const QKD_key_handle_t *key_handle);
 /* TODO: Also add QKD_finish function and register it in OpenSSL using ENGINE_set_finish_function */
 
 #endif

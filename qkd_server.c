@@ -55,8 +55,8 @@ static int server_generate_key(DH *dh)
          * Set destination to NULL, which means we don't care who the remote peer is (we rely on 
          * SSL authentication). */
         QKD_key_handle_t key_handle = QKD_key_handle_null;
-        QKD_RC qkd_result = QKD_open(NULL, qos, &key_handle);
-        QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_open failed");
+        QKD_result_t qkd_result = QKD_open(NULL, qos, &key_handle);
+        QKD_fatal_if(QKD_RESULT_SUCCESS != qkd_result, "QKD_open failed");
         QKD_debug("Allocated key handle: %s", QKD_key_handle_str(&key_handle));
 
         /* Convert allocated key handle to bignum and use it as the public key */
@@ -92,20 +92,20 @@ static int server_compute_key(unsigned char *shared_secret, const BIGNUM *client
      * already received the TLS Server Hello message, which contains the key handle in the
      * Diffie-Hellman public key. The client needs the key handle to be able to complete the
      * connection. */
-    QKD_RC qkd_result = QKD_connect_blocking(&key_handle, 0);   /* TODO: right value for timeout? */
-    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_connect_blocking failed");
+    QKD_result_t qkd_result = QKD_connect_blocking(&key_handle, 0);   /* TODO: right value for timeout? */
+    QKD_fatal_if(QKD_RESULT_SUCCESS != qkd_result, "QKD_connect_blocking failed");
 
     /* Get the shared key from the QKD provider. Note that the ETSI API wants the key to be signed
      * chars, but OpenSSL wants it to be unsigned chars. */
     qkd_result = QKD_get_key(&key_handle, (char *) shared_secret);
-    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_get_key failed");
+    QKD_fatal_if(QKD_RESULT_SUCCESS != qkd_result, "QKD_get_key failed");
     int shared_secret_size = DH_size(dh);
     QKD_debug("shared secret = %s", QKD_shared_secret_str((char *)shared_secret,
                                                            shared_secret_size));
 
     /* Close the QKD session. */
     qkd_result = QKD_close(&key_handle);
-    QKD_fatal_if(QKD_RC_SUCCESS != qkd_result, "QKD_close failed");
+    QKD_fatal_if(QKD_RESULT_SUCCESS != qkd_result, "QKD_close failed");
 
     QKD_exit();
     return shared_secret_size;
@@ -114,8 +114,8 @@ static int server_compute_key(unsigned char *shared_secret, const BIGNUM *client
 static int server_engine_init(ENGINE *engine)
 {
     QKD_enter();
-    QKD_RC result = QKD_init();
-    QKD_fatal_if(result != QKD_RC_SUCCESS, "QKD_init failed");
+    QKD_result_t result = QKD_init();
+    QKD_fatal_if(result != QKD_RESULT_SUCCESS, "QKD_init failed");
     QKD_exit();
     return 1;
 }

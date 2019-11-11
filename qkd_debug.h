@@ -46,7 +46,13 @@ void _QKD_debug(const char *file, int line, const char *func, const char *format
 #define QKD_return_success(format, value) \
 do { QKD_debug("Return success " format, value); return value; } while(0)
 
+#define QKD_return_success_qkd() \
+do { QKD_debug("Return success"); return QKD_RESULT_SUCCESS; } while(0)
+
 #define QKD_return_error(format, value) \
 do { QKD_error("Return error " format, value); return value; } while (0)
+
+#define QKD_return_error_qkd(qkd_result) \
+do { QKD_error("Return error %s", qkd_result_str(qkd_result)); return qkd_result; } while (0)
 
 #endif /* QKD_DEBUG_H */
