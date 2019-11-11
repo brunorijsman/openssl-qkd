@@ -545,7 +545,6 @@ QKD_result_t QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret
     QKD_return_success_qkd();
 }
 
-/* TODO: Call this somewhere */
 /**
  * Mock implementation of QKD_close, which is defined in the ETSI QKD API specification as follows:
  * "This terminates the association established for this key_handle and no further keys will be
