@@ -14,32 +14,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* TODO: format instead of msg everwhere */
-
 /* TODO: Turn debug on or off using environment variable */
 static bool debug = true;
 
 static void print_location(const char *file, int line, const char *func)
 {
     fprintf(stderr, "[%s:%d (%s)] ", file, line, func);
-}
-
-void _QKD_fatal_if(const char *file, int line, const char *func, bool is_error, const char *msg) 
-{
-    if (is_error) {
-        print_location(file, line, func);
-        fprintf(stderr, "%s\n", msg);
-        exit(1);
-    }
-}
-
-void _QKD_fatal_with_errno_if(const char *file, int line, const char *func, bool is_error,
-                              const char *msg) 
-{
-    if (is_error) {
-        fprintf(stderr, "%s: %s\n", msg, strerror(errno));
-        exit(1);
-    }
 }
 
 void _QKD_error(const char *file, int line, const char *func, const char *format, ...) 
