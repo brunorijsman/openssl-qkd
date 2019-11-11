@@ -1,6 +1,27 @@
+# Summary
+
+This document describes how I ([Bruno Rijsman](https://www.linkedin.com/in/brunorijsman/)) enhanced OpenSSL to use Quantum Key Distribution as follows.
+
+ * I added support for Quantum Key Distribution (QKD) as a Key Exchange protocol to OpenSSL.
+
+ * I used the Quantum Key Distribution (QKD) Application Programming Interface (API) standardized by the European Telecommunications Standards Institute (ETSI) in document [ETSI GS QKD 004 v1.1.1 (2010-12)](https://www.etsi.org/deliver/etsi_gs/QKD/001_099/004/01.01.01_60/gs_qkd004v010101p.pdf) to communicate with the quantum key management system.
+
+ * I wrote an OpenSSL QKD engine in C that is dynamically loaded to dynamically add support for QKD as a key exchange protocol.
+ 
+ * This avoids any code changes in the OpenSSL library itself, in the client (e.g. the web browser), or the server (e.g. the web server). Thus, by using an appropriate SSL configuration file, we demonstrate a standard web browser binary (e.g. Chrome) talking to a standard web server binary (e.g. Apache) doing a quantum key exchange.
+
+ * The implementation described of the OpenSSL QKD engine is based on "abusing" the existing OpenSSL Diffie-Hellman extensibility mechanism. A more proper solution would be to explicitly add the concept of a QKD key exchange protocol into OpenSSL with corresponding engine hooks. This, however, would require code changes in the OpenSSL core library itself.
+
+ * I wrote two implementations of the ETSI QKD API:
+
+   1. A mock implementation that simulates the behavior of a real quantum key management system for testing purposes. (This mock was based on a simpler implementation provided by QuTech.)
+
+   2. TODO A simulation of the BB84 Quantum Key Distributed algorithm, implemented on top of the SimulaQron quantum network simulator. The SimulaQron simulator is open sourced by QuTech, and the simulation code is based on TODO.
+
+
 # The Pan-European Quantum Internet Hackathon
 
-On 5 and 6 November 2019 I ([Bruno Rijsman](https://www.linkedin.com/in/brunorijsman/)) took part in the [Pan-European Quantum Internet Hackathon](https://labs.ripe.net/Members/ulka_athale_1/take-part-in-pan-european-quantum-internet-hackathon) that was orgnaized by the [RIPE labs](https://labs.ripe.net/).
+On 5 and 6 November 2019 I took part in the [Pan-European Quantum Internet Hackathon](https://labs.ripe.net/Members/ulka_athale_1/take-part-in-pan-european-quantum-internet-hackathon) that was orgnaized by the [RIPE labs](https://labs.ripe.net/).
 
 ![Pan European Quantum Hackathon Logo](figures/pan-european-quantum-internet-hackathon.png)
 
@@ -216,6 +237,8 @@ The following screenshot shows the TLS traffic between my browser and the Google
 
 In this case the client and server negotiate the use of Elliptic Curve Diffie-Hellman Ephemeral (ECDHE) whose parameters are a little bit different than the g and p of regular Diffie-Hellman, the the flow of the messages is the same.
 
+We only show a subset of the exchanged TLS messages, namely the ones that illustrate how the Diffie-Hellman exhange works.
+
 #### Session Overview
 
 ![HTTPS WireShark Entire Session](figures/https-wireshark-entire-session.png)
@@ -226,12 +249,11 @@ Let's zoom in on some specific packets to see the details of the Diffie-Hellman 
 
 In the following screenshot we see the _TLS Client Hello_ message that the client sends to the server.
 
-It contains a list of proposed _Cipher Suites_ that the client supports from which the server can choose ()
+It contains a list, sorted in order of preference, of proposed _Cipher Suites_ that the client supports from which the server can choose. Each cipher suite proposed, amongst other things, a specific key exchange protocol such as for example Elliptic Curve Diffie Hellman-Ephemeral (ECDHE).
 
 ![HTTPS WireShark Client Hello](figures/https-wireshark-client-hello.png)
 
 #### TLS Server Hello
-
 
 In the following screenshot we see the _TLS Server Hello_ message that the server sends to the client.
 
