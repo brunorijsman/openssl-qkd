@@ -312,7 +312,7 @@ Thus, at least in theory, the very foundations of security in computer networks 
 
 In practical reality, the Internet is still safe for now. No real quantum computer has ever been built that is sufficiently large and reliable to be able to really execute Shor's algorithm for real-life problems (i.e. for values of g and p that are used in real networks). It it is expected to take many more years before such a quantum computer comes into existence.
 
-On the other hand, come messages that are encrypted today are so sensitive that it is not acceptable that they will become decryptable even years in the future. (And if you put on your tin-foil hat, you could observe that if some secret service already possessed such a quantum computer, they would most certainly not make that information public.)
+On the other hand, some messages that are encrypted today are so sensitive that it is not acceptable that they will become decryptable even years in the future. (And if you put on your tin-foil hat, you could observe that if some secret service already possessed such a quantum computer, they would most certainly not make that information public.)
 
 
 # Two Approaches To Fixing Key Agreement In The Post-Quantum Era
