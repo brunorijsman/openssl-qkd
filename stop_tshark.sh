@@ -1,8 +1,8 @@
 #! /bin/bash
 #
-# stop-tshark.sh
+# stop_tshark.sh
 #
-# Stop tshark (WireShark for the Terminal) which was started using script start-tshark.sh.
+# Stop tshark (WireShark for the Terminal) which was started using script start_tshark.sh.
 # 
 # (c) 2019 Bruno Rijsman, All Rights Reserved.
 # See LICENSE for licensing information.

@@ -1,9 +1,9 @@
 #! /bin/bash
 #
-# stop-server.sh
+# stop_server.sh
 #
 # A bash script for stopping the OpenSSL demonstration web server that was started using script
-# start-server.sh.
+# start_server.sh.
 # 
 # (c) 2019 Bruno Rijsman, All Rights Reserved.
 # See LICENSE for licensing information.

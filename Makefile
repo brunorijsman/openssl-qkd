@@ -59,21 +59,20 @@ $(ENGINE_DIR)/$(SERVER): $(SERVER)
 	ln -sf ${CURDIR}/$(SERVER) $(ENGINE_DIR)/$(SERVER)
 
 test: all
-	./stop-server.sh
-	./start-tshark.sh
+	./stop_server.sh
+	./start_tshark.sh
 	sleep 2
-	./start-server.sh
-	./run-client.sh
+	./start_server.sh
+	./run_client.sh
 	sleep 1
-	./stop-server.sh
+	./stop_server.sh
 	sleep 1
-	./stop-tshark.sh
+	./stop_tshark.sh
 # TODO: Kill lingering openssl process (lsof -nP -i4TCP:8080 | grep LISTEN)
 	./check_tshark.py
 
 clean: clean-test
-	# TODO: Use run-test (run-mock-test run-simulaqron-test) script
-	# TODO: Add pass/fail to test, based on observing encrypted user data in tshark decode
+	# TODO: Use run_test (run_mock_test run_simulaqron_test) script
 	rm -f $(CLIENT) $(SERVER)
 	rm -rf $(ENGINE_DIR)/$(CLIENT) $(ENGINE_DIR)/$(SERVER)
 	rm -f key.pem cert.pem
@@ -83,8 +82,8 @@ clean: clean-test
 	rm -rf *.dSYM
 
 clean-test:
-	./stop-server.sh
-	./stop-tshark.sh
+	./stop_server.sh
+	./stop_tshark.sh
 	rm -f *.out
 	rm -f *.pid
 	rm -f *.pcap

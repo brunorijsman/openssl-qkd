@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# start-tshark.sh
+# start_tshark.sh
 #
 # Start tshark (WireShark for the Terminal) running in the background and capture TLS traffic
 # on port 44330 into a text file (tshark.out) and into a pcap file (tshark.pcap) that can be viewed
