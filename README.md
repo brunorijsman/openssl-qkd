@@ -155,13 +155,13 @@ Now that we are clear on modular math, we can explain the Diffie-Hellman algorit
 
   * The private_key is computed as follows (where ^ means exponentation):
 
-    private_key = (g ^ public_key) mod p
+    public_key = (g ^ private_key) mod p
 
   * Thus:
 
-    **server_public_key** = (g ^ server_public_key) mod p
+    **server_public_key** = (g ^ server_private_key) mod p
 
-    **client_public_key** = (g ^ client_public_key) mod p
+    **client_public_key** = (g ^ client_private_key) mod p
 
 
 
