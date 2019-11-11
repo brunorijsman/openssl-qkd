@@ -307,13 +307,15 @@ void qkd_session_delete(QKD_SESSION *session)
  * 
  * Returns QKD_result_t.
  */
-QKD_result_t QKD_init(void)
+QKD_result_t QKD_init(bool am_server)
 {
     QKD_enter();
-    listen_sock = listen_for_incoming_connections();
-    if (-1 == listen_sock) {
-        QKD_error_with_errno("listen failed");
-        QKD_return_error_qkd(QKD_RESULT_CONNECTION_FAILED);
+    if (am_server) {
+        listen_sock = listen_for_incoming_connections();
+        if (-1 == listen_sock) {
+            QKD_error_with_errno("listen failed");
+            QKD_return_error_qkd(QKD_RESULT_CONNECTION_FAILED);
+        }
     }
     QKD_return_success_qkd();
 }
@@ -517,7 +519,7 @@ QKD_result_t QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret
         QKD_result_t qkd_result = send_shared_secret(qkd_session->connection_sock, shared_secret,
                                                shared_secret_size);
         if (QKD_RESULT_SUCCESS != qkd_result) {
-            QKD_error("send_shared_secret failed: %s", qkd_result_str(qkd_result));
+            QKD_error("send_shared_secret failed: %s", QKD_result_str(qkd_result));
             QKD_return_error_qkd(qkd_result);
         }
         QKD_debug("Sent shared secret to server");
@@ -531,7 +533,7 @@ QKD_result_t QKD_get_key(const QKD_key_handle_t *key_handle, char* shared_secret
         QKD_result_t qkd_result = receive_shared_secret(qkd_session->connection_sock, shared_secret,
                                                   shared_secret_size);
         if (QKD_RESULT_SUCCESS != qkd_result) {
-            QKD_error("receive_shared_secret failed: %s", qkd_result_str(qkd_result));
+            QKD_error("receive_shared_secret failed: %s", QKD_result_str(qkd_result));
             QKD_return_error_qkd(qkd_result);
         }
         QKD_debug("Received shared secret from client");

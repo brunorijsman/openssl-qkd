@@ -56,6 +56,6 @@ do { QKD_debug("Return success"); return; } while(0)
 do { QKD_error("Return error " format, value); return value; } while (0)
 
 #define QKD_return_error_qkd(qkd_result) \
-do { QKD_error("Return error %s", qkd_result_str(qkd_result)); return qkd_result; } while (0)
+do { QKD_error("Return error %s", QKD_result_str(qkd_result)); return qkd_result; } while (0)
 
 #endif /* QKD_DEBUG_H */

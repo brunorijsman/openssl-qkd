@@ -34,7 +34,7 @@ typedef enum {
     QKD_RESULT_NOT_SUPPORTED
 } QKD_result_t;
 
-const char *qkd_result_str(QKD_result_t result);
+const char *QKD_result_str(QKD_result_t result);
 
 #define QKD_KEY_HANDLE_SIZE 64
 
@@ -60,7 +60,7 @@ typedef struct QKD_qos_st {
     uint32_t timeout;
 } QKD_qos_t;
 
-QKD_result_t QKD_init(void);   /* Not in ETSI API document */
+QKD_result_t QKD_init(bool am_server);   /* Not in ETSI API document */
 QKD_result_t QKD_open(char *destination, QKD_qos_t qos, QKD_key_handle_t *key_handle);
 QKD_result_t QKD_connect_nonblock(const QKD_key_handle_t *key_handle);
 QKD_result_t QKD_connect_blocking(const QKD_key_handle_t *key_handle, uint32_t timeout);

@@ -18,7 +18,7 @@
  * 
  * Returns the humand readable string.
  */
-const char *qkd_result_str(QKD_result_t result)
+const char *QKD_result_str(QKD_result_t result)
 {
     switch (result) {
         case QKD_RESULT_SUCCESS:

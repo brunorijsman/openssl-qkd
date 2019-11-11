@@ -133,6 +133,11 @@ static int client_compute_key(unsigned char *shared_secret, const BIGNUM *public
 static int client_engine_init(ENGINE *engine)
 {
     QKD_enter();
+    QKD_result_t qkd_result = QKD_init(false);
+    if (QKD_RESULT_SUCCESS != qkd_result) {
+        QKD_error("QKD_init failed: ", QKD_result_str(qkd_result));
+        QKD_return_error("%d", -1);
+    }
     QKD_return_success("%d", 1);
 }
 
