@@ -296,7 +296,7 @@ Then we see a message with encrypted data going back from the server to the clie
 
 [Earlier in the document](#the-diffie-hellman-algorithm-details) we described in detail how two communicating end-points can use the Diffie-Hellman algorithm to agree on a shared secret in such a manner that a malicious eavesdropper cannot discover what that shared secret is.
 
-This, however, assumes that the malicious eavesdropper only has the power of classical computers at here disposal.
+This, however, assumes that the malicious eavesdropper only has the power of classical computers at her disposal.
 
 We know that it is easy for classical computers to compute `public_key` when given `g`, `p`, and `private_key`:
 
