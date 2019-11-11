@@ -58,21 +58,12 @@ $(ENGINE_DIR)/$(SERVER): $(SERVER)
 	mkdir -p $(ENGINE_DIR)
 	ln -sf ${CURDIR}/$(SERVER) $(ENGINE_DIR)/$(SERVER)
 
-test: all
-	./stop_server.sh
-	./start_tshark.sh
-	sleep 2
-	./start_server.sh
-	./run_client.sh
-	sleep 1
-	./stop_server.sh
-	sleep 1
-	./stop_tshark.sh
-# TODO: Kill lingering openssl process (lsof -nP -i4TCP:8080 | grep LISTEN)
-	./check_tshark.py
+mock-test:
+	./run_mock_test.sh
+
+test: all mock-test
 
 clean: clean-test
-	# TODO: Use run_test (run_mock_test run_simulaqron_test) script
 	rm -f $(CLIENT) $(SERVER)
 	rm -rf $(ENGINE_DIR)/$(CLIENT) $(ENGINE_DIR)/$(SERVER)
 	rm -f key.pem cert.pem
@@ -88,4 +79,4 @@ clean-test:
 	rm -f *.pid
 	rm -f *.pcap
 
-.PHONY: all keys test clean clean-test
+.PHONY: all keys test mock-test clean clean-test
