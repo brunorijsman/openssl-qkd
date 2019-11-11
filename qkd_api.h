@@ -19,15 +19,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-/* TODO: Make sure all of these are used */
 typedef enum {
     QKD_RESULT_SUCCESS = 0,
     QKD_RESULT_SEND_FAILED,
     QKD_RESULT_RECEIVE_FAILED,
-    QKD_RESULT_GET_KEY_FAILED,
     QKD_RESULT_CONNECTION_FAILED,
-    QKD_RESULT_OPEN_FAILED,
-    QKD_RESULT_TIMEOUT,
     QKD_RESULT_OUT_OF_MEMORY,
     QKD_STATUS_OPEN_SSL_ERROR,
     QKD_RESULT_NOT_SUPPORTED

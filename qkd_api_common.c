@@ -27,14 +27,8 @@ const char *QKD_result_str(QKD_result_t result)
             return "send failed";
         case QKD_RESULT_RECEIVE_FAILED:
             return "receive failed";
-        case QKD_RESULT_GET_KEY_FAILED:
-            return "get key failed";
         case QKD_RESULT_CONNECTION_FAILED:
             return "connection failed";
-        case QKD_RESULT_OPEN_FAILED:
-            return "open failed";
-        case QKD_RESULT_TIMEOUT:
-            return "timeout";
         case QKD_RESULT_OUT_OF_MEMORY:
             return "out of memory";
         case QKD_STATUS_OPEN_SSL_ERROR:
