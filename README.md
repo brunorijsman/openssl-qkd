@@ -205,10 +205,12 @@ Now that we are clear on modular math, we can explain the Diffie-Hellman algorit
 
    client_shared_secret
 
+ * Now that the client and the server have agreed on a shared_secret, this value is used as the symmetric key to encrypt the rest of the conversation.
+
 
 # Diffie-Hellman In Action
 
-Let's have a look at the Diffie-Hellman algorithm in action in the real world. I use a browser (Chrome in this example) to visit a secure website ([https://www.google.com/](https://xkcd.com/) in this example). In this scenario, the browser acts as the TLS client, and the website acts as the TLS server. I use the [WireShark](https://www.wireshark.org/) protocol analyzer to capture and analyze the TLS traffic.
+Let's have a look at the Diffie-Hellman algorithm in action in the real world. I use a browser (Safari in this example) to visit a secure website ([https://www.google.com/](https://xkcd.com/) in this example). In this scenario, the browser acts as the TLS client, and the website acts as the TLS server. I use the [WireShark](https://www.wireshark.org/) protocol analyzer to capture and analyze the TLS traffic.
 
 The following screenshot shows the TLS traffic between my browser and the Google website (I have filtered the traffic to show only a single TLS session).
 
@@ -235,9 +237,6 @@ TODO
 At this point, the client and the server have agreed
 
 ![HTTPS WireShark Client Encrypted Application Data](figures/https-wireshark-client-encrypted-application-data.png)
-
-
-
 
 # Diffie-Hellman Can Be Broken By Quantum Computers
 
@@ -272,7 +271,11 @@ TODO
 
 TODO
 
-# Our OpenSSL Engine For QKD On Top Of The ETSI QKD API
+# The Code For The OpenSSL Engine For QKD On Top Of The ETSI QKD API
+
+TODO
+
+# Running The OpenSSL Engine For QKD On Top Of The ETSI QKD API
 
 TODO
 
