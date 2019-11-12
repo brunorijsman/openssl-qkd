@@ -1,5 +1,8 @@
 {
     "files.associations": {
         "conf.h": "c"
-    }
+    },
+    "cSpell.words": [
+        "diffie"
+    ]
 }
