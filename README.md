@@ -4,19 +4,19 @@ On 5 and 6 November 2019 I ([Bruno Rijsman](https://www.linkedin.com/in/brunorij
 
 ![Pan European Quantum Hackathon Logo](figures/pan-european-quantum-internet-hackathon.png)
 
-Participants from six geographically distributed locations (Delft, Dublin, Geneva, Padua, Paris, and Sarajevo) formed teams and worked on various projects related to the [Quantum Internet](https://qutech.nl/wp-content/uploads/2018/10/Quantum-internet-A-vision.pdf).
+Participants from six geographically distributed locations (Delft, Dublin, Geneva, Padua, Paris, and Sarajevo) formed teams that worked on various projects related to the [Quantum Internet](https://qutech.nl/wp-content/uploads/2018/10/Quantum-internet-A-vision.pdf).
 
 I participated in Delft where the hackathon was hosted by [QuTech](https://qutech.nl/), a world-leading quantum technology research and development office within the [Delft University of Technology](https://www.tudelft.nl/).
 
 # The OpenSSL integration challenge
 
-In Delft, I joined [Yvo Keuter](https://www.linkedin.com/in/yvo-keuter-6794932/) and [Tim Janssen](https://www.linkedin.com/in/timjanssen89/) to form a team working on one of the [challenges suggested by the hackathon organizers](https://github.com/PEQI19/challenges), namely the [_OpenSSL integration challenge_](https://github.com/PEQI19/PEQI-OpenSSL).
-
-![OpenSSL Logo](figures/openssl-logo.png)
+In Delft, I joined [Yvo Keuter](https://www.linkedin.com/in/yvo-keuter-6794932/) and [Tim Janssen](https://www.linkedin.com/in/timjanssen89/) to form a team working on one of the [challenges suggested by the hackathon organizers](https://github.com/PEQI19/challenges), namely the [OpenSSL integration challenge](https://github.com/PEQI19/PEQI-OpenSSL).
 
 This challenge was developed by [Wojciech Kozlowski](https://www.linkedin.com/in/wojciech-kozlowski/), a postdoctoral researcher at [QuTech](https://qutech.nl/) and one of the organizers of the Delft hackathon. He is also the main author of the [Architectural Principles of the Quantum Internet](https://datatracker.ietf.org/doc/draft-irtf-qirg-principles/) document that is being developed in the [Quantum Internet Research Group (QIRG)](https://datatracker.ietf.org/rg/qirg/about/) in the [Internet Research Task Force (IRTF)](https://irtf.org/).
 
-The _OpenSSL integration challenge_ consists of two parts:
+![OpenSSL Logo](figures/openssl-logo.png)
+
+The OpenSSL integration challenge consists of two parts:
 
  1. Enhance [OpenSSL](http://openssl.org/) to be able to use [Quantum Key Distribution (QKD)](https://en.wikipedia.org/wiki/Quantum_key_distribution) as a [key agreement protocol](https://en.wikipedia.org/wiki/Key-agreement_protocol). OpenSSL is an open source cryptography library that implements the [Secure Sockets Layer (SSL) and Transport Layer Security (TLS)](https://en.wikipedia.org/wiki/Transport_Layer_Security) protocols. OpenSSL is widely used in Internet applications such as web browsers and web servers.
 
@@ -26,7 +26,7 @@ The end-goal of the challenge is to use an off-the-shelf browser (e.g. Chrome) a
 
 # Structure of this report
 
-In this document I describe how we achieved the goals set forth by the _OpenSSL integration challenge_.
+In this document I describe how we achieved the goals set forth by the OpenSSL integration challenge.
 
 The report consists of multiple parts:
 
