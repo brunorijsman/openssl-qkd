@@ -1,19 +1,51 @@
-one of the challenges suggested by the organizers. It was called the [_OpenSSL Integration Challenge_](https://github.com/PEQI19/PEQI-OpenSSL) and its goal was to enhance the library with support for  as the key agreement protocol.
+This is part 1 in a multi-part report describing how we implemented Quantum Key Distribution (QKD) in OpenSSL as part of the pan-European quantum Internet hackathon in Delft on 5 and 6 November 2019. See [the main page of this report](../README.md) for the other parts.
+
+# Security in the classical Internet.
+
+## Security challenges in the Internet: authentication, confidentiality, and integrity.
+
+Imagine that you use your web browser to connect to your bank's website to transfer some money. Some of the main network security challenges in this transaction are:
+
+ 1. _Authentication_: You want to validate (i.e. make sure) that the website that you are connected to is really the bank's website and not some fake website that looks exactly like your bank's website that was created by a criminal to steal your username and password.
+ 
+ 2. _Confidentiality_: You want all the traffic between your browser and the bank's website to be encrypted so that it cannot be seen by some malicious snooper in the middle. For example you don't want a thief who is on the same public Wifi to steal your username and password. Frankly, you don't even want your Internet service provider to know what terms you are searching for on Google.
+
+ 3. _Integrity_: You want to make sure that the traffic that is exchanged between the browser and the website is not modified by some malicious actor in the middle. For example, you don't want that thief who is on the same public Wifi to change the bank account in the transfer to her own account.
+
+These challenges don't only apply to browsing on the Internet, but also to other applications such as e-mail, messaging, file transfers, machine-to-machine communications, etc.
+
+There are other security challenges such as [non-repudiation](https://en.wikipedia.org/wiki/Non-repudiation) or [anonymity](https://en.wikipedia.org/wiki/Anonymity#Anonymity_on_the_Internet), but in this report we focus on the three that we listed.
+ 
+## The Transport Layer Security (TLS) protocol.
+
+
+
+
+## The Diffie-Hellman key exchange protocol.
+
+
+## Example packet trace showing a Diffie-Hellman exchange.
+
+
+
+## What is OpenSSL and how does it fit into the picture?
 
 The open source OpenSSL library is widely used to provide security on the Internet. One of the main functions of the OpenSSL library is to implement the [Transport Layer Security (TLS)](https://en.wikipedia.org/wiki/Transport_Layer_Security) protocol, which forms the basis for the [Secure Hypertext Transfer Protocol (HTTPS)](https://en.wikipedia.org/wiki/HTTPS), which in turn enables secure and private browsing on the Internet.
 
 The name OpenSSL comes from the Secure Sockets Layer (SSL) protocol, a now outdated predecessor for the TLS protocol.
 
 
-The TLS protocol performs multiple functions, including:
 
- 1. _Authentication_: TLS validates that the website that you are connected to is really the website that it claims to be and not some malicious imposter (e.g. a fake website that looks just like your real bank website but that steals your username and password).
 
- 2. _Confidentiality_: TLS encrypts the traffic between your browser and the website so that it cannot be intercepted by some malicious snooper in the middle (e.g. someone who is trying to steal your credit card information).
+# TODO: Parking lot
 
- 3. _Integrity_: TLS makes sure that the traffic between your browser and the website is not modified by some malicious attacker in the middle (e.g. to change the account number in a bank transfer).
+
+ TLS makes sure that the traffic between your browser and the website is not modified by some malicious attacker in the middle (e.g. to change the account number in a bank transfer).
 
 For the encryption part TLS uses so-called [symmetric encryption algorithms](https://en.wikipedia.org/wiki/Symmetric-key_algorithm), where the sender and the receiver use the _same_ key to encrypt and decrypt the traffic. One example of such a symmetric encryption algorithm is the [Advanced Encryption Standard (AES)](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard).
+
+
+
 
 # The Key Agreement Problem
 
