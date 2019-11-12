@@ -14,7 +14,7 @@ source set_platform_dependent_variables.sh
 rm -f tshark.out
 echo "tshark started on $(date +'%Y-%m-%dT%H:%M:%S.%s')" >tshark.out
 ${MAYBE_SUDO} tshark \
-    -i lo0 \
+    -i ${LOOPBACK} \
     -w tshark.pcap \
     -V \
     -d tcp.port==44330,tls \
