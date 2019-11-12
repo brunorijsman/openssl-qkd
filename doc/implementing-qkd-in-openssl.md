@@ -48,7 +48,7 @@ The code in the repository as been tested on Apple macOS and on Ubuntu Linux 18.
 
 The instructions for installing, building, and running the code on Ubuntu Linux 18.04 LTS in an AWS instance as as follows:
 
-#### 1. Prepare an AWS Ubuntu instance
+#### 1. Create and prepare an AWS Ubuntu instance
 
 1.1. Launch an Ubuntu Linux 18.04 LTS instance in AWS using the default parameters. A t2.tiny instance is sufficient. 
 
@@ -63,17 +63,85 @@ sudo apt-get update
 sudo apt-get install -y build-essential
 ~~~~
 
-#### 2. Instal OpenSSL
+1.4. Install Python:
+~~~
+sudo apt-get install -y python
+~~~
+
+#### 2. Install and build tshark (and wireshark)
+
+Installing tshark is kind of a hassle. We can't use `apt-get` because it installs version 2.x of tshark; we need version 3.x of wireshark.
+
+These steps also install wireshark, which we don't need for the Makefile, but it is handy to have it if you are running on a desktop Ubuntu.
+
+Thanks to [Consent Factory](https://www.consentfactory.com/install-wireshark-3-0-1-ubuntu-18-04/) for describing the installation steps.
+
+2.1. Install the dependencies for tshark (this is all one long line):
+~~~
+sudo apt-get install -y build-essential pkg-config ninja-build bison flex qt5-default qttools5-dev-tools qtcreator ninja-build libpcap-dev cmake libglib2.0-dev libgcrypt20-dev qttools5-dev qtmultimedia5-dev libqt5svg5-dev
+~~~
+
+2.2. Create the Wireshark group and add yourself to the group:
+~~~
+sudo groupadd -g 62 wireshark
+sudo usermod -a -G wireshark ubuntu
+~~~
+
+2.3. Grab and extract the wireshark version 3.0.6 tarball:
+~~~
+cd ~
+wget https://www.wireshark.org/download/src/all-versions/wireshark-3.0.6.tar.xz
+~~~
+
+2.4. Extract the tarball and move into the directory:
+~~~
+tar xf wireshark-3.0.6.tar.xz
+cd wireshark-3.0.6
+~~~
+
+2.5. Build the tshark and wireshark applications. This will take a whopping 20 minutes or so, so grab a cup of coffee...
+~~~
+mkdir build &&
+cd build &&
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_DOCDIR=/usr/share/doc/wireshark-3.0.6 \
+-G Ninja \
+.. &&
+ninja
+~~~
+
+2.6. Install the built wireshark application:
+~~~
+sudo ninja install &&
+sudo install -v -m755 -d /usr/share/doc/wireshark-3.0.6 &&
+sudo install -v -m644 ../README.linux ../doc/README.* ../doc/{*.pod,randpkt.txt} \
+/usr/share/doc/wireshark-3.0.6 &&
+pushd /usr/share/doc/wireshark-3.0.6 &&
+for FILENAME in ../../wireshark/*.html; do
+sudo ln -s -v -f $FILENAME .
+done &&
+popd
+unset FILENAME
+~~~
+
+2.7. Secure the application directories:
+~~~
+sudo chown -v ubuntu:wireshark /usr/bin/{tshark,dumpcap} &&
+sudo chmod -v 6550 /usr/bin/{tshark,dumpcap}
+~~~
+
+#### 3. Install and build OpenSSL
 
 Technically, we don't need to install the OpenSSL source code. The OpenSSL engine mechanism allows us to dynamically load an engine shared library into the OpenSSL binary that is already installed on the instance. Still, we install the OpenSSL source code since reading the source code is essential to understanding how OpenSSL works, and because we will end up changing the OpenSSL source code if and when we introduce QKD as a first-class key exchange protocol at some point in the future.
 
-2.1. Clone OpenSSL from GitHub into the home directory of your AWS instance:
+3.1. Clone OpenSSL from GitHub into the home directory of your AWS instance:
 ~~~
 cd ~
 git clone https://github.com/openssl/openssl.git
 ~~~
 
-2.2. Configure and build the cloned OpenSSL code. Expect the `make` step to take about 5 minutes. Expect the `make test` step to take a bit more than 2 minutes. A few test cases (md2, rc5, gost, etc.) will be skipped, but all other test cases should report "ok". Do **not** run `make install` (we don't want to overwrite the default OpenSSL library).
+3.2. Configure and build the cloned OpenSSL code. Expect the `make` step to take about 5 minutes. Expect the `make test` step to take a bit more than 2 minutes. A few test cases (md2, rc5, gost, etc.) will be skipped, but all other test cases should report "ok". Do **not** run `make install` (we don't want to overwrite the default OpenSSL library).
 ~~~
 cd ~/openssl
 ./config
@@ -81,17 +149,27 @@ make
 make test
 ~~~
 
-#### 3. Instal openssl-qkd
+#### 4. Install, build, and run openssl-qkd
 
-3.1. Close openssl-qkd from GitHub into the home directory of your AWS instance:
+4.1. Clone openssl-qkd from GitHub into the home directory of your AWS instance:
 ~~~
 cd ~
 git clone https://github.com/brunorijsman/openssl-qkd.git
 ~~~
 
-3.2. Build the openssl-qkd code:
+4.2. Build the openssl-qkd code:
 ~~~
 cd ~/openssl-qkd
 make
 ~~~
 
+4.3. Run the openssl-qkd test:
+~~~
+cd ~/openssl-qkd
+make test
+~~~
+
+Note: currently the test sometimes fails with the following error message. This is a known issue that will be fixed (hopefully) soon. Just run the test again.
+~~~~
+Checking tshark output for correct Diffie-Helman exchange... Did not match pattern #0: Connection establish request \(SYN\): server port 44330
+~~~~

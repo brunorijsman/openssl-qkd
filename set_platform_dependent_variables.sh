@@ -24,10 +24,12 @@ export ENGINE_DIR=/usr/local/lib/engines-3
 UNAME_S=$(uname -s)
 if [[ ${UNAME_S} == "Linux" ]]; then
     export SHARED_EXT=.so
-    export LD_LIBRARY_PATH="${ENGINE_DIR}:${OPENSSL}:${LD_LIBRARY_PATH}"    
+    export LD_LIBRARY_PATH="${ENGINE_DIR}:${OPENSSL}:${LD_LIBRARY_PATH}"
+    export MAYBE_SUDO="sudo"
 elif [[ ${UNAME_S} == "Darwin" ]]; then
     export SHARED_EXT=.dylib
     export DYLD_FALLBACK_LIBRARY_PATH="${ENGINE_DIR}:${OPENSSL}:${DYLD_FALLBACK_LIBRARY_PATH}"
+    export MAYBE_SUDO=""
 else
     echo "Unsupported platform" 1>&2
     exit 1

@@ -10,9 +10,10 @@
 # See LICENSE for licensing information.
 #
 echo -n "Starting tshark in background... "
+source set_platform_dependent_variables.sh
 rm -f tshark.out
 echo "tshark started on $(date +'%Y-%m-%dT%H:%M:%S.%s')" >tshark.out
-tshark \
+${MAYBE_SUDO} tshark \
     -i lo0 \
     -w tshark.pcap \
     -V \

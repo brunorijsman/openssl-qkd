@@ -1,6 +1,8 @@
 {
     "files.associations": {
-        "conf.h": "c"
+        "conf.h": "c",
+        "qkd_debug.h": "c",
+        "assert.h": "c"
     },
     "cSpell.words": [
         "diffie",
