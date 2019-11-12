@@ -18,11 +18,11 @@ This challenge was developed by [Wojciech Kozlowski](https://www.linkedin.com/in
 
 The _OpenSSL integration challenge_ consists of two parts:
 
- 1. Enhance OpenSSL to be able to use Quantum Key Distribution as a key agreement protocol.
+ 1. Enhance [OpenSSL](http://openssl.org/) to be able to use [Quantum Key Distribution (QKD)](https://en.wikipedia.org/wiki/Quantum_key_distribution) as a [key agreement protocol](https://en.wikipedia.org/wiki/Key-agreement_protocol). OpenSSL is an open source cryptography library that implements the [Secure Sockets Layer (SSL) and Transport Layer Security (TLS)](https://en.wikipedia.org/wiki/Transport_Layer_Security) protocols. OpenSSL is widely used in Internet applications such as web browsers and web servers.
 
- 2. Implement a specific Quantum Key Distribution protocol, namely BB84, on top of the SimulaQron quantum network simulator.
+ 2. Implement a specific quantum key distribution protocol, namely the [Bennett and Brassard 1984 (BB84)](https://en.wikipedia.org/wiki/BB84) protocol, on top of the SimulaQron quantum network simulator.
 
-The end-goal of the challenge is to use an off-the-shelf browser (e.g. Chrome) and connect it to a secure HTTPS website hosted on an off-the-shelf web server (e.g. Apache), while using the BB84 Quantum Key Distribution algorithm as the key agreement protocol (running a SimulaQron simulated quantum network), instead of the classical Diffie-Hellman protocol that is normally used in classical networks.
+The end-goal of the challenge is to use an off-the-shelf browser (e.g. Chrome) and connect it to a secure HTTPS website hosted on an off-the-shelf web server (e.g. Apache), while using the BB84 quantum key distribution algorithm as the key agreement protocol (running a [SimulaQron](http://www.simulaqron.org/) simulated quantum network), instead of the classical Diffie-Hellman protocol that is normally used in classical networks.
 
 # Structure of this report
 
@@ -32,9 +32,9 @@ The report consists of multiple parts:
 
  * Part 1: [**Security in the classical Internet**](doc/security-in-the-classical-internet):
  
-   * Summarizes the security challenges in the classical Internet such as authentication, confidentiality, and integrity.
+   * Summarizes the security challenges in the classical Internet such as [authentication, confidentiality, and integrity](https://en.wikipedia.org/wiki/Information_security).
 
-   * Describes the classical protocols such as Transport Layer Security (TLS) and algorithms such as Diffie-Hellman that are used to solve these security challenges.
+   * Describes the classical protocols such as [Transport Layer Security (TLS)]((https://en.wikipedia.org/wiki/Transport_Layer_Security)) and algorithms such as [Diffie-Hellman key exchange](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange) that are used to solve these security challenges.
 
    * Shows an example packet trace of a secure HTTPS session between a web browser and a web site and explains what is going on.
 
@@ -44,17 +44,17 @@ The report consists of multiple parts:
 
    * Describes that mathematical assumptions upon which the security of classical security algorithms is based.
 
-   * Explains how quantum computers, in particular the famous Shor's quantum algorithm, breaks classical security algorithms.
+   * Explains how [quantum information theory](https://en.wikipedia.org/wiki/Quantum_information#Quantum_information_theory), in particular the famous [Shor's quantum algorithm for efficiently factoring large numbers](https://en.wikipedia.org/wiki/Shor%27s_algorithm), breaks classical security algorithms.
 
-   * Describes the two approaches to fixing the fact that classical security has been broken: (1) Quantum Key Distribution (QKD) protocols and (2) post-quantum cryptography.
+   * Describes the two approaches to fixing the fact that classical security has been broken: (1) [Quantum Key Distribution (QKD)](https://en.wikipedia.org/wiki/Quantum_key_distribution) protocols and (2) [post-quantum cryptography](https://en.wikipedia.org/wiki/Post-quantum_cryptography).
 
-   * Gives the details of one specific Quantum Key Distribution (QKD) protocol, namely BB84 protocol.
+   * Gives the details of one specific Quantum Key Distribution (QKD) protocol, namely [BB84](https://en.wikipedia.org/wiki/BB84) protocol.
 
  * Part 3: [**The ETSI KQD API**](doc/the-etsi-qkd-api.md):
 
    * Gives an idea of what Quantum Key Distribution (QKD) currently looks like in the real world. It introduces a few companies that already have commercially available quantum key management systems.
 
-   * Introduces a standard framework and standard Application Programmers Interface (API) for Quantum Key Distribution (QKD) defined by the [European Telecommunications Standards Institute (ETSI)](https://www.etsi.org/).
+   * Introduces a standard framework and standard [Application Programmers Interface (API) for Quantum Key Distribution (QKD)](https://www.etsi.org/deliver/etsi_gs/QKD/001_099/004/01.01.01_60/gs_qkd004v010101p.pdf) defined by the [European Telecommunications Standards Institute (ETSI)](https://www.etsi.org/).
 
  * Part 4: [**Implementing QKD in OpenSSL**](doc/implementing-qkd-in-openssl.md):
 
@@ -66,4 +66,4 @@ The report consists of multiple parts:
 
    * Gives instructions on how to build and run the code in this repository.
 
-At some point in the future, I also plan to implement BB84 on top of SimulaQron and add a part 5 to this report to document that work.
+At some point in the future, I also plan to implement BB84 on top of [SimulaQron](http://www.simulaqron.org/) and add a part 5 to this report to document that work.
