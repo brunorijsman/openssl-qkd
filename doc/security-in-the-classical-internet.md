@@ -30,6 +30,48 @@ There are multiple versions of TLS, each described in its own standards document
 
 The predecessor for TLS was the [Secure Sockets Layer (SSL)](https://tools.ietf.org/html/rfc6101) protocol, which is now considered obsolete. However, many people still use the older term SSL when they are actually referring to TLS. For example, one of the main open source implementations of TLS is still called [OpenSSL](https://www.openssl.org/).
 
+## Symmetric versus asymmetric encryption.
+
+One of the main functions of the TLS protocols is to encrypt all traffic between the two communicating end-points.
+
+Generally speaking, there are two types of encryption:
+ 
+ * _Symmetric encryption_.
+ * _Asymmetric encryption_ also known as _public key encryption_ or _private-public key encryption_.
+
+#### Symmetric encryption.
+
+In symmetric encryption the two communicating end-points use one and the same key.
+
+The sender encrypts the traffic with a particular key. The receiver decrypts the traffic with that same key. The same key is used in both directions: for client-to-server and server-to-client traffic.
+
+The key must remain secret. Only the two end-points are allowed to know the key. If some malicious attacker also discovers the key, she will be able to tap and decrypt the traffic as it flows from sender to receiver, without the sender or receiver noticing anything.
+
+There are many algorithms for symmetric encryption, such as:
+ 
+
+
+As the power of classical computers increases over time, and as new attack vectors are discovered on encryption algorithms, some protocols become obsolete over time because they are not considered to be secure anymore. For example, the [Data Encryption Standard (DES)](XXX) was widely used for many years but is not considered to be secure anymore.
+
+
+ 
+#### Asymmetric encryption.
+
+In asymmetric encryption the two communicating end-points, the client and the server, use different keys:
+
+
+
+#### A peek forward: what is broken by quantum information theory?
+
+Later on in this report we will point out that some aspects of classical 
+
+## They key distribution problem
+
+
+For the encryption part TLS uses so-called [symmetric encryption algorithms](https://en.wikipedia.org/wiki/Symmetric-key_algorithm), where the sender and the receiver use the _same_ key to encrypt and decrypt the traffic. One example of such a symmetric encryption algorithm is the [Advanced Encryption Standard (AES)](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard).
+
+
+
 ## The Diffie-Hellman key exchange protocol.
 
 
@@ -46,12 +88,6 @@ The name OpenSSL comes from the Secure Sockets Layer (SSL) protocol, a now outda
 
 
 
-# TODO: Parking lot
-
-
- TLS makes sure that the traffic between your browser and the website is not modified by some malicious attacker in the middle (e.g. to change the account number in a bank transfer).
-
-For the encryption part TLS uses so-called [symmetric encryption algorithms](https://en.wikipedia.org/wiki/Symmetric-key_algorithm), where the sender and the receiver use the _same_ key to encrypt and decrypt the traffic. One example of such a symmetric encryption algorithm is the [Advanced Encryption Standard (AES)](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard).
 
 
 
