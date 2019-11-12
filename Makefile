@@ -65,12 +65,12 @@ mock-test:
 test: all mock-test
 
 clean: clean-test
+	$(MAYBE_SUDO) rm -rf $(ENGINE_DIR)/$(CLIENT) $(ENGINE_DIR)/$(SERVER)
+	$(MAYBE_SUDO) rm -f $(ENGINE_DIR)/$(CLIENT)
+	$(MAYBE_SUDO) rm -f $(ENGINE_DIR)/$(SERVER)
 	rm -f $(CLIENT) $(SERVER)
-	rm -rf $(ENGINE_DIR)/$(CLIENT) $(ENGINE_DIR)/$(SERVER)
 	rm -f key.pem cert.pem
 	rm -f *.o core
-	rm -f $(ENGINE_DIR)/$(CLIENT)
-	rm -f $(ENGINE_DIR)/$(SERVER)
 	rm -rf *.dSYM
 
 clean-test:
