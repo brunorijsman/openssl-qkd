@@ -56,8 +56,8 @@ $(ENGINE_DIR)/$(CLIENT): $(CLIENT)
 	$(MAYBE_SUDO) ln -sf ${CURDIR}/$(CLIENT) $(ENGINE_DIR)/$(CLIENT)
 
 $(ENGINE_DIR)/$(SERVER): $(SERVER)
-	mkdir -p $(ENGINE_DIR)
-	ln -sf ${CURDIR}/$(SERVER) $(ENGINE_DIR)/$(SERVER)
+	$(MAYBE_SUDO) mkdir -p $(ENGINE_DIR)
+	$(MAYBE_SUDO) ln -sf ${CURDIR}/$(SERVER) $(ENGINE_DIR)/$(SERVER)
 
 mock-test:
 	./run_mock_test.sh
