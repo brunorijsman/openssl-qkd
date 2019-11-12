@@ -32,4 +32,6 @@ TODO
 
 ## How to build and run the code in this repository.
 
+The code in the repository as been tested on Apple macOS and on Ubuntu Linux 18.04 LTS in an AWS instance.
+
 TODO
