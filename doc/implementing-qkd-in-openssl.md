@@ -131,6 +131,11 @@ sudo chown -v ubuntu:wireshark /usr/bin/{tshark,dumpcap} &&
 sudo chmod -v 6550 /usr/bin/{tshark,dumpcap}
 ~~~
 
+2.8. Allow tshark to capture interface traffic. Answer "yes" to the pop-up question "Should non-superusers be able to capture packets?"
+~~~
+sudo dpkg-reconfigure wireshark-common
+~~~
+
 #### 3. Install and build OpenSSL
 
 Technically, we don't need to install the OpenSSL source code. The OpenSSL engine mechanism allows us to dynamically load an engine shared library into the OpenSSL binary that is already installed on the instance. Still, we install the OpenSSL source code since reading the source code is essential to understanding how OpenSSL works, and because we will end up changing the OpenSSL source code if and when we introduce QKD as a first-class key exchange protocol at some point in the future.
