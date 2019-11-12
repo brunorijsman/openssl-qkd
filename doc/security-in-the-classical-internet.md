@@ -49,7 +49,7 @@ The key must remain secret. Only the two end-points are allowed to know the key.
 
 There are several algorithms (also known as ciphers) for symmetric encryption, such as for example the [Advanced Encryption Standard (AES)](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), the [International Data Encryption Algorithm (IDEA)](https://en.wikipedia.org/wiki/International_Data_Encryption_Algorithm), and [Blowfish](https://en.wikipedia.org/wiki/Blowfish_(cipher)).
  
-Each algorithm are multiple variations (so-called modes) and supports multiple key sizes (for example 128 bits, 256 bits, 512 bits etc.)
+Each algorithm are multiple variations (so-called modes) and supports multiple key sizes (for example 128 bits, 192 bits, 256 bits etc.)
 
 Symmetric encryption is very fast and can be implemented in hardware. As a random example, the [Juniper PTX10K-LC1105 line card](https://www.juniper.net/documentation/en_US/release-independent/junos/topics/reference/specifications/line-card-ptx10k-lc1105.html) has 30 MacSec Ethernet ports, where each port can do 100 Gbps AES256 encryption at wire-speed, for a total of 3 Tbps of encryption and decryption per card.
 
@@ -75,11 +75,13 @@ The problem with asymmetric encryption is that it is slow. Specifically, it is n
 
 Still, the same mathematical principles of asymmetric encryption are used to address some other problems in network security, including [key agreement](https://en.wikipedia.org/wiki/Key-agreement_protocol) and [secure signing](https://en.wikipedia.org/wiki/Digital_signature). We will discuss the former in more detail when we talk about the [key distribution problem](#the-key-distribution-problem) below.
 
-#### Breaking classical encryption.
+#### The security of classical encryption.
 
-As the power of classical computers increases over time, and as new classical attack vectors are discovered on encryption algorithms, some protocols become obsolete over time because they are not considered to be secure anymore. Or at least, the required key sizes increase over time. For example, the [Data Encryption Standard (DES)](https://en.wikipedia.org/wiki/Data_Encryption_Standard) was widely used for many years but is not considered to be secure anymore.
+As the power of classical computers increases over time and as new classical attack vectors are discovered on encryption algorithms, some protocols become obsolete over time because they are not considered to be secure anymore. Or at least, the required key sizes increase over time. For example, the [Data Encryption Standard (DES)](https://en.wikipedia.org/wiki/Data_Encryption_Standard) was widely used for many years but is not considered to be secure anymore and has been replaced by AES.
 
-Later on in this report we will point out that some aspects of classical 
+The security of asymmetric encryption protocols is based on the fact that it is infeasible to factor large numbers in to prime factors. At least, it is infeasible for classical computers to do the factorization. In the 1990s an efficient quantum algorithm was discovered that quantum computer to factor large numbers. As a result, most existing asymmetric encryption protocols are not secure if the adversary has access to a sufficiently large and reliable quantum computer (no such computer is known to exist at this time.) 
+
+We will go into much more detail in [part 2 (Quantum computing breaks and fixes classical security)](quantum-computing-breaks-and-fixes-classical-security.md) of this report. We bring it up here to make an important point: only asymmetric encryption is known to be vulnerable to a quantum attack; as far as we know (but this is not formally proven) symmetric encryption is not vulnerable to quantum attack.
 
 ## The key distribution problem
 
