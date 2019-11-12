@@ -4,7 +4,7 @@ This is part 4 in a multi-part report describing how we implemented Quantum Key 
 
 ## The RIPE quantum Internet hackathon challenge.
 
-TODO
+The work that we did to add QKD support to OpenSSL was based on the [OpenSSL integration challenge](https://github.com/PEQI19/PEQI-OpenSSL) that was designed by [Wojciech Kozlowski](https://www.linkedin.com/in/wojciech-kozlowski/) for the [Pan-European Quantum Internet Hackathon](https://labs.ripe.net/Members/ulka_athale_1/take-part-in-pan-european-quantum-internet-hackathon) hosted at [QuTech](https://qutech.nl/) at the [Delft University of Technology](https://www.tudelft.nl/) on 5 and 6 November, 2019.
 
 ## Two approaches to adding QKD support to OpenSSL.
 
