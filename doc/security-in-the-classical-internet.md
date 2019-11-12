@@ -45,27 +45,43 @@ In symmetric encryption the two communicating end-points use one and the same ke
 
 The sender encrypts the traffic with a particular key. The receiver decrypts the traffic with that same key. The same key is used in both directions: for client-to-server and server-to-client traffic.
 
-The key must remain secret. Only the two end-points are allowed to know the key. If some malicious attacker also discovers the key, she will be able to tap and decrypt the traffic as it flows from sender to receiver, without the sender or receiver noticing anything.
+The key must remain secret. Only the two end-points are allowed to know the key. If some malicious attacker also discovers the key, she will be able to tap and decrypt the traffic as it flows from sender to receiver. She can even decrypt the traffic, change it, and re-encrypt the changed traffic, without the two end-points discovering that the message was tampered with.
 
-There are many algorithms for symmetric encryption, such as:
+There are several algorithms (also known as ciphers) for symmetric encryption, such as for example the [Advanced Encryption Standard (AES)](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), the [International Data Encryption Algorithm (IDEA)](https://en.wikipedia.org/wiki/International_Data_Encryption_Algorithm), and [Blowfish](https://en.wikipedia.org/wiki/Blowfish_(cipher)).
  
+Each algorithm are multiple variations (so-called modes) and supports multiple key sizes (for example 128 bits, 256 bits, 512 bits etc.)
 
+Symmetric encryption is very fast and can be implemented in hardware. As a random example, the [Juniper PTX10K-LC1105 line card](https://www.juniper.net/documentation/en_US/release-independent/junos/topics/reference/specifications/line-card-ptx10k-lc1105.html) has 30 MacSec Ethernet ports, where each port can do 100 Gbps AES256 encryption at wire-speed, for a total of 3 Tbps of encryption and decryption per card.
 
-As the power of classical computers increases over time, and as new attack vectors are discovered on encryption algorithms, some protocols become obsolete over time because they are not considered to be secure anymore. For example, the [Data Encryption Standard (DES)](XXX) was widely used for many years but is not considered to be secure anymore.
-
-
- 
 #### Asymmetric encryption.
 
-In asymmetric encryption the two communicating end-points, the client and the server, use different keys:
+In asymmetric encryption the two communicating end-points use different keys:
 
+ * Let's call the end-points S (for Sender) and R (for Receiver). We will now describe how S can send a message to R. A similar protocol can be used for sending a message from R to S (just reverse everything in the following explanation).
 
+ * R creates a pair of keys: one key is called the private key and the other key is called the public key. Note that every receiver needs its own private-public key pair.
 
-#### A peek forward: what is broken by quantum information theory?
+ * If a message is encrypted with the public key, it can only be decrypted with the private key. This asymmetry is a consequence of the mathematical details of how the protocol is designed, using so-called one-way functions that can easily be computed but that are infeasible to inverse.
+
+ * R publishes its public key, but keeps it private key secret. Everyone is allowed to know the public key, even malicious attackers. No-one is allowed to know the private key, not even S.
+
+ * When S sends a message to R, it encrypts the message with the public key. Only R will be able to decrypt the message, because only R knows the private key. Some malicious attacker can see the encrypted message and knows the public key, but she cannot decrypt the message because she does not have the private key.
+
+For obvious reasons, asymmetric encryption is also known as public key encryption or private-public key encryption.
+
+The best known asymmetric encryption algorithm is called [Rivest Shamir Adleman (RSA)](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) after the names of inventors.
+
+The problem with asymmetric encryption is that it is slow. Specifically, it is not fast enough for line rate encryption of large volumes of traffic. For that reason, TLS always uses symmetric encryption for encrypting and decrypting the application traffic.
+
+Still, the same mathematical principles of asymmetric encryption are used to address some other problems in network security, including [key agreement](https://en.wikipedia.org/wiki/Key-agreement_protocol) and [secure signing](https://en.wikipedia.org/wiki/Digital_signature). We will discuss the former in more detail when we talk about the [key distribution problem](#the-key-distribution-problem) below.
+
+#### Breaking classical encryption.
+
+As the power of classical computers increases over time, and as new classical attack vectors are discovered on encryption algorithms, some protocols become obsolete over time because they are not considered to be secure anymore. Or at least, the required key sizes increase over time. For example, the [Data Encryption Standard (DES)](https://en.wikipedia.org/wiki/Data_Encryption_Standard) was widely used for many years but is not considered to be secure anymore.
 
 Later on in this report we will point out that some aspects of classical 
 
-## They key distribution problem
+## The key distribution problem
 
 
 For the encryption part TLS uses so-called [symmetric encryption algorithms](https://en.wikipedia.org/wiki/Symmetric-key_algorithm), where the sender and the receiver use the _same_ key to encrypt and decrypt the traffic. One example of such a symmetric encryption algorithm is the [Advanced Encryption Standard (AES)](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard).
