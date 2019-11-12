@@ -14,7 +14,7 @@
 #include <assert.h>
 #include <netdb.h>
 #include <stdlib.h>
-#include <strings.h> 
+#include <string.h> 
 #include <time.h>
 #include <unistd.h>
 #include <arpa/inet.h>
