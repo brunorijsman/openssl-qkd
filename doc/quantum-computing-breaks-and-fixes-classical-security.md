@@ -58,11 +58,28 @@ Despite these problems, it appears that post-quantum cryptography will a more fe
 
 If we just introduce quantum key distribution on some point-to-point links (possibly with some repeaters in the middle) the architectural impact on the Internet could be limited. But if we want to move to a full-on quantum Internet where quantum routers create entangled Bell pairs between arbitrary end-points anywhere on the planet, we will have to rip and replace the entire Internet and replace it with new quantum router technology that is still very far away on the horizon.
 
-
-
 ## Quantum Key Distribution (KQD).
 
-TODO
+The second approach to fixing broken network security is [Quantum Key Distribution (QKD)](https://en.wikipedia.org/wiki/Quantum_key_distribution).
+
+This is a fundamentally different approach to network security that does not rely on one-way functions at all. Instead, QKD relies on the laws of quantum physics to implement security.
+
+It is probably best to look at a specific QKD protocol to understand how it works, and in the next section (where we discuss the BB84 QKD protocol) we will do exactly that.
+
+At the risk of sounding overly vague, let me first point out what the fundamental ideas behind QKD are:
+
+ * Instead of sending classical bits over the network, QKD sends quantum "qubits" over the network. In practice this roughly corresponds to sending light pulses that consist of carefully prepared single photons, so that the quantum effects of the light pulse come into play.
+
+ * There are several specific quantum effects that are relevant to QKD:
+   * Quantum "qubits" cannot be copied due to the quantum physics ["no-cloning theorem"](https://en.wikipedia.org/wiki/No-cloning_theorem).
+   * In certain circumstances, observing a "qubit" (measuring it) unavoidably causes the value of the qubit to change due to the so-called ["collapse of the quantum wave function"](https://en.wikipedia.org/wiki/Wave_function_collapse).
+   * It is possible to create a so-called [Bell pair](https://en.wikipedia.org/wiki/Bell_state) of qubits that can subsequently be used to ["teleport"](https://en.wikipedia.org/wiki/Quantum_teleportation) some arbitrary qubit across the network.
+
+ * QKD protocols cleverly use these quantum effects in the key agreement protocol:
+   * In some QKD protocols the two communicating parties use qubits to exchange the bits in the key material, and prepare the qubits in a clever way so that either it can be detected that an adversary observed the key bits.
+   * In some QKD protocols, qubits are teleported over the network to prepare the key material.
+
+Once QKD has been used to establish a session key, old-fashioned classical symmetric encryption is used for bulk encryption of the application traffic.
 
 ## The BB84 quantum key distribution protocol.
 
