@@ -1,4 +1,4 @@
-This is part 4 in a multi-part report describing how we implemented Quantum Key Distribution (QKD) in OpenSSL as part of the pan-European quantum Internet hackathon in Delft on 5 and 6 November 2019. See [the main page of this report](../README.md) for the other parts.
+This is part 4 in a multi-part report describing how we implemented Quantum Key Distribution (QKD) in OpenSSL as part of the pan-European quantum Internet hackathon in Delft on 5 and 6 November 2019. See [the main page of this report](../README.md) for the other parts.  -- [Bruno Rijsman](https://www.linkedin.com/in/brunorijsman/)
 
 # Implementing QKD in OpenSSL
 
@@ -52,7 +52,9 @@ Who knows, maybe sometime in the future in some remote South-America town, I wil
 
 This section describes in detail how we "hacked" the existing engine-based extension mechanism for Diffie-Hellman to add support for QKD in OpenSSL on top of the ETSI QKD API.
 
-TODO
+The following resources are helpful to understand the OpenSSL engine framework:
+
+ * 
 
 ## The mock implementation of the ETSI QKD API.
 
