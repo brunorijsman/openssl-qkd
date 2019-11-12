@@ -42,9 +42,11 @@ More details about our hacked implementation are given below.
 
 #### Approach 2: Introducing QKD as a new first-class key exchange protocol.
 
-As a result of how engines are implemented in OpenSSL (see the description above), OpenSSL engines have their limitations. They can only be used to accelerate a pre-determined set of operations in existing algorithms. They cannot be used to introduce, for example, a completely new key exchange algorithms such as QKD.
+As a result of how engines are implemented in OpenSSL (see the description above), OpenSSL engines have their limitations. They can only be used to accelerate a pre-determined set of operations in existing crypto algorithms. They cannot be used to introduce, for example, a completely new key exchange algorithms such as QKD.
 
-We got away with introducing QKD support without changing the OpenSSL source code because we "hacked" the Diffie-Hellman engine.
+We got away with introducing QKD support without changing the OpenSSL source code by "hacking" the Diffie-Hellman engine as summarized above. Admittedly, this is not the proper way to implement QKD. The resulting code is ugly and fragile (see the [challenges section](encountered-challenges-and-their-solutions) below for more details)). The proper thing to do would have been to change the OpenSSL code to introduce QKD as a first-class abstraction in OpenSSL. We would still need an engine (for QKD, not for "fake" Diffie-Hellman) because the QKD provider is typically some external device reached through the ETSI API.
+
+Who knows, maybe sometime in the future in some remote South-America town, I will find myself with some spare time on my hands, do a "proper" implementation, and update this repository and report accordingly.
 
 ## Hacking the OpenSSL Diffie-Hellman engine to add QKD.
 
@@ -55,6 +57,10 @@ TODO
 ## The mock implementation of the ETSI QKD API.
 
 This sections describes in details on we created a "mock" (i.e. fake) implementation of the ETSI QKD API that allows us to test OpenSSL QKD without using any quantum network (neither a real quantum network nor a simulated quantum network).
+
+TODO
+
+## Encountered challenges and their solutions.
 
 TODO
 
