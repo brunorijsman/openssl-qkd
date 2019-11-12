@@ -93,33 +93,19 @@ One obvious method is to agree on the key to be used in advance, before the comm
 
 Another method for implementing key agreement is based on the same mathematical principles as asymmetric encryption.
 
+The basic idea is very simple to understand:
 
-uses a very special kind of encryption, called asymmetric encryption or more commonly [public key cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography). In this approach, there is a pair of keys: the so-called public key and the so-called private key:
+ * Let say that S (Sender) and R (Receiver) want to agree on a symmetric key (the so-called session key) to use for a particular high-volume communication session.
+ * S picks a random value as the session key.
+ * S uses R's public key to encrypt the session key using RSA (an asymmetric encryption algorithm).
+ * R uses its own private key to decrypt the session key.
+ * Now S and R have agreed on a session key.
 
- * When the browser sends traffic to the website, the browser encrypts the traffic with the public key, and the website decrypts the traffic with the private key.
-
- * In the other direction, when the website sends traffic to the browser, the website encrypts the traffic with the private key, and the browser decrypts the traffic with the public key.
-
- The public-private key pair has some very special properties:
-
-  * If you encrypt something with the public key, it can only be decrypted with the private key (and not with the public key).
-
-  * Vice versa, if you encrypt something with the private key, it can only be decrypted with the public key (and not with the private key).
-
-  * If you know the public key, it is infeasible for a classical computer to determine the corresponding private key (a quantum computer may be able to do it, but that is not the topic of this challenge).
-
-Because of these special properties, public-key cryptography solves the key distribution problem. A website can simply publish its public key but keep its private key secret (hence the names public and private key):
-
- * The browser can use the published public key to encrypt traffic that is sent to the website. Only the real website will be able to decrypt the traffic because only the real website knows the corresponding private key.
-
- * The browser can use the published public key to decrypt traffic that is received from the website. It can be sure that only the real website could have encrypted the traffic because only the real website knows the corresponding private key.
-
-There are some additional technicalities that allow the browser to verify that a published public key is actually owned by the website that claims to have published it. This involves concepts such as [public key certificates](https://en.wikipedia.org/wiki/Public_key_certificate), [Certificate Authorities (CA)](https://en.wikipedia.org/wiki/Certificate_authority), [digital signatures](https://en.wikipedia.org/wiki/Digital_signature) etc. that are beyond the scope of this blog.
+There are some additional technicalities that allow S to verify that the public key is actually owned by R. This involves concepts such as [public key certificates](https://en.wikipedia.org/wiki/Public_key_certificate), [Certificate Authorities (CA)](https://en.wikipedia.org/wiki/Certificate_authority), [digital signatures](https://en.wikipedia.org/wiki/Digital_signature) etc. that are beyond the scope of this report.
  
-It sounds like public key encryption solves our key distribution problem, and indeed it does. Unfortunately, there is another problem: public key encryption is too slow to encrypt large volumes of traffic and still maintain decent throughput.
+This above protocol is known as [RSA Key Transport](https://www.researchgate.net/figure/TLS-key-transport-with-RSA_fig1_234811497), but for various reasons this protocol is now deprecated.
 
-
-
+The actual protocol that is used in the Internet today for key agreement is known as the [Diffie-Hellman protocol](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange). It does not use asymmetric encryption such as RSA directly, but it is based on the same mathematical principles.
 
 ## The Diffie-Hellman key exchange protocol.
 
