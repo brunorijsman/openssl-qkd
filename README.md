@@ -10,7 +10,7 @@ I participated in Delft where the hackathon was hosted by [QuTech](https://qutec
 
 # The OpenSSL integration challenge
 
-In Delft, I joined [Yvo Keuter](https://www.linkedin.com/in/yvo-keuter-6794932/) and [Tim Janssen](https://www.linkedin.com/in/timjanssen89/) to form a team working on one of the challenges suggested by the hackathon organizers, namely the [_OpenSSL integration challenge_](https://github.com/PEQI19/PEQI-OpenSSL).
+In Delft, I joined [Yvo Keuter](https://www.linkedin.com/in/yvo-keuter-6794932/) and [Tim Janssen](https://www.linkedin.com/in/timjanssen89/) to form a team working on one of the [challenges suggested](https://github.com/PEQI19/challenges) by the hackathon organizers, namely the [_OpenSSL integration challenge_](https://github.com/PEQI19/PEQI-OpenSSL).
 
 ![OpenSSL Logo](figures/openssl-logo.png)
 
