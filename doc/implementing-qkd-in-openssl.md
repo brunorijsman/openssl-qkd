@@ -30,15 +30,21 @@ The main purpose of OpenSSL engines to allow time-consuming cryptographic operat
 
 The engine APIs allow the dynamically loaded engine to register a callback function that OpenSSL should call whenever a particular expensive operations needs to be performed. This registered function is called instead of the default software implementation in OpenSSL, and it is expected to implement the same function in a more efficient manner on special-purpose hardware.
 
-In our current implementation of QKD support in OpenSSL, we have used the engine mechanism in a creative way to avoid having to change the OpenSSL source code (see approach 2 below). A less charitable way of saying it is that our current implementation is a hack.
+In our current implementation of QKD support in OpenSSL, we have used the engine mechanism in a creative way to avoid having to change the OpenSSL source code (see approach 2 below). A less charitable way of saying it is that our current implementation is a hack. 
 
+Our QKD engine overloaded two callback functions that were really intended to implement hardware acceleration for the Diffie-Hellman (DH) key exchange algorithm:
 
+* The Diffie-Hellman `compute_key` engine callback is really intended to choose a Diffie-Hellman private key and to compute the corresponding public key, using the negotiated Diffie-Hellman g and p parameters. We have hacked this callback and we have hijacked the public key to instead communicate an ETSI QKD `key_handle` from the QKD server to the QKD client.
+
+* The Diffie-Hellman `generate_key` engine callback is really intended to generate a Diffie-Hellman shared secret using the end-point's own private key, the peer's public key, and the negotiated Diffie-Hellman g and p parameters. We have hacked this callback to instead retrieve the shared secret from the QKD key management layer using the ETSI QKD GET_KEY API.
+
+More details about our hacked implementation are given below.
 
 #### Approach 2: Introducing QKD as a new first-class key exchange protocol.
 
-As a result of how engines are implemented in OpenSSL (see the description above), OpenSSL engines have their limitations. They can only be used to accelerate a pre-determined set of operations in existing algorithms. They cannot be used to introduce, for example, a completely new key exchange algorithms such as QKD. You still need to change the source code of
+As a result of how engines are implemented in OpenSSL (see the description above), OpenSSL engines have their limitations. They can only be used to accelerate a pre-determined set of operations in existing algorithms. They cannot be used to introduce, for example, a completely new key exchange algorithms such as QKD.
 
-TODO
+We got away with introducing QKD support without changing the OpenSSL source code because we "hacked" the Diffie-Hellman engine.
 
 ## Hacking the OpenSSL Diffie-Hellman engine to add QKD.
 
