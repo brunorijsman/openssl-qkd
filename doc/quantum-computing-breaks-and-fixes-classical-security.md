@@ -4,7 +4,7 @@ This is part 2 in a multi-part report describing how we implemented Quantum Key 
 
 ## Diffie-Hellman is vulnerable to quantum attacks.
 
-[Earlier in the document](#the-diffie-hellman-algorithm-details) we described in detail how two communicating end-points can use the Diffie-Hellman algorithm to agree on a shared secret in such a manner that a malicious eavesdropper cannot discover what that shared secret is.
+In [part 1 of this report](#security-in-the-classical-internet) we described in detail how two communicating end-points can use the Diffie-Hellman algorithm to agree on a shared secret in such a manner that a malicious eavesdropper cannot discover what that shared secret is.
 
 This, however, assumes that the malicious eavesdropper only has the power of classical computers at her disposal.
 
@@ -46,6 +46,8 @@ The _post-quantum cryptography_ approach is kind of obvious: let's find new one-
 
 Finding such a new quantum-resistant one-way function is an active area of research. Many post-quantum crypto algorithms have been proposed, including Lattice-based crypto, multivariate crypto, hash-based crypto, code-based crypto, super-singular elliptic curve isogeny crypto, etc. (this list is taken from the [post-quantum cryptography wikipedia page](https://en.wikipedia.org/wiki/Post-quantum_cryptography)). All these new crypto algorithms have in common that they are based on some new one-way function to replace factorization / modular logarithms.
 
+The [Open Quantum Safe organization](https://openquantumsafe.org/) has added support for many of these post-quantum encryption protocols to [OpenSSL](https://www.openssl.org/) by open-sourcing the [Open Quantum-Safe Library (LIBOQS)](https://github.com/open-quantum-safe/liboqs).
+
 There are two problems with the post-quantum cryptography approach:
 
  1. While these newly proposed post-quantum cryptography algorithms and their associated new quantum-resistant one-way functions are _believed_ to be quantum-safe, they are not _proven_ to be quantum safe. Heck, everyone thought factorization was quantum-safe until Shor shocked the world and proved that it wasn't.
@@ -56,17 +58,25 @@ Despite these problems, it appears that post-quantum cryptography will a more fe
 
 If we just introduce quantum key distribution on some point-to-point links (possibly with some repeaters in the middle) the architectural impact on the Internet could be limited. But if we want to move to a full-on quantum Internet where quantum routers create entangled Bell pairs between arbitrary end-points anywhere on the planet, we will have to rip and replace the entire Internet and replace it with new quantum router technology that is still very far away on the horizon.
 
+
+
 ## Quantum Key Distribution (KQD).
 
 TODO
 
 ## The BB84 quantum key distribution protocol.
 
-TODO
+TODO: Document this once I have implemented BB84 on top of SimulaQron (future work).
 
 ## QKD in real life.
 
-QKD is probably the most mature application of quantum networking and there already several companies that sell commercially available and deployable QKD devices, including:
+QKD is probably the most mature application of quantum networking and there already several companies that sell commercially available and deployable QKD devices, including (this is not a complete list):
 
- * [ID Quantique](https://www.idquantique.com/quantum-safe-security/products/#quantum_key_distribution)
- * [MagiQ QPN](https://www.magiqtech.com/solutions/network-security/)
+ * [ID Quantique](https://www.idquantique.com/): [Cerberis and Clavis](https://www.idquantique.com/quantum-safe-security/products/#quantum_key_distribution)
+ * [MagiQ](https://www.magiqtech.com): [QPN](https://www.magiqtech.com/solutions/network-security/)
+ * [Quantum Xchange](https://quantumxc.com/): [Phio QK](https://quantumxc.com/phio-qk/) and [Phio TX](https://quantumxc.com/phio-tx/)
+ * [Quintessence Labs](https://www.quintessencelabs.com): [qOptica](https://www.quintessencelabs.com/products/quantum-key-distribution-qkd/)
+ 
+This list does not include companies that sell post-quantum (classical) cryptography products, but I believe they are included in the Total Addressable Market (TAM) numbers below.
+
+As of 2019 the total marked for QKD devices is around $85 million, and it is estimated to grow to $980 million by 2024 (see [this report](https://www.globenewswire.com/news-release/2019/04/30/1812788/0/en/Inside-Quantum-Technology-Report-says-Quantum-Key-Distribution-Market-to-Reach-980-million-by-2024.html))
