@@ -11,7 +11,7 @@
 #include "qkd_api.h"
 #include <assert.h>
 #include <stdio.h>
-#include <strings.h> 
+#include <string.h> 
 
 /**
  * Convert a QKD result code to a human readable string.
