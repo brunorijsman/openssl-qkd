@@ -109,42 +109,18 @@ The actual protocol that is used in the Internet today for key agreement is know
 
 ## The Diffie-Hellman key exchange protocol.
 
-
-## Example packet trace showing a Diffie-Hellman exchange.
-
-
-
-## What is OpenSSL and how does it fit into the picture?
-
-The open source OpenSSL library is widely used to provide security on the Internet. One of the main functions of the OpenSSL library is to implement the [Transport Layer Security (TLS)](https://en.wikipedia.org/wiki/Transport_Layer_Security) protocol, which forms the basis for the [Secure Hypertext Transfer Protocol (HTTPS)](https://en.wikipedia.org/wiki/HTTPS), which in turn enables secure and private browsing on the Internet.
-
-The name OpenSSL comes from the Secure Sockets Layer (SSL) protocol, a now outdated predecessor for the TLS protocol.
-
-
-
-
-
-
-
-
-# The Key Agreement Problem
-
-
-# Diffie-Hellman To The Rescue
-
-It turns out that there is a way for two communicating parties to dynamically agree on a new symmetric encryption key for each communication session.
+It turns out that there is a way for two communicating parties to dynamically agree on a new symmetric encryption key (the session key) for each communication session.
 
 The browser and the website and exchange a series of messages, following a pre-determined protocol, and at the end of that message exchange, the browser and the website will have agreed on a so-called _shared secret_ that is only known to the browser and to the website and not to anyone else. The browser and the website can use this shared secret as the symmetric encryption key.
 
 The amazing thing is that this statement ("the shared secret is only know to the browser and to the website and not to anyone else") is true _even_ if:
 
  (a) the key agreement protocol messages are sent in the clear (i.e. not encrypted), and
-
  (b) some malicious attacker is wiretapping the connection and observing all the messages that are exchanged during the key agreement protocol.
 
 When I first read about this it blew my mind. Think about it: two random strangers can meet for the first time. They talk a little bit, and at the end of the conversation they both agree on some secret number. I am standing right next to them, and I can hear everything they are saying, but I cannot figure out what the secret number is. And these are random strangers who have never met before and how don't know anything about each other (so they can't say "the secret number is my birth year" for example). How is that even possible?
 
-One widely used algorithm for dynamically agreeing on a shared secret is called the [Diffie-Hellman (DH) algorithm](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange). The mathematical details of how it works are surprisingly simple (see below for details).
+The most widely used algorithm for dynamically agreeing on a shared secret is called the [Diffie-Hellman (DH) algorithm](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange). The mathematical details of how it works are surprisingly simple (see below for details).
 
 There are actually a number of variations on the Diffie-Hellman algorithm:
 
@@ -154,10 +130,9 @@ There are actually a number of variations on the Diffie-Hellman algorithm:
 
 When your browser connects to a secure website, in most cases some variation of Diffie-Hellman (usually ECDHE) is used to implement key agreement. And in many cases, the OpenSSL library is used to implement Diffie-Hellman.
 
+## The Diffie-Hellman algorithm details
 
-# The Diffie-Hellman Algorithm Details
-
-The basic Diffie-Hellman algorthm (as opposed to the eliptic curve Diffie-Hellman algorithm) works as follows.
+The basic Diffie-Hellman algorithm (as opposed to the elliptic curve Diffie-Hellman algorithm ECDH) works as follows.
 
 First you have to understand the concept of modular arithmetic. In _modulo N_ math, there is only a finite set of numbers from zero to N-1. When you add one number to another number, and the result is greater or equal to N, then the result "rolls over".
 
@@ -278,6 +253,27 @@ Now that we are clear on modular math, we can explain the Diffie-Hellman algorit
    client_shared_secret
 
  * Now that the client and the server have agreed on a shared_secret, this value is used as the symmetric key to encrypt the rest of the conversation.
+
+
+
+## Example packet trace showing a Diffie-Hellman exchange.
+
+
+
+## What is OpenSSL and how does it fit into the picture?
+
+The open source OpenSSL library is widely used to provide security on the Internet. One of the main functions of the OpenSSL library is to implement the [Transport Layer Security (TLS)](https://en.wikipedia.org/wiki/Transport_Layer_Security) protocol, which forms the basis for the [Secure Hypertext Transfer Protocol (HTTPS)](https://en.wikipedia.org/wiki/HTTPS), which in turn enables secure and private browsing on the Internet.
+
+The name OpenSSL comes from the Secure Sockets Layer (SSL) protocol, a now outdated predecessor for the TLS protocol.
+
+
+
+
+
+
+
+
+
 
 
 # Diffie-Hellman In Action
