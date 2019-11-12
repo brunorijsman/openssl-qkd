@@ -3,6 +3,7 @@
         "conf.h": "c"
     },
     "cSpell.words": [
-        "diffie"
+        "diffie",
+        "shor"
     ]
 }

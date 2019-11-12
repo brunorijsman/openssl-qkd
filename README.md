@@ -40,6 +40,30 @@ The report consists of multiple parts:
 
    * Describes what the open source OpenSSL library is and how it fits into the picture.
 
- * Part 2:
+ * Part 2: [**Quantum computing breaks and fixes classical security**](doc/quantum-computing-breaks-and-fixes-classical-security):
 
- * Part 3:
+   * Describes that mathematical assumptions upon which the security of classical security algorithms is based.
+
+   * Explains how quantum computers, in particular the famous Shor's quantum algorithm, breaks classical security algorithms.
+
+   * Describes the two approaches to fixing the fact that classical security has been broken: (1) Quantum Key Distribution (QKD) protocols and (2) post-quantum cryptography.
+
+   * Gives the details of one specific Quantum Key Distribution (QKD) protocol, namely BB84 protocol.
+
+ * Part 3: [**The ETSI KQD API**](doc/the-etsi-qkd-api.md):
+
+   * Gives an idea of what Quantum Key Distribution (QKD) currently looks like in the real world. It introduces a few companies that already have commercially available quantum key management systems.
+
+   * Introduces a standard framework and standard Application Programmers Interface (API) for Quantum Key Distribution (QKD) defined by the [European Telecommunications Standards Institute (ETSI)](https://www.etsi.org/).
+
+ * Part 4: [**Implementing QKD in OpenSSL**](doc/implementing-qkd-in-openssl.md):
+
+   * Describes two possible approaches for implementing Quantum Key Distribution (QKD) in OpenSSL: (1) hacking the existing engine-based extension mechanism for Diffie-Hellman and (2) introducing QKD as a new key exchange protocol.
+
+   * Describes in detail how we implemented the first approach, i.e. how we "hacked" the existing engine-based extension mechanism for Diffie-Hellman to add support for QKD in OpenSSL on top of the ETSI QKD API.
+
+   * Describes how we created a "mock" (i.e. fake) implementation of the ETSI QKD API that allows us to test OpenSSL QKD without using any quantum network (neither a real quantum network nor a simulated quantum network).
+
+   * Gives instructions on how to build and run the code in this repository.
+
+At some point in the future, I also plan to implement BB84 on top of SimulaQron and add a part 5 to this report which documents that work.
