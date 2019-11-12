@@ -66,4 +66,4 @@ The report consists of multiple parts:
 
    * Gives instructions on how to build and run the code in this repository.
 
-At some point in the future, I also plan to implement BB84 on top of SimulaQron and add a part 5 to this report which documents that work.
+At some point in the future, I also plan to implement BB84 on top of SimulaQron and add a part 5 to this report to document that work.
