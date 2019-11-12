@@ -26,7 +26,7 @@ The end-goal of the challenge is to use an off-the-shelf browser (e.g. Chrome) a
 
 # Structure of this report
 
-In this document I describe how we achieved the goals set forth by the OpenSSL integration challenge.
+In this report I describe how we achieved the goals set forth by the OpenSSL integration challenge.
 
 The report consists of multiple parts:
 
