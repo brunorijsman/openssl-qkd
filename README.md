@@ -30,7 +30,7 @@ In this report I describe how we achieved the goals set forth by the OpenSSL int
 
 The report consists of multiple parts:
 
- * Part 1: [**Security in the classical Internet**](doc/security-in-the-classical-internet):
+ * Part 1: [**Security in the classical Internet**](doc/security-in-the-classical-internet.md):
  
    * Summarizes the security challenges in the classical (pre-quantum) Internet such as [authentication, confidentiality, and integrity](https://en.wikipedia.org/wiki/Information_security).
 
@@ -40,7 +40,7 @@ The report consists of multiple parts:
 
    * Describes what the open source OpenSSL library is and how it fits into the picture.
 
- * Part 2: [**Quantum computing breaks and fixes classical security**](doc/quantum-computing-breaks-and-fixes-classical-security):
+ * Part 2: [**Quantum computing breaks and fixes classical security**](doc/quantum-computing-breaks-and-fixes-classical-security.md):
 
    * Describes that mathematical assumptions upon which the security of classical security algorithms is based.
 
