@@ -32,7 +32,7 @@ The report consists of multiple parts:
 
  * Part 1: [**Security in the classical Internet**](doc/security-in-the-classical-internet):
  
-   * Summarizes the security challenges in the classical Internet (i.e. the pre-quantum Internet) such as [authentication, confidentiality, and integrity](https://en.wikipedia.org/wiki/Information_security).
+   * Summarizes the security challenges in the classical (pre-quantum) Internet such as [authentication, confidentiality, and integrity](https://en.wikipedia.org/wiki/Information_security).
 
    * Describes the protocols such as [Transport Layer Security (TLS)](https://en.wikipedia.org/wiki/Transport_Layer_Security) and algorithms such as [Diffie-Hellman key exchange](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange) that are used to solve these security challenges in the classical Internet.
 
