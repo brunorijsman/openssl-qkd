@@ -50,9 +50,9 @@ The report consists of multiple parts:
 
    * Gives the details of one specific Quantum Key Distribution (QKD) protocol, namely [BB84](https://en.wikipedia.org/wiki/BB84) protocol.
 
- * Part 3: [**The ETSI KQD API**](doc/the-etsi-qkd-api.md):
-
    * Gives an idea of what Quantum Key Distribution (QKD) currently looks like in the real world. It introduces a few companies that already have commercially available quantum key management systems.
+
+ * Part 3: [**The ETSI KQD API**](doc/the-etsi-qkd-api.md):
 
    * Introduces a standard framework and standard [Application Programmers Interface (API) for Quantum Key Distribution (QKD)](https://www.etsi.org/deliver/etsi_gs/QKD/001_099/004/01.01.01_60/gs_qkd004v010101p.pdf) defined by the [European Telecommunications Standards Institute (ETSI)](https://www.etsi.org/).
 
