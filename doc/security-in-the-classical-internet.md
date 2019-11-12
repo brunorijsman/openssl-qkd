@@ -6,7 +6,7 @@ This is part 1 in a multi-part report describing how we implemented Quantum Key 
 
 Imagine that you use your web browser to connect to your bank's website to transfer some money. Some of the main network security challenges in this transaction are:
 
- 1. _Authentication_: You want to validate (i.e. make sure) that the website that you are connected to is really the bank's website and not some fake website that looks exactly like your bank's website that was created by a criminal to steal your username and password.
+ 1. _Authentication_: You want to validate (i.e. make sure) that the website that you are connected to is really the bank's website and not some fake website that looks exactly like your bank's website but was created by a criminal to steal your username and password.
  
  2. _Confidentiality_: You want all the traffic between your browser and the bank's website to be encrypted so that it cannot be seen by some malicious snooper in the middle. For example you don't want a thief who is on the same public Wifi to steal your username and password. Frankly, you don't even want your Internet service provider to know what terms you are searching for on Google.
 
@@ -18,8 +18,17 @@ There are other security challenges such as [non-repudiation](https://en.wikiped
  
 ## The Transport Layer Security (TLS) protocol.
 
+The [Transport Layer Security (TLS)](https://en.wikipedia.org/wiki/Transport_Layer_Security) protocol is one of the most widely used protocols on the Internet for providing authentication, confidentiality, integrity, and other security functions.
 
+TLS was standardized by the [Internet Engineering Task Force (IETF)](https://www.ietf.org/), which is the main standardization organization for Internet protocols.
 
+There are multiple versions of TLS, each described in its own standards document which is called a [Request For Comment (RFC)](https://en.wikipedia.org/wiki/Request_for_Comments) in IETF jargon:
+ * TLS 1.0 is described in [RFC 2246](https://tools.ietf.org/pdf/rfc2246.pdf)
+ * TLS 1.1 is described in [RFC 4346](https://tools.ietf.org/pdf/rfc4346.pdf)
+ * TLS 1.2 is described in [RFC 5246](https://tools.ietf.org/pdf/rfc5246.pdf)
+ * TLS 1.3 is the most recent version of TLS and is described in [RFC 8446](https://tools.ietf.org/pdf/rfc8446.pdf)
+
+The predecessor for TLS was the [Secure Sockets Layer (SSL)](https://tools.ietf.org/html/rfc6101) protocol, which is now considered obsolete. However, many people still use the older term SSL when they are actually referring to TLS. For example, one of the main open source implementations of TLS is still called [OpenSSL](https://www.openssl.org/).
 
 ## The Diffie-Hellman key exchange protocol.
 
