@@ -130,7 +130,7 @@ There are actually a number of variations on the Diffie-Hellman algorithm:
 
 When your browser connects to a secure website, in most cases some variation of Diffie-Hellman (usually ECDHE) is used to implement key agreement. And in many cases, the OpenSSL library is used to implement Diffie-Hellman.
 
-## The Diffie-Hellman algorithm details
+## The Diffie-Hellman algorithm details.
 
 The basic Diffie-Hellman algorithm (as opposed to the elliptic curve Diffie-Hellman algorithm ECDH) works as follows.
 
@@ -254,10 +254,68 @@ Now that we are clear on modular math, we can explain the Diffie-Hellman algorit
 
  * Now that the client and the server have agreed on a shared_secret, this value is used as the symmetric key to encrypt the rest of the conversation.
 
-
-
 ## Example packet trace showing a Diffie-Hellman exchange.
 
+Let's have a look at the Diffie-Hellman algorithm in action in the real world. I use a browser (Safari in this example) to visit a secure website ([https://www.google.com/](https://xkcd.com/) in this example). In this scenario, the browser acts as the TLS client, and the website acts as the TLS server. I use the [WireShark](https://www.wireshark.org/) protocol analyzer to capture and analyze the TLS traffic.
+
+The following screenshot shows the TLS traffic between my browser and the Google website (I have filtered the traffic to show only a single TLS session).
+
+In this case the client and server negotiate the use of Elliptic Curve Diffie-Hellman Ephemeral (ECDHE) whose parameters are a little bit different than the g and p of regular Diffie-Hellman, the the flow of the messages is the same.
+
+We only show a subset of the exchanged TLS messages, namely the ones that illustrate how the Diffie-Hellman exhange works.
+
+#### Session Overview
+
+![HTTPS WireShark Entire Session](../figures/https-wireshark-entire-session.png)
+
+Let's zoom in on some specific packets to see the details of the Diffie-Hellman exchange.
+
+#### TLS Client Hello
+
+In the following screenshot we see the _TLS Client Hello_ message that the client sends to the server.
+
+It contains a list, sorted in order of preference, of proposed _Cipher Suites_ that the client supports from which the server can choose. Each cipher suite proposed, amongst other things, a specific key exchange protocol such as for example Elliptic Curve Diffie Hellman-Ephemeral (ECDHE).
+
+![HTTPS WireShark Client Hello](../figures/https-wireshark-client-hello.png)
+
+#### TLS Server Hello
+
+In the following screenshot we see the _TLS Server Hello_ message that the server sends to the client.
+
+It contains the _Cipher Suite_ that the server has chosen.
+
+![HTTPS WireShark Server Hello](../figures/https-wireshark-server-hello.png)
+
+
+#### TLS Server Certificate Status
+
+In the following screenshot we see the _TLS Certificate Status_ message that the server sends to the client.
+
+The _Server Key Exchange_ field contains the public _Elliptic Curve (EC) Diffie-Hellman Parameters_ as well as the _Public Key_ chosen by the server.
+
+![HTTPS WireShark Certificate Status](../figures/https-wireshark-server-certificate-status.png)
+
+#### TLS Server Client Key Exchange
+
+In the following screenshot we see the _TLS Client Key Exchange_ message that the client sends to the server.
+
+It contains the Diffie-Hellman _Public Key_ chosen by the client.
+
+![HTTPS WireShark Client Key Exchange](../figures/https-wireshark-client-key-exchange.png)
+
+#### Encrypted Application Data
+
+At this point both the server and the client have all the information that they need to each compute the shared secret (which never appears on the wire).
+
+From here on out, both side use the shared secret to encrypt the application traffic.
+
+First we see a message with encrypted application data from the client to the server. This actually contains the encrypted HTTP GET request (we know that, but we cannot see that in the encrypted packet).
+
+![HTTPS WireShark Client Encrypted Application Data](../figures/https-wireshark-client-application-data.png)
+
+Then we see a message with encrypted data going back from the server to the client. This actually contains the encrypted HTTP GET response (we know that, but we cannot see that in the encrypted packet).
+
+![HTTPS WireShark Server Encrypted Application Data](../figures/https-wireshark-server-application-data.png)
 
 
 ## What is OpenSSL and how does it fit into the picture?
@@ -275,67 +333,4 @@ The name OpenSSL comes from the Secure Sockets Layer (SSL) protocol, a now outda
 
 
 
-
-# Diffie-Hellman In Action
-
-Let's have a look at the Diffie-Hellman algorithm in action in the real world. I use a browser (Safari in this example) to visit a secure website ([https://www.google.com/](https://xkcd.com/) in this example). In this scenario, the browser acts as the TLS client, and the website acts as the TLS server. I use the [WireShark](https://www.wireshark.org/) protocol analyzer to capture and analyze the TLS traffic.
-
-The following screenshot shows the TLS traffic between my browser and the Google website (I have filtered the traffic to show only a single TLS session).
-
-In this case the client and server negotiate the use of Elliptic Curve Diffie-Hellman Ephemeral (ECDHE) whose parameters are a little bit different than the g and p of regular Diffie-Hellman, the the flow of the messages is the same.
-
-We only show a subset of the exchanged TLS messages, namely the ones that illustrate how the Diffie-Hellman exhange works.
-
-#### Session Overview
-
-![HTTPS WireShark Entire Session](figures/https-wireshark-entire-session.png)
-
-Let's zoom in on some specific packets to see the details of the Diffie-Hellman exchange.
-
-#### TLS Client Hello
-
-In the following screenshot we see the _TLS Client Hello_ message that the client sends to the server.
-
-It contains a list, sorted in order of preference, of proposed _Cipher Suites_ that the client supports from which the server can choose. Each cipher suite proposed, amongst other things, a specific key exchange protocol such as for example Elliptic Curve Diffie Hellman-Ephemeral (ECDHE).
-
-![HTTPS WireShark Client Hello](figures/https-wireshark-client-hello.png)
-
-#### TLS Server Hello
-
-In the following screenshot we see the _TLS Server Hello_ message that the server sends to the client.
-
-It contains the _Cipher Suite_ that the server has chosen.
-
-![HTTPS WireShark Server Hello](figures/https-wireshark-server-hello.png)
-
-
-#### TLS Server Certificate Status
-
-In the following screenshot we see the _TLS Certificate Status_ message that the server sends to the client.
-
-The _Server Key Exchange_ field contains the public _Elliptic Curve (EC) Diffie-Hellman Parameters_ as well as the _Public Key_ chosen by the server.
-
-![HTTPS WireShark Certificate Status](figures/https-wireshark-server-certificate-status.png)
-
-#### TLS Server Client Key Exchange
-
-In the following screenshot we see the _TLS Client Key Exchange_ message that the client sends to the server.
-
-It contains the Diffie-Hellman _Public Key_ chosen by the client.
-
-![HTTPS WireShark Client Key Exchange](figures/https-wireshark-client-key-exchange.png)
-
-#### Encrypted Application Data
-
-At this point both the server and the client have all the information that they need to each compute the shared secret (which never appears on the wire).
-
-From here on out, both side use the shared secret to encrypt the application traffic.
-
-First we see a message with encrypted application data from the client to the server. This actually contains the encrypted HTTP GET request (we know that, but we cannot see that in the encrypted packet).
-
-![HTTPS WireShark Client Encrypted Application Data](figures/https-wireshark-client-application-data.png)
-
-Then we see a message with encrypted data going back from the server to the client. This actually contains the encrypted HTTP GET response (we know that, but we cannot see that in the encrypted packet).
-
-![HTTPS WireShark Server Encrypted Application Data](figures/https-wireshark-server-application-data.png)
 
