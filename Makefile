@@ -3,10 +3,12 @@ ifeq ($(UNAME_S), Linux)
 CC = gcc
 SHARED_EXT = .so
 SHARED_PATH_ENV = LD_LIBRARY_PATH
+MAYBE_SUDO = sudo
 else ifeq ($(UNAME_S), Darwin)
 CC = clang
 SHARED_EXT = .dylib
 SHARED_PATH_ENV = DYLD_FALLBACK_LIBRARY_PATH
+MAYBE_SUDO = 
 else
 $(error Unsupported platform)
 endif
@@ -50,8 +52,8 @@ key.pem cert.pem:
 		-config certificate_openssl.cnf
 
 $(ENGINE_DIR)/$(CLIENT): $(CLIENT)
-	mkdir -p $(ENGINE_DIR)
-	ln -sf ${CURDIR}/$(CLIENT) $(ENGINE_DIR)/$(CLIENT)
+	$(MAYBE_SUDO) mkdir -p $(ENGINE_DIR)
+	$(MAYBE_SUDO) ln -sf ${CURDIR}/$(CLIENT) $(ENGINE_DIR)/$(CLIENT)
 
 $(ENGINE_DIR)/$(SERVER): $(SERVER)
 	mkdir -p $(ENGINE_DIR)
