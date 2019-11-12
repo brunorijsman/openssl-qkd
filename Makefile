@@ -1,13 +1,12 @@
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S), Linux)
-	@echo "Linux"
-	CC = gcc
-	SHARED_EXT = .so
-	SHARED_PATH_ENV = LD_LIBRARY_PATH
+CC = gcc
+SHARED_EXT = .so
+SHARED_PATH_ENV = LD_LIBRARY_PATH
 else ifeq ($(UNAME_S), Darwin)
-	CC = clang
-	SHARED_EXT = .dylib
-	SHARED_PATH_ENV = DYLD_FALLBACK_LIBRARY_PATH
+CC = clang
+SHARED_EXT = .dylib
+SHARED_PATH_ENV = DYLD_FALLBACK_LIBRARY_PATH
 else
 $(error Unsupported platform)
 endif
