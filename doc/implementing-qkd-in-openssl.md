@@ -24,9 +24,19 @@ There are two approaches to adding support for QKD in OpenSSL using the ETSI QKD
 
 #### Approach 1: Hacking the existing engine-based extension mechanism for Diffie-Hellman.
 
-TODO
+OpenSSL has a mechanism, called "engines", that allows third parties (such as myself) to add extensions to OpenSSL. These extensions can be implemented as dynamic libraries (.so files on Linux or .dylib files on macOS) which allows the extensions to be dynamically loaded into OpenSSL without make any changes to the source code of OpenSSL itself. The OpenSSL configuration file controls which extensions are loaded into OpenSSL.
+
+The main purpose of OpenSSL engines to allow time-consuming cryptographic operations to be offloaded from the default software implementation in OpenSSL into special-purpose crypto acceleration hardware. OpenSSL has made some a-priori decisions about which operations make sense to be offloaded. The OpenSSL engine framework provides APIs to allow those specific operations, and only those specific operations, to be offloaded. 
+
+The engine APIs allow the dynamically loaded engine to register a callback function that OpenSSL should call whenever a particular expensive operations needs to be performed. This registered function is called instead of the default software implementation in OpenSSL, and it is expected to implement the same function in a more efficient manner on special-purpose hardware.
+
+In our current implementation of QKD support in OpenSSL, we have used the engine mechanism in a creative way to avoid having to change the OpenSSL source code (see approach 2 below). A less charitable way of saying it is that our current implementation is a hack.
+
+
 
 #### Approach 2: Introducing QKD as a new first-class key exchange protocol.
+
+As a result of how engines are implemented in OpenSSL (see the description above), OpenSSL engines have their limitations. They can only be used to accelerate a pre-determined set of operations in existing algorithms. They cannot be used to introduce, for example, a completely new key exchange algorithms such as QKD. You still need to change the source code of
 
 TODO
 
