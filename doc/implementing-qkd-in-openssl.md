@@ -174,6 +174,13 @@ cd ~/openssl-qkd
 make test
 ~~~
 
+You should see the following at the end out the output:
+~~~
+Checking tshark output for correct Diffie-Helman exchange... OK
+~~~
+
+**Congratulations!** You have successfully run a (mock) QKD key exchange between an HTTP client and an HTTP server using OpenSSL and the ETSI QKD API!
+
 Note: currently the test sometimes fails with the following error message. This is a known issue that will be fixed (hopefully) soon. Just run the test again.
 ~~~~
 Checking tshark output for correct Diffie-Helman exchange... Did not match pattern #0: Connection establish request \(SYN\): server port 44330
