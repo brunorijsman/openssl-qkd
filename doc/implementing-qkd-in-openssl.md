@@ -88,32 +88,33 @@ The following diagram shows how the ETSI QKD API is intended to be used (see sec
 
 ![ETSI QKD API ladder diagram](../figures/etsi-qkd-api-ladder-diagram.png)
 
-We had to create separate engines for the HTTPS/TLS server and the HTTP/TLS client. TODO
+Notice that the server side uses the API in a slightly different way than the client. For example, the server calls QKD_OPEN with a NULL key_handle (which causes a new key_handle to be allocated) whereas the client calls QKD_OPEN with the key_handle that was allocated on the server side. However, the DH callbacks in the engine have no way of finding out whether they are being called on the server side or on the client side. For this reason we ended up having to create two separate engines: one for the server side and a different one for the client side.
 
 
-#### QKD Engine Server
+
+The following table summarizes how the **server** maps OpenSSL engine DH callbacks to ETSI QKD API calls:
 
 | Engine callback | Intended purpose | Actual implementation |
 |---|---|---|
 | init | Initialize the engine | Call QKD_init |
-| compute_key | Compute the DH private key and derive the DH public key from it | TODO |
-| generate_key | Generate the shared_secret given the remote peer's public key | TODO |
+| generate_key | Generate the DH private key and derive the DH public key from it | Use fixed value for the DH private key. Call QKD_OPEN and use returned key_handle as DH public key.  |
+| compute_key | Compute the shared_secret given the remote peer's public key | Retrieve our own (i.e. the server's) DH public key as the key_handle. Call QKD_CONNECT_BLOCKING. Call QKD_GET_KEY and use the returned QKD key as the DH shared secret. Call QKD_CLOSE. |
 
+The following table summarizes how the **client** maps OpenSSL engine DH callbacks to ETSI QKD API calls:
 
-
-
+| Engine callback | Intended purpose | Actual implementation |
+|---|---|---|
+| init | Initialize the engine | Call QKD_init |
+| generate_key | Generate the DH private key and derive the DH public key from it | Use fixed values for the DH private key and the DH public key. |
+| compute_key | Compute the shared_secret given the remote peer's public key | Use the peer's (i.e. the server's) DH public key as the key_handle. Call QKD_OPEN. Call QKD_CONNECT_BLOCKING. Call QKD_GET_KEY and use the return QKD key as the DH shared secret. Call QKD_CLOSE. |
 
 The following files contain our implementation of the OpenSSL engine for QKD:
 
- * `qkd_engine_common.c` and `qkd_engine_common.h` 
+ * `qkd_engine_common.c` and `qkd_engine_common.h` contain the engine code that is common to the server and the client.
+ * `qkd_engine_server.c` contains the code that is unique to the server (it implements the server mapping table shown above).
+ * `qkd_engine_client.c` contains the code that is unique to the client (it implements the client mapping table shown above).
 
 Note that this engine code doesn't know or care whether the QKD implementation is (a) a mock QKD implementation or (b) an implementation of real BB84 QKD running on a simulated quantum network using SimulaQron or even (c) implementation of real QKD running over a real quantum network running some commercially available real QKD device.
-
-
-
-TODO
-
-
 
 ## The mock implementation of the ETSI QKD API.
 

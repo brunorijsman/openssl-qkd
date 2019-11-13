@@ -32,7 +32,7 @@ The following figure shows what was actually achieved soon after the end of the 
 
 In this report I describe how we achieved the goals set forth by the OpenSSL integration challenge.
 
-The report consists of multiple parts:
+The report consists of multiple parts (if you are already familiar with classical cryptography and quantum cryptography you probably want to skip ahead to part 4 which describes the actual implementation):
 
  * Part 1: [**Security in the classical Internet**](doc/security-in-the-classical-internet.md):
  
