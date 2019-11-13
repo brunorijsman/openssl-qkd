@@ -1,1 +1,7 @@
 theme: jekyll-theme-slate
+title: Quantum Key Distribution (QKD) in OpenSSL
+description: A report describing how we implemented QKD for OpenSSL during the RIPE Quantum Internet Hackathon 2019
+author: Bruno Rijsman
+plugins:
+  - jekyll-seo-tag
+google_analytics: UA-31532124-6
