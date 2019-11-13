@@ -120,7 +120,47 @@ Note that this engine code doesn't know or care whether the QKD implementation i
 
 This sections describes in details on we created a "mock" (i.e. fake) implementation of the ETSI QKD API that allows us to test OpenSSL QKD without using any quantum network (neither a real quantum network nor a simulated quantum network).
 
-TODO
+Behavior of the mock ETSI QKD API on the server side:
+
+| ETSI QKD API | Mock implementation |
+|---|---|
+| QKD_INIT | Listen for incoming mock QKD connection. |
+| QKD_OPEN | Allocate and remember a new key_handle. |
+| QKD_CONNECT_BLOCKING | Accept incoming QKD connection from client. Receive client key_handle over QKD connection. Verify that client key_handle is same as server key_handle. |
+| QKD_CONNECT_NONBLOCK | Not implemented yet. |
+| QKD_CONNECT_GET_KEY | Receive the shared_secret from the client over the QKD connection. |
+| QKD_CONNECT_CLOSE | Close the QKD connection. |
+
+Behavior of the mock ETSI QKD API on the client side:
+
+| ETSI QKD API | Mock implementation |
+|---|---|
+| QKD_INIT | - |
+| QKD_OPEN | Remember the provided key_handle. |
+| QKD_CONNECT_BLOCKING | Create outgoing QKD connection to server. Send key_handle over QKD connection to the server.. |
+| QKD_CONNECT_NONBLOCK | Not implemented yet. |
+| QKD_CONNECT_GET_KEY | Allocate a random shared_secret. Send the shared_secret over the QKD connection to the server. |
+| QKD_CONNECT_CLOSE | Close the QKD connection. |
+
+The exchange of key handles over the QKD connection is done only for verification / debugging reasons. We just want to make sure that the client is connected to the right server and vice versa.
+
+(*) See the [challenges section](#encountered-challenges-and-their-solutions) for an explanation why the _client_ side choses the shared secret and send it to the _server_ instead of vice versa, what would have seemed more natural.
+
+Note that the mock QKD protocol is asymmetric. One side generates the shared secret and provides it to the other side. Once again, we see that the mock API needs to know whether it is running on the server side or on the client side. The current implementation does this by assuming that the server will pass a NULL destination to the QKD_OPEN call ("accept incoming QKD sessions from any client) whereas the client will pass a non-NULL destination to the QKD_OPEN call ("create a QKD session to a specific server").
+
+The file `qkd_api.h` contains the interface definition of the ETSI QKD API. This file remains the same, regardless of whether the underlying API implementation is (a) a mock API or (b) a real BB84 QKD implementation running on a simulated quantum network using SimulaQron or (c) a real QKD implementation running on a real quantum network using real commercially available QKD devices or (d) anything else.
+
+The file `qkd_api_mock.c` implements the ETSI QKD API as defined in the `qkd_api.h` header file. It maps the API functions to the behavior described in the two table above.
+
+Both the `qkd_api.h` and `qkd_api_mock.c` file in this repository are based on the original mock API that was provided by the hackathon organizers.
+
+There are a few remaining major TODO items in the mock API implementation:
+
+ 1. Support the server and the client running on different computers.
+
+ 1. On the server, support more than one concurrent client session.
+
+ 1. Add support for QKD_CONNECT_NONBLOCK.
 
 ## Encountered challenges and their solutions.
 
@@ -128,7 +168,18 @@ We encountered the following challenges:
 
  * The engine's behavior is different on the server and client side, but the engine callback functions have no way of finding out whether they are running on the server or the client. Solution: we created two separate engines, one for the server and one for the client.
 
-TODO: Deadlock
+ * During the implementation of the mock API we ran into an interesting deadlock problem, namely:
+   * In an earlier attempted implementation, the client choses the random shared secret and sent it over the TCP connection to the server, by doing a blocking write on the TCP socket.
+   * It turns out that OpenSSL on the client side calls the compute_key callback before sending the TLS Client Key Exchange message (which contains the clients's public key) to the server.
+   * On the server side, OpenSSL will not call compute_key until after the TLS Client Key Exchange message is received from the client.
+   * This leads to the following deadlock: 
+     * When the client writes to the TCP socket, it blocks until the server reads the TCP socket.
+     * The server does not read the TCP socket until after it has received the TLS Client Key Exchange message.
+     * The client does not send the TLS Client Key Exchange message until after it has finished writing to the TCP socket.
+     * Deadlock.
+   * We solved this deadlock by reversing the roles. In the final code, the server choses the random shared secret and sends it over the TCP connection to the client.
+   * This design is fragile because the mock API makes assumptions about the order in which the API functions are called.
+   * This, in turn, is a side-effect of abusing the OpenSSL Diffie-Hellman callbacks to "hack QKD into OpenSSL". If and when we introduce QKD as a first-class key exchange mechanism with its own APIs and its own engine, then we will design those QKD APIs and callbacks in a matter that maps better to the QKD use cases.
 
 ## How to build and run the code in this repository.
 
@@ -276,4 +327,26 @@ Checking tshark output for correct Diffie-Helman exchange... Did not match patte
 
 ## What does the mock QKD in OpenSSL unit test / demo do?
 
-TODO
+The unit test / demo involves the following components:
+
+ 1. The OpenSSL demo HTTPS web server (`openssl s_server`). It waits for incoming HTTPS GET requests and produces a web page with some OpenSSL statistics in response. In our unit test we use an OpenSSL configuration file that dynamically loads the server-side mock QKD engine.
+
+ 1. The OpenSSL demo HTTPS web client (`openssl s_client`). It sends an HTTPS GET requests to the web server and prints the response. In our unit test we use an OpenSSL configuration file that dynamically loads the client-side mock QKD engine.
+
+ 1. A tshark process that captures all network packets between the client and the server. It produces a tshark.out file which contains the decoded traffic in human-readable form. Our unit test script parses this tshark.out file to check whether the expected TLS handshake messages are actually observed. It also produces a binary tshak.pcap file which can be loaded into WireShark for interactive investigation of the TLS exchange.
+
+The unit test / demo can be run using `make test` or invoking the `run_mock_test.sh` shell script. Either way, it does the following:
+
+ 1. Stop any HTTPS server process that might still be running in the background from a previous run. (Script `stop_server.sh`)
+
+ 1. Start a new HTTPS server process in the background, listening for incoming HTTPS GET requests. (Script `start_server.sh`)
+
+ 1. Start a tshark process in the background to capture the traffic between the client and server. (Script `start_tshark.sh`)
+
+ 1. Run a HTTP client process to send a single HTTPS GET request to the server and print the response. (Script `run_client.sh`)
+
+ 1. Stop the tshark process running in the background. (Script `stop_tshark.sh`)
+
+ 1. Stop the HTTPS server process running in the background. (Script `stop_server.sh`)
+
+ 1. Analyze the captured and decoded traffic file `tshark.out` and verify that the expected TLS message were exchanged. (Script `check_shark.py`)
