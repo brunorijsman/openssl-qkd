@@ -84,6 +84,20 @@ The following resources are helpful for understanding how engines work in OpenSS
  * [OpenSSL man page for DH_compute_key engine callback](https://www.openssl.org/docs/man1.1.0/man3/DH_compute_key.html)
  * [Gost-engine/engine GitHub repo containing an OpenSSL engine implementation](https://github.com/gost-engine/engine)
 
+We had to create separate engines for the HTTPS/TLS server and the HTTP/TLS client. TODO
+
+The following files contain our implementation of the OpenSSL engine for QKD:
+
+ * `qkd_engine_common.c` and `qkd_engine_common.h` 
+
+Note that this engine code doesn't know or care whether the QKD implementation is (a) a mock QKD implementation or (b) an implementation of real BB84 QKD running on a simulated quantum network using SimulaQron or even (c) implementation of real QKD running over a real quantum network running some commercially available real QKD device.
+
+
+
+TODO
+
+
+
 ## The mock implementation of the ETSI QKD API.
 
 This sections describes in details on we created a "mock" (i.e. fake) implementation of the ETSI QKD API that allows us to test OpenSSL QKD without using any quantum network (neither a real quantum network nor a simulated quantum network).
