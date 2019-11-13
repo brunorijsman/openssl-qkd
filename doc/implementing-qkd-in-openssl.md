@@ -52,9 +52,9 @@ Who knows, maybe sometime in the future in some remote South-America town, I wil
 
 This section describes in detail how we "hacked" the existing engine-based extension mechanism for Diffie-Hellman to add support for QKD in OpenSSL on top of the ETSI QKD API.
 
-The following resources are helpful to understand the OpenSSL engine framework:
+The following resources are helpful for understanding the code in this repository:
 
- * 
+ * The OpenSSL documentation 
 
 ## The mock implementation of the ETSI QKD API.
 
