@@ -88,8 +88,20 @@ The following diagram shows how the ETSI QKD API is intended to be used (see sec
 
 ![ETSI QKD API ladder diagram](../figures/etsi-qkd-api-ladder-diagram.png)
 
-
 We had to create separate engines for the HTTPS/TLS server and the HTTP/TLS client. TODO
+
+
+#### QKD Engine Server
+
+| Engine callback | Intended purpose | Actual implementation |
+|---|---|---|
+| init | Initialize the engine | Call QKD_init |
+| compute_key | Compute the DH private key and derive the DH public key from it | TODO |
+| generate_key | Generate the shared_secret given the remote peer's public key | TODO |
+
+
+
+
 
 The following files contain our implementation of the OpenSSL engine for QKD:
 
