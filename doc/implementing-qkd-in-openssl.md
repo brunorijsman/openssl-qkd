@@ -124,7 +124,11 @@ TODO
 
 ## Encountered challenges and their solutions.
 
-TODO
+We encountered the following challenges:
+
+ * The engine's behavior is different on the server and client side, but the engine callback functions have no way of finding out whether they are running on the server or the client. Solution: we created two separate engines, one for the server and one for the client.
+
+TODO: Deadlock
 
 ## How to build and run the code in this repository.
 
