@@ -26,7 +26,7 @@ The end-goal of the challenge is to use an off-the-shelf browser (e.g. Chrome) a
 
 The following figure shows what was actually achieved soon after the end of the hackathon (see [part 4](doc/implementing-qkd-in-openssl.md) for more details). At some time in the future I will replace the "mock QKD" implementation with a "real" implementation of BB84 QKD and update this report to document the results (I put "real" in quotes because it will run on a simulated quantum network using [SimulaQron](http://www.simulaqron.org/)).
 
-![OpenSSL Logo](figures/architecture-mock-qkd.png)
+![Architecture using engines and mock QKD](figures/architecture-engine-mock-qkd.png)
 
 # Structure of this report
 

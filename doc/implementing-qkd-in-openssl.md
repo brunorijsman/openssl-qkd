@@ -38,7 +38,9 @@ Our QKD engine overloaded two callback functions that were really intended to im
 
 * The Diffie-Hellman `generate_key` engine callback is really intended to generate a Diffie-Hellman shared secret using the end-point's own private key, the peer's public key, and the negotiated Diffie-Hellman g and p parameters. We have hacked this callback to instead retrieve the shared secret from the QKD key management layer using the ETSI QKD GET_KEY API.
 
-More details about our hacked implementation are given below.
+The following diagram illustrates this first approach of hacking the existing engine-based extension mechanism for Diffie-Hellman. A more detailed description of the actual code is given below.
+
+![Architecture using engines and QKD](../figures/architecture-engine-qkd.png)
 
 #### Approach 2: Introducing QKD as a new first-class key exchange protocol.
 
@@ -48,15 +50,39 @@ We got away with introducing QKD support without changing the OpenSSL source cod
 
 Who knows, maybe sometime in the future in some remote South-America town, I will find myself with some spare time on my hands, do a "proper" implementation, and update this repository and report accordingly.
 
+## Mock QKD versus BB84 QKD running on SimulaQron
+
+The plan of attack for the hackathon was to split the work across two teams:
+
+ * One team would work on implementing an engine for OpenSSL to consume the ETSI QKD API for doing an QKD-based key exchange in OpenSSL. This was the team that I was a part of.
+
+ * Another team would work on implementing the ETSI QKD API by implementing the BB84 QKD protocol on top of the SimulaQron quantum network simulator using the SimulaQron CQC API. (CQC is simply the name of the C-language binding of the API that is used to talk to SimulaQron).
+
+Thus, whereas team 1 is a _consumer_ of the ETSI QKD API, team 2 is a _provider_ of the ETSI QKD API.
+
+To allow the two teams to work in parallel, team 1 would initially use a "mock" implementation of the ETSI QKD API. This is shown on the left side in the diagram below. In this mock implementation there is a "fake" ETSI QKD API provider that simply allocates a random shared secret and send it "in the clear" over a TCP connection to the other side.
+
+Once both team 1 and team 2 are finished, the two components (the consumer and the provider) can be integrated together as show on the right side in the diagram below.
+
+At this point in time, we have only completed the left side of the diagram. The right side, i.e. the integration, has not yet been achieved. But I plan to complete that integration in the future and update this repository and this report accordingly.
+
+![Mock QKD vs BB84 QKD running on SimulaQron](../figures/architecture-engine-mock-qkd-vs-bb84-qkd-on-simulaqron.png)
+
 ## Hacking the OpenSSL Diffie-Hellman engine to add QKD.
 
 This section describes in detail how we "hacked" the existing engine-based extension mechanism for Diffie-Hellman to add support for QKD in OpenSSL on top of the ETSI QKD API.
 
-The following resources are helpful for understanding the code in this repository:
+The following resources are helpful for understanding how engines work in OpenSSL in general and for understanding the code in this repository in specific:
 
-TODO: Finish this list
-
- * The OpenSSL documentation 
+ * [OpenSSL wiki main page](https://wiki.openssl.org/index.php/Main_Page)
+ * [OpenSSL wiki libcrypto main page](https://wiki.openssl.org/index.php/Libcrypto_API)
+ * [OpenSSL wiki Diffie-Hellman](https://wiki.openssl.org/index.php/Diffie_Hellman)
+ * [OpenSSL wiki example ECDH engine](https://wiki.openssl.org/index.php/Creating_an_OpenSSL_Engine_to_use_indigenous_ECDH_ECDSA_and_HASH_Algorithms)
+ * [OpenSSL wiki SSL and TLS tutorial](https://wiki.openssl.org/index.php/SSL_and_TLS_Protocols)
+ * [OpenSSL man page for engines](https://www.openssl.org/docs/man1.1.0/man3/ENGINE_add.html)
+ * [OpenSSL man page for DH_generate_key engine callback](https://www.openssl.org/docs/man1.1.0/man3/DH_generate_key.html)
+ * [OpenSSL man page for DH_compute_key engine callback](https://www.openssl.org/docs/man1.1.0/man3/DH_compute_key.html)
+ * [Gost-engine/engine GitHub repo containing an OpenSSL engine implementation](https://github.com/gost-engine/engine)
 
 ## The mock implementation of the ETSI QKD API.
 
