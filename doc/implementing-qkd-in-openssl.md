@@ -10,9 +10,9 @@ The challenge consists of two parts:
 
  1. Add QKD support to OpenSSL by invoking the [ETSI KQD API](https://www.etsi.org/deliver/etsi_gs/QKD/001_099/004/01.01.01_60/gs_QKD004v010101p.pdf). Here OpenSSL becomes a consumer of the QKD API. The hackathon organizers had provided a mock implementation of the QKD API for testing purposes.
 
- 2. Implement a specific QKD protocol, namely BB84, on top of the SimulaQron quantum network simulator. Here the BB84 implementation becomes a provider of the QKD API.
+ 2. Implement a specific QKD protocol, namely [Bennett and Brassard 1984 (BB84)](https://en.wikipedia.org/wiki/BB84) , on top of the [SimulaQron](http://www.simulaqron.org/) quantum network simulator. Here the BB84 implementation becomes a provider of the QKD API.
 
-The end-goal of the challenge is to use an off-the-shelf browser (e.g. Chrome) and connect it to a secure HTTPS website hosted on an off-the-shelf web server (e.g. Apache), while using the BB84 quantum key distribution algorithm as the key agreement protocol (running a [SimulaQron](http://www.simulaqron.org/) simulated quantum network), instead of the classical Diffie-Hellman protocol that is normally used in classical networks.
+The end-goal of the challenge is to use an off-the-shelf browser (e.g. Chrome) and connect it to a secure HTTPS website hosted on an off-the-shelf web server (e.g. Apache), while using the BB84 quantum key distribution algorithm as the key agreement protocol (running a SimulaQron simulated quantum network), instead of the classical Diffie-Hellman protocol that is normally used in classical networks.
 
 During the hackathon, the team that I was a part of worked on part 1 of the challenge. This page describes that work (which was successfully completed). Another team ("team awesome") worked on part 2 of the challenge, which they partially completed. The end-goal (i.e. the integration between part 1 and 2) was not yet achieved. It is my intention to complete the work for part 2, to complete the integration, and to update this document once that work is completed.
 
