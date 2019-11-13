@@ -12,6 +12,7 @@
 ./start_tshark.sh
 sleep 2
 ./start_server.sh
+sleep 1
 ./run_client.sh
 sleep 1
 ./stop_server.sh

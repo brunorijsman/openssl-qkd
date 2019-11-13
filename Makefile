@@ -21,20 +21,20 @@ ENGINE_DIR = /usr/local/lib/engines-3
 
 CFLAGS = -Wall -Werror -I. -I$(OPENSSL_INCLUDE) -L$(OPENSSL_LIB) -g -fPIC
 
-CLIENT = qkd_client$(SHARED_EXT)
-SERVER = qkd_server$(SHARED_EXT)
+CLIENT = qkd_engine_client$(SHARED_EXT)
+SERVER = qkd_engine_server$(SHARED_EXT)
 
 all: $(CLIENT) $(SERVER) key.pem cert.pem $(ENGINE_DIR)/$(CLIENT) $(ENGINE_DIR)/$(SERVER)
 
 MOCK_API_C = qkd_api_common.c qkd_api_mock.c
 MOCK_API_H = qkd_api.h
 
-CLIENT_C = qkd_client.c qkd_engine_common.c qkd_debug.c $(MOCK_API_C)
+CLIENT_C = qkd_engine_client.c qkd_engine_common.c qkd_debug.c $(MOCK_API_C)
 CLIENT_H = qkd_engine_common.h $(MOCK_API_H)
 $(CLIENT): $(CLIENT_C) $(CLIENT_H)
 	$(LINK.c) -shared -o $@ $(CLIENT_C) -lcrypto
 
-SERVER_C = qkd_server.c qkd_engine_common.c qkd_debug.c $(MOCK_API_C)
+SERVER_C = qkd_engine_server.c qkd_engine_common.c qkd_debug.c $(MOCK_API_C)
 SERVER_H = qkd_engine_common.h $(MOCK_API_H)
 $(SERVER): $(SERVER_C) $(SERVER_H)
 	$(LINK.c) -shared -o $@ $(SERVER_C) -lcrypto

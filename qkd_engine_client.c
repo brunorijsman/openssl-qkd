@@ -1,9 +1,9 @@
 /**
- * qkd_client.c
+ * qkd_engine_client.c
  * 
  * An OpenSSL Engine for OpenSSL clients that "hijacks" the existing Diffie-Helman key agreement
  * protocol in OpenSSL to implement a QKD key agreement on top of the ETSI QKD API.
- * There is a separate engine for OpenSSL servers (see qkd_server.c).
+ * There is a separate engine for OpenSSL servers (see qkd_engine_server.c).
  * See qkd_api.h for the definition of the ETSI QKD API.
  * 
  * (c) 2019 Bruno Rijsman, All Rights Reserved.
@@ -148,7 +148,7 @@ static int client_engine_init(ENGINE *engine)
 int client_engine_bind(ENGINE *engine, const char *engine_id)
 {
     QKD_enter();
-    int result = QKD_engine_bind(engine, "qkd_client", "QKD Client Engine", client_generate_key,
+    int result = QKD_engine_bind(engine, "qkd_engine_client", "QKD Client Engine", client_generate_key,
                                  client_compute_key, client_engine_init);
     if (1 != result) {
         QKD_error("QKD_engine_bind failed (return code %d)", result);

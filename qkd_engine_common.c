@@ -1,8 +1,8 @@
 /**
  * qkd_engine_common.c
  * 
- * Code that is common to both OpenSSL engines: the server engine (qkd_server.c) and the client
- * engine (qkd_client.c).
+ * Code that is common to both OpenSSL engines: the server engine (qkd_engine_server.c) and the client
+ * engine (qkd_engine_client.c).
  * 
  * (c) 2019 Bruno Rijsman, All Rights Reserved.
  * See LICENSE for licensing information.

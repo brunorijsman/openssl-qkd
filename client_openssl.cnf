@@ -14,9 +14,9 @@ openssl_conf = openssl_def
 engines = engine_section
 
 [engine_section]
-qkd_client = qkd_client_section
+qkd_engine_client = qkd_engine_client_section
 
-[qkd_client_section]
-engine_id = qkd_client
+[qkd_engine_client_section]
+engine_id = qkd_engine_client
 default_algorithms = ALL
 init = 0
