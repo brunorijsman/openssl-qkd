@@ -8,8 +8,8 @@
  * See LICENSE for licensing information.
  */
 
-#ifndef ETSI_KQD_COMMON_H
-#define ETSI_KQD_COMMON_H
+#ifndef ETSI_QKD_COMMON_H
+#define ETSI_QKD_COMMON_H
 
 #include "qkd_api.h"
 #include <openssl/dh.h>

@@ -58,7 +58,7 @@ Despite these problems, it appears that post-quantum cryptography will a more fe
 
 If we just introduce quantum key distribution on some point-to-point links (possibly with some repeaters in the middle) the architectural impact on the Internet could be limited. But if we want to move to a full-on quantum Internet where quantum routers create entangled Bell pairs between arbitrary end-points anywhere on the planet, we will have to rip and replace the entire Internet and replace it with new quantum router technology that is still very far away on the horizon.
 
-## Quantum Key Distribution (KQD).
+## Quantum Key Distribution (QKD).
 
 The second approach to fixing broken network security is [Quantum Key Distribution (QKD)](https://en.wikipedia.org/wiki/Quantum_key_distribution).
 

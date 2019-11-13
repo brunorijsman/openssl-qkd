@@ -8,7 +8,7 @@ The work that we did to add [Quantum Key Distribution (QKD)](https://en.wikipedi
 
 The challenge consists of two parts:
 
- 1. Add QKD support to OpenSSL by invoking the [ETSI KQD API](https://www.etsi.org/deliver/etsi_gs/QKD/001_099/004/01.01.01_60/gs_QKD004v010101p.pdf). Here OpenSSL becomes a consumer of the QKD API. The hackathon organizers had provided a mock implementation of the QKD API for testing purposes.
+ 1. Add QKD support to OpenSSL by invoking the [ETSI QKD API](https://www.etsi.org/deliver/etsi_gs/QKD/001_099/004/01.01.01_60/gs_QKD004v010101p.pdf). Here OpenSSL becomes a consumer of the QKD API. The hackathon organizers had provided a mock implementation of the QKD API for testing purposes.
 
  2. Implement a specific QKD protocol, namely [Bennett and Brassard 1984 (BB84)](https://en.wikipedia.org/wiki/BB84) , on top of the [SimulaQron](http://www.simulaqron.org/) quantum network simulator. Here the BB84 implementation becomes a provider of the QKD API.
 
