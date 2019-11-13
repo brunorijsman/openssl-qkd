@@ -84,6 +84,11 @@ The following resources are helpful for understanding how engines work in OpenSS
  * [OpenSSL man page for DH_compute_key engine callback](https://www.openssl.org/docs/man1.1.0/man3/DH_compute_key.html)
  * [Gost-engine/engine GitHub repo containing an OpenSSL engine implementation](https://github.com/gost-engine/engine)
 
+The following diagram shows how the ETSI QKD API is intended to be used (see section 6.1.1. of the [ETSI API](https://www.etsi.org/deliver/etsi_gs/QKD/001_099/004/01.01.01_60/gs_qkd004v010101p.pdf) for details):
+
+![ETSI QKD API ladder diagram](../figures/etsi-qkd-api-ladder-diagram.png)
+
+
 We had to create separate engines for the HTTPS/TLS server and the HTTP/TLS client. TODO
 
 The following files contain our implementation of the OpenSSL engine for QKD:
