@@ -54,6 +54,8 @@ This section describes in detail how we "hacked" the existing engine-based exten
 
 The following resources are helpful for understanding the code in this repository:
 
+TODO: Finish this list
+
  * The OpenSSL documentation 
 
 ## The mock implementation of the ETSI QKD API.
@@ -209,3 +211,7 @@ Note: currently the test sometimes fails with the following error message. This 
 ~~~~
 Checking tshark output for correct Diffie-Helman exchange... Did not match pattern #0: Connection establish request \(SYN\): server port 44330
 ~~~~
+
+## What does the mock QKD in OpenSSL unit test / demo do?
+
+TODO

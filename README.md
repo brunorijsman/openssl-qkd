@@ -24,6 +24,10 @@ The OpenSSL integration challenge consists of two parts:
 
 The end-goal of the challenge is to use an off-the-shelf browser (e.g. Chrome) and connect it to a secure HTTPS website hosted on an off-the-shelf web server (e.g. Apache), while using the BB84 quantum key distribution algorithm as the key agreement protocol (running a [SimulaQron](http://www.simulaqron.org/) simulated quantum network), instead of the classical Diffie-Hellman protocol that is normally used in classical networks.
 
+The following figure shows what was actually achieved soon after the end of the hackathon (see [part 4](doc/implementing-qkd-in-openssl.md) for more details). At some time in the future I will replace the "mock QKD" implementation with a "real" implementation of BB84 QKD and update this report to document the results (I put "real" in quotes because it will run on a simulated quantum network using [SimulaQron](http://www.simulaqron.org/)).
+
+![OpenSSL Logo](figures/architecture-mock-qkd.png)
+
 # Structure of this report
 
 In this report I describe how we achieved the goals set forth by the OpenSSL integration challenge.
