@@ -169,15 +169,16 @@ We encountered the following challenges:
  * The engine's behavior is different on the server and client side, but the engine callback functions have no way of finding out whether they are running on the server or the client. Solution: we created two separate engines, one for the server and one for the client.
 
  * During the implementation of the mock API we ran into an interesting deadlock problem, namely:
-   * In an earlier attempted implementation, the client choses the random shared secret and sent it over the TCP connection to the server, by doing a blocking write on the TCP socket.
-   * It turns out that OpenSSL on the client side calls the compute_key callback before sending the TLS Client Key Exchange message (which contains the clients's public key) to the server.
-   * On the server side, OpenSSL will not call compute_key until after the TLS Client Key Exchange message is received from the client.
-   * This leads to the following deadlock: 
-     * When the client writes to the TCP socket, it blocks until the server reads the TCP socket.
-     * The server does not read the TCP socket until after it has received the TLS Client Key Exchange message.
-     * The client does not send the TLS Client Key Exchange message until after it has finished writing to the TCP socket.
-     * Deadlock.
-   * We solved this deadlock by reversing the roles. In the final code, the server choses the random shared secret and sends it over the TCP connection to the client.
+   * In an earlier attempted implementation, it used to be the server who chose the random shared secret and sent it over the TCP connection to the client, by doing a blocking write on the TCP socket.
+   * This turned out to cause a deadlock because the OpenSSL implementation of the client side is as follows
+      1. The client receives a Server Hello Message, which contains the Diffie-Hellman parameters and public key from the server.
+      2. The client chooses its own Diffie-Hellman private key, using the received Diffie-Hellman parameters.
+      3. The client calls generate_key to compute the shared secret based on (a) the received Diffie-Hellman paramters, (b) the received server's public key, and (c) it's own, i.e. the client's private key.
+      4. Then, and only then, does the client send the Client Key Exchange message to the server, which contains the client's public key.
+      5. The server can only call generate_key after it has received the Client Key Exchange message.
+   * Now, if the server chooses the key, then the client will do a blocking receive in step
+      3 to receive the shared secret from the server, but that message will never come because it can only be sent in step 5.
+   * We fixed this by reversing who chooses the shared secret (the key): in the current code the client choses the shared secret and sends it to the server, instead of the other way around (the latter causes the deadlock).
    * This design is fragile because the mock API makes assumptions about the order in which the API functions are called.
    * This, in turn, is a side-effect of abusing the OpenSSL Diffie-Hellman callbacks to "hack QKD into OpenSSL". If and when we introduce QKD as a first-class key exchange mechanism with its own APIs and its own engine, then we will design those QKD APIs and callbacks in a matter that maps better to the QKD use cases.
 
